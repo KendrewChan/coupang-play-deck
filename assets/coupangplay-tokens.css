@@ -1,0 +1,236 @@
+/* Coupang Play design tokens: colours + fonts.
+ * Source: official web stylesheet on https://www.coupangplay.com/
+ *   https://assets.coupangplay.com/_next/static/css/41f0ef034c283a1c.css
+ * Extracted 2026-11-05. Base palette + dark theme (":root,:root .dark") semantic tokens, verbatim.
+ * Logo: assets/coupangplay-logo.webp (web_gnb_logo_new.webp from the same site).
+ */
+:root{
+  /* Fonts (Pretendard = UI text; "CP Sans Text" = branded, not publicly hosted) */
+  --typography-base-font-family-base:"Pretendard";
+  --typography-base-font-family-branded:"CP Sans Text";
+
+  /* Base palette */
+  /* black */
+  --color-base-black-05a:rgba(0,0,0,.05);
+  --color-base-black-10a:rgba(0,0,0,.1);
+  --color-base-black-15a:rgba(0,0,0,.15);
+  --color-base-black-25a:rgba(0,0,0,.25);
+  --color-base-black-35a:rgba(0,0,0,.35);
+  --color-base-black-45a:rgba(0,0,0,.45);
+  --color-base-black-55a:rgba(0,0,0,.55);
+  --color-base-black-65a:rgba(0,0,0,.65);
+  --color-base-black-75a:rgba(0,0,0,.75);
+  --color-base-black-85a:rgba(0,0,0,.85);
+  --color-base-black-95a:rgba(0,0,0,.95);
+  --color-base-black-100a:#000;
+  /* blue */
+  --color-base-blue-50:#ebf1ff;
+  --color-base-blue-75:#d7e2ff;
+  --color-base-blue-100:#c3d4ff;
+  --color-base-blue-200:#95b9ff;
+  --color-base-blue-300:#5d9eff;
+  --color-base-blue-400:#0080ff;
+  --color-base-blue-500:#006bc6;
+  --color-base-blue-600:#00407a;
+  --color-base-blue-700:#003566;
+  --color-base-blue-800:#002a53;
+  --color-base-blue-900:#002041;
+  --color-base-blue-950:#001128;
+  /* blue-gray */
+  --color-base-blue-gray-50:#f0f1f3;
+  --color-base-blue-gray-75:#e0e2e7;
+  --color-base-blue-gray-100:#d2d4db;
+  --color-base-blue-gray-200:#b5b9c4;
+  --color-base-blue-gray-300:#989ead;
+  --color-base-blue-gray-400:#7e8397;
+  --color-base-blue-gray-500:#656b78;
+  --color-base-blue-gray-600:#3b4048;
+  --color-base-blue-gray-700:#31353c;
+  --color-base-blue-gray-800:#272a30;
+  --color-base-blue-gray-900:#1c2024;
+  --color-base-blue-gray-950:#0f1114;
+  /* cyan */
+  --color-base-cyan-50:#ccf9ff;
+  --color-base-cyan-75:#84f3ff;
+  --color-base-cyan-100:#00eafa;
+  --color-base-cyan-200:#00deed;
+  --color-base-cyan-300:#00afbb;
+  --color-base-cyan-400:#00929c;
+  --color-base-cyan-500:#00767f;
+  --color-base-cyan-600:#00474d;
+  --color-base-cyan-700:#003b40;
+  --color-base-cyan-800:#002f33;
+  --color-base-cyan-900:#002427;
+  --color-base-cyan-950:#001416;
+  /* gray */
+  --color-base-gray-50:#f1f1f1;
+  --color-base-gray-75:#e2e2e2;
+  --color-base-gray-100:#d4d4d4;
+  --color-base-gray-200:#b9b9b9;
+  --color-base-gray-300:#9e9e9e;
+  --color-base-gray-400:#848484;
+  --color-base-gray-500:#6a6a6a;
+  --color-base-gray-600:#404040;
+  --color-base-gray-700:#353535;
+  --color-base-gray-800:#2a2a2a;
+  --color-base-gray-900:#1f1f1f;
+  --color-base-gray-950:#111;
+  /* green */
+  --color-base-green-50:#c5fddf;
+  --color-base-green-75:#70fbbc;
+  --color-base-green-100:#4defaa;
+  --color-base-green-200:#42d094;
+  --color-base-green-300:#37b27e;
+  --color-base-green-400:#2c9568;
+  --color-base-green-500:#227954;
+  --color-base-green-600:#114931;
+  --color-base-green-700:#0d3c28;
+  --color-base-green-800:#093020;
+  --color-base-green-900:#052518;
+  --color-base-green-950:#02140b;
+  /* magenta */
+  --color-base-magenta-50:#ffebff;
+  --color-base-magenta-75:#ffd5ff;
+  --color-base-magenta-100:#ffc0ff;
+  --color-base-magenta-200:#ff90ff;
+  --color-base-magenta-300:#ff4fff;
+  --color-base-magenta-400:#e800e8;
+  --color-base-magenta-500:#bd00bd;
+  --color-base-magenta-600:#750075;
+  --color-base-magenta-700:#620062;
+  --color-base-magenta-800:#500050;
+  --color-base-magenta-900:#3f003f;
+  --color-base-magenta-950:#260026;
+  /* orange */
+  --color-base-orange-50:#ffede9;
+  --color-base-orange-75:#ffdad2;
+  --color-base-orange-100:#ffc8bb;
+  --color-base-orange-200:#ffa185;
+  --color-base-orange-250:#f80;
+  --color-base-orange-300:#ff6e00;
+  --color-base-orange-400:#db5d00;
+  --color-base-orange-500:#b24b00;
+  --color-base-orange-600:#6e2b00;
+  --color-base-orange-700:#5d2300;
+  --color-base-orange-800:#4c1b00;
+  --color-base-orange-900:#3a1400;
+  --color-base-orange-950:#230900;
+  /* red */
+  --color-base-red-50:#feecec;
+  --color-base-red-75:#fddada;
+  --color-base-red-100:#fbc8c8;
+  --color-base-red-200:#f9a1a1;
+  --color-base-red-300:#f87575;
+  --color-base-red-400:#f73939;
+  --color-base-red-500:#cd2626;
+  --color-base-red-600:#811010;
+  --color-base-red-700:#6b0f0f;
+  --color-base-red-800:#560e0e;
+  --color-base-red-900:#430909;
+  --color-base-red-950:#290404;
+  /* white */
+  --color-base-white-05a:hsla(0,0%,100%,.05);
+  --color-base-white-10a:hsla(0,0%,100%,.1);
+  --color-base-white-15a:hsla(0,0%,100%,.15);
+  --color-base-white-25a:hsla(0,0%,100%,.25);
+  --color-base-white-35a:hsla(0,0%,100%,.35);
+  --color-base-white-45a:hsla(0,0%,100%,.45);
+  --color-base-white-55a:hsla(0,0%,100%,.55);
+  --color-base-white-65a:hsla(0,0%,100%,.65);
+  --color-base-white-75a:hsla(0,0%,100%,.75);
+  --color-base-white-85a:hsla(0,0%,100%,.85);
+  --color-base-white-95a:hsla(0,0%,100%,.95);
+  --color-base-white-100a:#fff;
+  /* yellow */
+  --color-base-yellow-50:#ffeed8;
+  --color-base-yellow-75:#ffe6c3;
+  --color-base-yellow-100:#ffdeab;
+  --color-base-yellow-200:#ffcf76;
+  --color-base-yellow-300:#ffd13c;
+  --color-base-yellow-400:#dab600;
+  --color-base-yellow-500:#c09d00;
+  --color-base-yellow-600:#856b00;
+  --color-base-yellow-700:#514000;
+  --color-base-yellow-800:#362a00;
+  --color-base-yellow-900:#281e00;
+  --color-base-yellow-950:#181200;
+
+  /* Semantic + component tokens, dark theme */
+  --color-semantic-text-static-white:var(--color-base-white-100a);
+  --color-semantic-text-static-black:var(--color-base-black-100a);
+  --color-semantic-text-primary:var(--color-base-white-100a);
+  --color-semantic-text-primary-inverse:var(--color-base-blue-gray-950);
+  --color-semantic-text-primary-alt:var(--color-base-blue-300);
+  --color-semantic-text-primary-alt-inverse:var(--color-base-blue-500);
+  --color-semantic-text-secondary:var(--color-base-white-85a);
+  --color-semantic-text-tertiary:var(--color-base-white-65a);
+  --color-semantic-text-disabled:var(--color-base-white-35a);
+  --color-semantic-text-negative:var(--color-base-red-300);
+  --color-semantic-text-negative-inverse:var(--color-base-red-500);
+  --color-semantic-text-positive:var(--color-base-green-300);
+  --color-semantic-text-positive-inverse:var(--color-base-green-500);
+  --color-semantic-text-notice:var(--color-base-yellow-300);
+  --color-semantic-text-notice-inverse:var(--color-base-yellow-500);
+  --color-semantic-text-error:var(--color-base-red-400);
+  --color-semantic-text-available:var(--color-base-green-300);
+  --color-semantic-text-caution:var(--color-base-orange-250);
+  --color-semantic-fill-primary:var(--color-base-blue-400);
+  --color-semantic-fill-primary-inverse:var(--color-base-white-100a);
+  --color-semantic-fill-secondary:var(--color-base-blue-gray-600);
+  --color-semantic-fill-tertiary:var(--color-base-blue-gray-900);
+  --color-semantic-fill-disabled:var(--color-base-white-10a);
+  --color-semantic-fill-negative:var(--color-base-red-400);
+  --color-semantic-fill-negative-inverse:var(--color-base-red-50);
+  --color-semantic-fill-negative-tertiary:var(--color-base-red-900);
+  --color-semantic-fill-positive:var(--color-base-green-400);
+  --color-semantic-fill-positive-inverse:var(--color-base-green-50);
+  --color-semantic-fill-positive-tertiary:var(--color-base-green-900);
+  --color-semantic-fill-notice:var(--color-base-yellow-400);
+  --color-semantic-fill-notice-inverse:var(--color-base-yellow-50);
+  --color-semantic-fill-notice-tertiary:var(--color-base-yellow-900);
+  --color-semantic-fill-error:var(--color-base-red-400);
+  --color-semantic-fill-error-inverse:rgba(247,57,57,.15);
+  --color-semantic-fill-available:var(--color-base-green-300);
+  --color-semantic-fill-available-inverse:rgba(55,178,126,.15);
+  --color-semantic-fill-caution:var(--color-base-orange-250);
+  --color-semantic-fill-caution-inverse:rgba(255,136,0,.15);
+  --color-semantic-background-surface:var(--color-base-blue-gray-950);
+  --color-semantic-background-elevated:var(--color-base-blue-gray-950);
+  --color-semantic-border-primary:var(--color-base-white-100a);
+  --color-semantic-border-primary-alt:var(--color-base-blue-400);
+  --color-semantic-border-secondary:var(--color-base-blue-gray-800);
+  --color-semantic-border-tertiary:var(--color-base-white-10a);
+  --color-semantic-border-disabled:var(--color-base-white-15a);
+  --color-semantic-border-negative:var(--color-base-red-400);
+  --color-semantic-border-frame:var(--color-base-white-05a);
+  --color-semantic-utils-statelayer-light:var(--color-base-white-10a);
+  --color-semantic-utils-statelayer-dark:var(--color-base-black-25a);
+  --color-semantic-utils-dimoverlay:var(--color-base-black-75a);
+  --color-component-button-fill-primary-default:var(--color-base-blue-400);
+  --color-component-button-fill-primary-active:var(--color-base-blue-400);
+  --color-component-button-fill-primary-focused:var(--color-base-blue-400);
+  --color-component-badge-general-fill-image:var(--color-base-black-45a);
+  --color-component-badge-general-fill-solid:var(--color-base-blue-gray-700);
+  --color-component-badge-tvod-fill:var(--color-base-orange-50);
+  --color-component-badge-tvod-text:var(--color-base-orange-300);
+  --color-component-badge-live-fill:var(--color-base-red-500);
+  --color-component-badge-age-rating-fill:var(--color-base-blue-gray-600);
+  --color-component-badge-channel-fill:var(--color-base-orange-300);
+  --color-category-sports-channel-text:#019aff;
+  --color-category-sports-channel-fill:#019aff;
+
+  /* Deck aliases: short names used by start.html, mapped onto official tokens */
+  --blue:var(--color-base-blue-400);        /* #0080ff primary (fill-primary, primary button) */
+  --blue-400:var(--color-base-blue-300);    /* #5d9eff lighter: text-primary-alt / hover */
+  --blue-600:var(--color-base-blue-500);    /* #006bc6 darker */
+  --bg:var(--color-semantic-background-surface);  /* #0f1114 */
+  --card:var(--color-semantic-fill-tertiary);     /* #1c2024 */
+  --line:var(--color-semantic-border-secondary);  /* #272a30 */
+  --line-subtle:var(--color-semantic-border-tertiary); /* white 10% */
+  --line-strong:var(--color-base-blue-gray-600);  /* #3b4048 */
+  --fg:var(--color-semantic-text-primary);        /* #fff */
+  --fg2:var(--color-semantic-text-secondary);     /* white 85% */
+  --fg3:var(--color-semantic-text-tertiary);      /* white 65% */
+  --on:var(--color-base-white-100a);              /* text on primary fill */
+  --live:var(--color-component-badge-live-fill);  /* #cd2626 LIVE badge */
+}

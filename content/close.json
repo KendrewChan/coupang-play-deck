@@ -1,0 +1,78 @@
+{
+  "id": "close",
+  "accent": "#42D6A4",
+  "nav": "Principles",
+  "title": "Principles",
+  "time": "~5 min",
+  "kind": "Philosophy",
+  "logline": "Six principles, each from something you just saw",
+  "rows": [
+    [
+      "",
+      "Revenue systems are judged on availability, latency, correctness and revenue. These are my habits for trading them off while keeping the team fast"
+    ]
+  ],
+  "parts": [
+    {
+      "t": "Technical Principles",
+      "s": "",
+      "poster": "close-1",
+      "min": 2,
+      "key": true,
+      "rows": [
+        [
+          "Make failure cheap",
+          "Partial results, retries and a DLQ make failure routine, not an outage"
+        ],
+        [
+          "Shape the load you control",
+          "Spread the workload and protect shared capacity with quotas"
+        ],
+        [
+          "Correctness lives in the write",
+          "A cancel works only from SCHEDULED, enforced by a conditional update"
+        ]
+      ],
+      "stack": true
+    },
+    {
+      "t": "Process Principles",
+      "s": "",
+      "poster": "close-2",
+      "min": 2,
+      "key": true,
+      "rows": [
+        [
+          "Systemize the second time, not the first",
+          "Solve it by hand once, then automate it when it comes back"
+        ],
+        [
+          "Make the safe path the fast path",
+          "Build the gate into the tool so it is quicker than skipping it"
+        ],
+        [
+          "Write it down so it scales past me",
+          "Facts in the wiki, procedures in skills, every change reviewed"
+        ]
+      ],
+      "stack": true
+    },
+    {
+      "t": "What's next",
+      "s": "",
+      "poster": "close-3",
+      "min": 1,
+      "stack": true,
+      "rows": [
+        [
+          "Coordinate multiple coding agents",
+          "Manage several coding agents in one workspace"
+        ],
+        [
+          "Cut time to release",
+          "Tighten the spec workflow and its coding loop, and reduce HITL"
+        ]
+      ]
+    }
+  ]
+}

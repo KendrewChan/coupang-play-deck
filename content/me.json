@@ -1,0 +1,36 @@
+{
+  "id": "me",
+  "clip": true,
+  "accent": "#25D1FF",
+  "nav": "Introduction",
+  "title": "Introduction",
+  "time": "~5 min",
+  "kind": "Intro",
+  "parts": [
+    {
+      "t": "Hi, I'm Kendrew",
+      "s": "TikTok Shop (Global E-Commerce)",
+      "min": 2,
+      "rows": [
+        ["Team", "Video Strategy: drive revenue on TikTok video across regions"],
+        ["Experience", "4 years"],
+        ["Focus", "Go, Distributed systems, AI infrastructure"]
+      ]
+    },
+    {
+      "t": "What I've built",
+      "s": "Highlights",
+      "min": 2,
+      "rows": [
+        ["AI video translation", "Initiated and led the project. Live in 13 EU markets; +8% average seller revenue in a randomized A/B"],
+        ["AI knowledge layer", "AI Wiki (10 members), Spec Workflow (~100 weekly active engineers), Oncall and Alarm Agents"]
+      ]
+    },
+    {
+      "t": "Today's agenda",
+      "min": 1,
+      "chips": ["pipeline", "knowledge", "close", "bridge"],
+      "foot": "Feel free to ask any questions"
+    }
+  ]
+}

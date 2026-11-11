@@ -1,0 +1,233 @@
+{
+  "id": "pipeline",
+  "diagram": "translation-pipeline/diagram2d.html",
+  "accent": "#00A8FF",
+  "nav": "AI translation pipeline",
+  "title": "AI video translation pipeline",
+  "time": "~15 min",
+  "kind": "Deep dive",
+  "logline": "One video, posted in every market a seller sells in",
+  "rows": [],
+  "parts": [
+    {
+      "t": "Problem",
+      "s": "",
+      "min": 2,
+      "poster": "pipeline-1",
+      "rows": [
+        ["Problem", "High-performing videos don't carry over to other markets. One-click cross-posts of the original video earned ~50% less revenue than an average post"],
+        ["Insight", "In-house models already translate speech, clone the voice and sync lips"]
+      ]
+    },
+    {
+      "t": "Why translate, not generate",
+      "s": "Translation is the cheapest per quality point, and it starts from a video that already sells",
+      "min": 1,
+      "poster": "pipeline-5",
+      "compare": {
+        "max": 14.1,
+        "items": [
+          {
+            "name": "Full generation: Seedance 1.0",
+            "note": "Rejected: no sales history",
+            "lo": 8.07,
+            "hi": 8.07,
+            "cost": "$8.07",
+            "q": "~95%",
+            "per": "$0.085"
+          },
+          {
+            "name": "Full generation: Seedance 2.0",
+            "note": "Rejected: highest cost, unproven",
+            "lo": 14.1,
+            "hi": 14.1,
+            "cost": "$14.10",
+            "q": "100%",
+            "per": "$0.14"
+          },
+          {
+            "name": "Translate + lip-sync: Pinch",
+            "note": "Chosen: best value + video already sells",
+            "lo": 1.06,
+            "hi": 1.06,
+            "cost": "$1.06",
+            "q": "~88%",
+            "per": "$0.012",
+            "pick": true
+          },
+          {
+            "name": "Translate + lip-sync: HeyGen Precision",
+            "note": "Rejected: ~4× the cost for +2 points",
+            "lo": 4.06,
+            "hi": 4.06,
+            "cost": "$4.06",
+            "q": "~90%",
+            "per": "$0.045"
+          }
+        ]
+      }
+    },
+    {
+      "t": "The client layer",
+      "s": "",
+      "min": 1,
+      "poster": "pipeline-2",
+      "view": "v=apis",
+      "screens": [
+        {
+          "t": "Authorize",
+          "api": "authorize seller",
+          "ui": [
+            ["h", "Auto-post"],
+            ["note", "Let us translate your best videos and post them to your other EU markets"],
+            ["toggle", "Turn on auto-post", true],
+            ["button", "Authorize"]
+          ]
+        },
+        {
+          "t": "Pick markets",
+          "api": "get / set settings",
+          "ui": [
+            ["h", "Target markets"],
+            ["note", "Only markets you tick get posts"],
+            ["check", "Italy", true],
+            ["check", "Spain", true],
+            ["check", "Germany", true],
+            ["check", "Poland", false],
+            ["button", "Save"]
+          ]
+        },
+        {
+          "t": "Ready to post",
+          "api": "list · cancel · feedback",
+          "ui": [
+            ["h", "Scheduled posts"],
+            [
+              "video",
+              "Summer linen dress",
+              "Italy · posts Tue 18:00",
+              ["Cancel", "Feedback"]
+            ],
+            [
+              "video",
+              "Summer linen dress",
+              "Spain · posts Tue 18:00",
+              ["Cancel", "Feedback"]
+            ]
+          ]
+        },
+        {
+          "t": "Posted",
+          "api": "list posted",
+          "ui": [
+            ["h", "Posted videos"],
+            [
+              "video",
+              "Summer linen dress",
+              "Italy · posted · 1.2k views",
+              ["Delete"]
+            ],
+            [
+              "video",
+              "Garden chair set",
+              "Germany · retry in 7 days",
+              []
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "t": "One video, end to end",
+      "s": "",
+      "min": 1.5,
+      "poster": "pipeline-4",
+      "view": "v=overview",
+      "flow": {
+        "nodes": [
+          ["Historical + Realtime videos", "all markets"],
+          ["Translate", "1 French video"],
+          [""]
+        ],
+        "fan": [
+          ["Italy", "lip-synced · voice translated"],
+          ["Spain", "lip-synced · voice translated"],
+          ["Germany", "lip-synced · voice translated"]
+        ],
+        "after": ["Auto-Post"]
+      }
+    },
+    {
+      "t": "Deduplicating translations",
+      "s": "",
+      "min": 1.5,
+      "poster": "pipeline-6",
+      "view": "v=intake&c=elig",
+      "rows": [
+        ["<span style=\"color:#ef4444\">✗</span> GPU waste", "Translating our own output, or translating a video into markets with the same language"],
+        ["<span style=\"color:#22c55e\">✓</span> Mark", "Mark videos as AI-translated. Filter them out in the warehouse tables and ETL"],
+        ["<span style=\"color:#22c55e\">✓</span> Clone", "Reuse videos for markets with the same language"]
+      ]
+    },
+    {
+      "t": "Rationing shared AI capacity",
+      "s": "",
+      "min": 1,
+      "poster": "pipeline-8",
+      "view": "v=translation&c=ai",
+      "rows": [
+        ["Constraint", "AI platform has limited resources shared across teams"],
+        ["Decision", "Limit sellers to 3 translations a day, so large sellers can't use up the shared budget"],
+        ["Backfill", "Backfill runs in an off-peak window to reduce GPU contention"]
+      ]
+    },
+    {
+      "t": "Fan-out: parent / child tasks and partial success",
+      "s": "",
+      "min": 2,
+      "poster": "pipeline-7",
+      "view": "v=translation&c=tables",
+      "rows": [
+        ["Shape", "1 source : N target videos. Compute parent status from children"],
+        ["<span style=\"color:#ef4444\">✗</span> Prevent partial", "Succeed and fail together"],
+        ["<span style=\"color:#22c55e\">✓</span> Allow partial", "Successful tasks proceed, failed tasks retry"],
+        ["Failure handling", "Retry failed tasks up to 3 times, then send them to the DLQ"]
+      ]
+    },
+    {
+      "t": "Scheduled posting: review window and throttled release",
+      "s": "",
+      "min": 2.5,
+      "poster": "pipeline-9",
+      "key": true,
+      "view": "v=posting&c=sched",
+      "stack": true,
+      "rows": [
+        ["Videos post T+2 after translation", "→ Sellers can cancel bad translations before they go live, and their quality feedback helps us improve the system"],
+        ["The scheduler polls for due videos in throttled batches of up to 50", "→ Spreads load on the DB and downstream services"],
+        ["Scheduled post time, queue and throttle limits are dynamic config", "→ We can tune them without a deploy"]
+      ]
+    },
+    {
+      "t": "Impact",
+      "s": "",
+      "min": 1.5,
+      "poster": "pipeline-10",
+      "rows": [
+        ["Method", "Calculate average GMV of treatment against control. Random Seller A/B: 15% treatment vs 15% control (Aug - Oct)"],
+        ["Result", "+8% average seller revenue"],
+        ["Reliability", "~95% of translated videos posted. Sellers kept them through the review window"]
+      ]
+    },
+    {
+      "t": "What I would do differently",
+      "s": "",
+      "min": 1,
+      "poster": "pipeline-11",
+      "rows": [
+        ["Blind spot", "Posted videos flowed back into our candidate pool and got translated again. An AI-origin flag fixed it. Now I ask of every output: can this come back as input?"],
+        ["Metrics", "I launched with technical metrics but no business metrics, and only added those after release. Next time I'd define both before launch"]
+      ]
+    }
+  ]
+}

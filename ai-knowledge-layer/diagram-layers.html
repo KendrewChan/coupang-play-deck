@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kendrew's Presentation</title><link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:radial-gradient(ellipse at 40% 40%,#1c2024 0%,#0f1114 70%);font-family:Pretendard,"SF Pro Text",Inter,ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#fff}
+#bar{position:fixed;left:0;right:0;top:0;height:54px;display:flex;align-items:center;gap:14px;padding:0 18px;background:#0f1114e6;border-bottom:1px solid #272a30;backdrop-filter:blur(10px);z-index:5}
+#crumbs{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600}
+#crumbs a{color:#5d9eff;cursor:pointer;text-decoration:none}
+#crumbs a:hover{text-decoration:underline}
+#crumbs .sep{opacity:.4}
+#crumbs .cur{color:#fff}
+#bar .sp{flex:1}
+#bar .dl{font-size:15px;font-weight:800;margin-right:4px}
+#bar .hint{font-size:12px;opacity:.55}
+button{background:#1c2024;border:1px solid #3b4048;color:#fff;padding:7px 12px;border-radius:6px;font:inherit;font-size:12px;cursor:pointer}
+button:hover{background:#31353c}
+button:disabled{opacity:.35;cursor:default}
+#wrap{position:fixed;top:54px;left:0;right:400px;bottom:0}
+svg{width:100%;height:100%;display:block}
+#panel{position:fixed;top:54px;right:0;width:400px;bottom:170px;overflow:auto;background:#1c2024;border-left:1px solid #272a30;padding:18px 20px 30px;box-sizing:border-box;font-size:13px;line-height:1.5}
+#panel h2{margin:0 0 4px;font-size:18px}
+#panel .kind{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.55;margin-bottom:10px}
+#panel h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.6}
+#panel ul{margin:0;padding-left:18px}
+#panel .sbtns{display:flex;flex-wrap:wrap;gap:8px}
+.sbtn{background:#ffffff0d;border:1px solid #3a3f47;border-radius:8px;color:#e6e8eb;padding:6px 12px;cursor:pointer;font-size:13px}
+.sbtn:hover{background:#ffffff1a;border-color:#7cc4ff}
+#schema{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding-right:400px}
+body.schema #schema{display:flex}
+#sbox{position:relative;width:min(640px,calc(100vw - 448px));max-height:86vh;overflow-y:auto;background:#1c2024;border:1px solid #272a30;border-radius:14px;padding:24px 26px 28px;font-size:13px;line-height:1.5}
+#sbox .stag{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#7cc4ff}
+#sbox h2{margin:6px 0;font-size:22px}
+#sbox h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.6}
+#sbox ul{margin:0;padding-left:18px}
+#sclose{position:absolute;top:10px;right:12px;background:none;border:0;color:#9aa0a6;font-size:18px;cursor:pointer}
+#sbox .ex-tbl{overflow-x:auto;border:1px solid #272a30;border-radius:8px;margin:6px 0}
+#sbox .ex-tbl table{border-collapse:collapse;font-size:12px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+#sbox .ex-tbl th,#sbox .ex-tbl td{padding:4px 8px;border-bottom:1px solid #272a30;text-align:left}
+#sbox .ex-tbl th{background:#ffffff0d}
+#sbox .ex-tbl tr:last-child td{border-bottom:0}
+#panel .ex-tbl{overflow-x:auto;border:1px solid #272a30;border-radius:8px;margin:6px 0}
+#panel .ex-tbl table{border-collapse:collapse;font-size:12px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+#panel .ex-tbl th,#panel .ex-tbl td{padding:4px 8px;border-bottom:1px solid #272a30;text-align:left}
+#panel .ex-tbl th{background:#ffffff0d}
+#panel .ex-tbl tr:last-child td{border-bottom:0}
+#panel li{margin:3px 0}
+#panel .tag{display:inline-block;font-size:12px;font-weight:650;padding:2px 8px;border-radius:999px;margin-right:6px}
+#panel .g{display:inline-block;min-width:62px;font-size:12px;font-weight:700;text-transform:uppercase;margin-right:6px;opacity:.85}
+#panel .g.code{color:#37b27e}#panel .g.prompt{color:#ffd13c}#panel .g.platform{color:#5d9eff}
+#legend{position:fixed;right:0;bottom:0;width:400px;box-sizing:border-box;padding:10px 20px;background:#0f1114;border-top:1px solid #272a30;border-left:1px solid #272a30;font-size:12px;z-index:6;line-height:1.5;display:grid;grid-template-columns:1fr 1fr;column-gap:10px}
+#legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#legend .full{grid-column:1/-1;display:flex;gap:10px;align-items:center;white-space:nowrap}
+#legend .full i{margin-right:4px}
+#legend .ln{display:inline-block;width:22px;height:0;margin-right:6px;vertical-align:middle;border-top:2px solid #989ead}
+.node{cursor:default}
+.node.click{cursor:pointer}
+.node{transition:opacity .15s}
+.node.dim{opacity:.22}
+.node.click:hover rect.box{filter:brightness(1.35)}
+.node text{pointer-events:none}
+</style></head>
+<body>
+<div id="bar">
+  <span class="dl">Diagram</span>
+  <button id="up" title="Back up one layer (Esc)">← Up</button>
+  <div id="crumbs"></div>
+  <div class="sp"></div>
+  <div class="hint">Click a box with ⊕ to open its inside · ↗ jumps to another system · Esc goes up</div>
+</div>
+<div id="wrap"><svg id="s" viewBox="0 0 1200 680" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <g id="stage"></g>
+</svg></div>
+<div id="panel"></div>
+<div id="schema" role="dialog" aria-modal="true"><div id="sbox"><button id="sclose" aria-label="close">✕</button><div id="sc"></div></div></div>
+<div id="legend">
+  <div><i style="background:#ff880040;border:1px solid #ff8800"></i>Oncall Agent</div>
+  <div><i style="background:#ffa18540;border:1px solid #ffa185"></i>Alarm Agent</div>
+  <div><i style="background:#ff4fff40;border:1px solid #ff4fff"></i>Wiki Maintainer</div>
+  <div><i style="background:#5d9eff40;border:1px solid #5d9eff"></i>AI Wiki</div>
+  <div><i style="background:#00deed40;border:1px solid #00deed"></i>Spec Workflow</div>
+  <div><i style="background:#989ead33;border:1px dashed #989ead"></i>External system</div>
+  <div><i style="background:#15181c;border:1px dashed #fff"></i>↗ Jump to other layer</div>
+  <div><span class="ln" style="border-top-color:#b5b9c4"></span>Flow / read (grey)</div>
+  <div><span class="ln" style="border-top:4px solid #b5b9c4"></span>Write</div>
+  <div class="full"><span><span class="ln" style="border-top-color:#00eafa"></span>Cyan = hovered / selected links</span></div>
+  <div class="full">Bands:<span><i style="background:#42d09440;border:1px solid #42d094"></i>entry</span><span><i style="background:#8B65FF40;border:1px solid #8B65FF"></i>agent</span><span><i style="background:#5d9eff40;border:1px solid #5d9eff"></i>knowledge</span><span><i style="background:#00deed40;border:1px solid #00deed"></i>workflow</span></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// DATA. Each layer: title, d (panel shown on entering), nodes, edges.
+// node: id,label,sub,x,y,w,h,own(built|evolved|others),child(layer id),go(portal layer id),kind(ghost|person|stack),d(panel)
+// edge: [from,to,label,style(read|write|designed|dormant),opts{c:[x,y]} control point]
+// ---------------------------------------------------------------------------
+// Colours: Coupang Play base palette (../assets/coupangplay-tokens.css)
+// 4 system colours (logo gradient: orange, magenta, blue, cyan) + 2 status colours (gray external, yellow stale)
+const C = {oncall:'#ff8800',alarm:'#ffa185',maint:'#ff4fff',wiki:'#5d9eff',spec:'#00deed',ext:'#989ead',warn:'#ffd13c'};
+const SYS = {bot:C.oncall,sched:C.maint,wiki:C.wiki,harness:C.spec,env:C.spec,rec:C.spec};
+function colorOf(lid,n){ return (n.c&&C[n.c]) || (n.child&&SYS[n.child]) || (n.go&&SYS[n.go]) || ((n.kind==='ghost'||n.kind==='person')?C.ext:SYS[lid]) || C.ext; }
+
+const L = {
+root:{title:'AI knowledge layer',
+ d:{kind:'Overview',what:'One agent-readable wiki at the centre. Agents pull context from it on every ticket, alarm or delivery stage. A nightly scheduler closes the loop: it reads the day’s oncall and alarm history and writes what was learned back into the wiki.',
+  how:['Arrows show which way knowledge flows: wiki → agents is context; the scheduler pulls the histories and writes updates to the wiki.','Skills repo is shared: the Oncall Agent and the Spec Workflow stages both load their skills from it.','Oncall Agent and Alarm Agent use the wiki as context; their history is the scheduler’s input.','Wiki Maintainer: end-of-day job that diffs the day’s tickets and alarms against the wiki and opens an update MR.','Spec Workflow: uses the wiki as context at each stage; its Archive stage files each project back.','The wiki is plain Markdown + YAML in git: index routing, no vector DB.'],
+  gotchas:['This is the team’s own wiki, covering every domain the team owns.','Success is judged on real outcomes (MTTR, deflection), not on how much content is added.']},
+ nodes:[
+  {id:'oncall',label:'Oncall Agent',sub:'answers oncall questions\nin chat',x:30,y:50,w:270,h:140,child:'bot'},
+  {id:'sched',label:'Wiki Maintainer',sub:'end-of-day scheduler\noncall + alarm history → wiki',x:30,y:280,w:270,h:120,child:'sched'},
+  {id:'alarm',label:'Alarm Agent',sub:'triages monitoring alarms',c:'alarm',x:30,y:500,w:270,h:140,
+   d:{kind:'Agent',what:'Picks up monitoring alarms, pulls the matching runbook / known issue from the wiki, and gathers evidence (logs, metrics, recent deploys) before a human acts.',how:['Same building blocks as the Oncall Agent: same runtime, same wiki, read-only evidence tools.','The difference is the trigger and the output: an alarm starts it, and it writes a triage note instead of a chat answer.','Context: wiki runbooks, Scenario Runbook precedents, service registry.','Output: alarm triage note + its outcome, kept as alarm history.','Alarm history is one of the Wiki Maintainer’s two inputs.'],link:['See the Oncall Agent diagram','bot']}},
+  {id:'wiki',label:'AI Wiki',sub:'the team’s agent-readable\nknowledge, in git',x:465,y:235,w:270,h:210,child:'wiki'},
+  {id:'harness',label:'Spec Workflow',sub:'PRD → design → env → code\n→ tests → archive',x:900,y:235,w:270,h:210,child:'harness'},
+  {id:'skills',label:'Skills repo',sub:'shared · team-maintained\nOncall Agent + Spec Workflow',x:465,y:30,w:270,h:110,
+   d:{kind:'Skills repo',what:'The shared, team-maintained repo that the Oncall Agent and the Spec Workflow stages both load their skills from.',how:['Read skills: generic, read-only (for example log search and DB read), each returning a bounded summary.','Domain skills, one folder per domain: when to use it, what to check, which wiki entry and recipe to open (for example a candidate eligibility check, a translation task trace, a slot calendar lookup). They point at wiki entries and hold no copied facts.','Write skills: change pre-prod or config through the platforms, loaded only on a change request.'],guards:[['platform','Every skill calls its platform with a scoped token; the platform enforces least privilege.']]}},
+ ],
+ edges:[
+  ['wiki','oncall','ticket context','read',{c:[420,140]}],
+  ['wiki','alarm','alarm context','read',{c:[420,560]}],
+  ['sched','oncall','pulls ticket history','read'],
+  ['sched','alarm','pulls alarm history','read'],
+  ['sched','wiki','update MRs','write',{s:['R','L'],f:[.5,.5]}],
+  ['wiki','harness','stage context','read',{s:['R','L'],f:[.35,.35]}],
+  ['harness','wiki','archive MR','write',{s:['L','R'],f:[.65,.65]}],
+ ]},
+
+// ---------------- ONCALL ----------------
+bot:{title:'Oncall Agent',
+ d:{kind:'Multi-agent oncall bot',what:'A team-owned routing platform that starts a worker agent for each oncall thread, answering in the team chat. Each team owns its routing platform and its skills repo; each direction the team supports is an oncall skill.',
+  how:['Drawn as the design: the AI Wiki is the single source of truth. A domain skill points the worker at the wiki’s knowledge and recipes; nothing is copied into the bot.','Skills repo holds the oncall skills: one per direction, plus generic ones such as log search and DB read. The skills repo and the wiki are maintained by the team.','The worker runs the wiki’s queries through the generic DB-read skill and log search through the generic log-search skill, each returning a bounded summary.','Every answered ticket lands in ticket history, which the Wiki Maintainer reads.'],
+  guards:[['platform','Per-run thread history and tool traces in the runtime UI.'],['platform','Least privilege: every platform call carries an authorization token and the platform enforces it. Reads run on the asker’s delegated, scoped token; the bot’s own actions run on a narrow bot-level identity with no restart, rollback or deploy. Never a shared developer identity.']],
+  gotchas:['Identity is pinned: an invariant test ensures a worker’s workspace sync can never overwrite the root identity.','No vector store: retrieval is staged file loading.','All agents share one runtime; they differ by prompt, tool allowlist and workspace.','The token is the security boundary and is checked server-side by each platform. Skill and tool allowlists only limit what the agent attempts.']},
+ nodes:[
+  {id:'chat',label:'Chat thread',sub:'@bot',x:20,y:145,w:150,h:80,kind:'person',
+   d:{kind:'Entry',what:'The requester’s thread in the oncall group. The answer comes back here, conclusion first, with SQL / logs hidden unless asked.',guards:[['prompt','Privacy hard stop before any tool call.'],['platform','The asker’s identity is propagated to every tool call, so their own permissions apply.']],gotchas:['Triggered by an explicit @mention, so the requester stays in control of what the bot sees.']}},
+  {id:'router',label:'Routing platform',sub:'hosts the router agent\nstores ticket history',x:220,y:115,w:220,h:140,
+   d:{kind:'Routing platform',what:'The platform that hosts the router agent and stores ticket history. The router agent is the entry point: privacy and language gates, classify by full business intent, start a worker for the thread, or reuse its live one (and call other teams’ routers over agent-to-agent calls), check worker output, write the final answer.',
+    how:['Each answered thread (question, evidence, conclusion, handoff) is stored as ticket history. The Wiki Maintainer pulls the day’s history at end of day.','Open an attempt ledger: max 1 worker launch per turn.','Treat worker output as evidence; live / code evidence wins conflicts.','If a handoff is needed, read the live routing doc once.','Causal-conclusion gate, then conclusion-first answer.'],
+    guards:[['prompt','One worker launch per turn (circuit breaker) + static test.'],['prompt','Presentation firewall: hide SQL, rows, logs unless asked.'],['prompt','Handoff is a recommendation only.']],
+    gotchas:['Route by full business intent, never by IDs alone.','“A wait timeout is not a result”: the router never answers on a timeout.']}},
+  {id:'worker',label:'Worker agent',sub:'loads a domain skill\nreturns a summary\nstays alive 1 hour, then closes',x:510,y:135,w:220,h:100,
+   d:{kind:'Worker agent',what:'A generic agent the router agent starts for an oncall thread. Follow-up messages in the thread reach the same worker while it is alive. It loads the matching domain skill, follows it into the wiki, runs the generic read skills and returns a short result. The worker stays alive for 1 hour, then closes.',how:['Same runtime as the router; differs by prompt, tool allowlist and workspace.','Return format is fixed: conclusion, evidence, blockers. No raw rows or logs.','The routing platform keeps no context: raw logs and query results stay in the worker.'],guards:[['code','Read-only tool allowlist: no restart, rollback or deploy capability is granted.'],['code','Log search and DB reads return bounded summaries, not raw output.']],gotchas:['Auth failure ≠ “no data”: retry once, then report the blocker.']}},
+  {id:'cskill',label:'Content skill',sub:'domain skill · read-only redirect\nto wiki content entries',x:810,y:40,w:260,h:90,
+   d:{kind:'Domain skill',what:'Answers seller-content questions. A thin procedure: when to use it, which wiki entries to open, which generic read skills to call. Domain facts and log recipes stay in the wiki.',how:['Points at the wiki’s content entries and recipes (referenced, never copied).','Needs a seller id; bounded SELECTs over its content tables, using the wiki’s query through the generic DB-read skill.','Passes the wiki’s log recipe (service, error codes, window) to the generic log-search skill.','Read-only: changes go through the separate write skills, which load only on a change request.'],guards:[['prompt','Wiki docs are evidence sources, never its write area.']]}},
+  {id:'wskill',label:'Write skills',sub:'gated · loaded only on a change\nrequest (config · DB row · timer)',x:810,y:140,w:260,h:90,
+   d:{kind:'Domain skill',what:'The bot’s only write paths: allowlist change, a DB row change and a serverless timer trigger. Separate from the content skill so a read-only question never loads them.',how:['Each action goes through another platform’s ticket or trigger, never a direct write.','Draft first, preview, then apply on explicit request.'],guards:[['platform','Release pipeline’s human approval node.'],['code','Draft helper only previews unless --apply is passed.'],['platform','Timer-trigger path requires a second-person approval before it runs.']]}},
+  {id:'oskill',label:'Onboarding skill',sub:'domain skill\nsame flow as content',x:810,y:240,w:260,h:90,kind:'ghost',
+   d:{kind:'Domain skill',what:'Answers seller-onboarding questions with the same flow as the content skill, pointed at the wiki’s onboarding entries and recipes.'}},
+  {id:'ext',label:'External agents',sub:'agent-to-agent calls',x:510,y:400,w:220,h:76,kind:'ghost',
+   d:{kind:'External agents',what:'Routers and agents owned by other teams (product platform, datasets, governance), called over agent-to-agent calls. The router validates their result against an agreed result contract.'}},
+  {id:'wiki',label:'AI Wiki',sub:'source of truth\nknowledge + recipes',x:1130,y:45,w:300,h:80,go:'wiki'},
+  {id:'plat',label:'Platforms',sub:'DB read · logs · config\nrelease tickets',x:1130,y:140,w:300,h:90,kind:'ghost',
+   d:{kind:'Platforms',what:'Internal systems the agents call as tools. Owned by other teams; the bot only holds credentials to them.',
+    how:['Read: the worker runs the wiki’s queries and reads logs, config and deploy state through the generic read skills.','Write (write skills only): config change via a release ticket, prod DB row change via a DB release ticket, serverless timer trigger.','Restart, rollback and deploy are outside the bot’s tool allowlist.'],
+    guards:[['code','Prod DB: SELECT / SHOW / DESCRIBE only, regex gate before any call.'],['platform','Release ticket and DB release stop at a human approval node.'],['platform','Timer trigger needs a second-person approval before it runs.'],['platform','Calls use the asker’s delegated per-user credentials (least privilege), not a shared identity.']]}},
+  {id:'gskill',label:'Generic skills',sub:'log search · DB read\nbounded summary output',x:810,y:340,w:260,h:90,
+   d:{kind:'Domain skill',what:'Generic skills shared by every domain skill: log search and DB read. They take a recipe or query from the wiki and return a bounded summary, never raw logs or rows.',guards:[['platform','Authorization is the caller’s token, enforced by the platform: shared skills never widen access, because each consumer calls with its own token.'],['code','Read-only skills.'],['code','Output is a bounded summary: top hits, window, counts.']],gotchas:['Live in the team’s skills repo like the domain skills. Starter versions can come from the same template the wiki is scaffolded from.']}},
+  {id:'sched',label:'Wiki\nMaintainer',sub:'end of day',x:255,y:400,w:150,h:80,go:'sched'},
+ ],
+ edges:[
+  ['chat','router','@mention','read'],
+  ['router','worker','starts worker','read',{s:['R','L'],f:[.5,.5]}],['router','ext','','read',{s:['B','L'],f:[.95,.5]}],
+  ['worker','cskill','loads skill','read',{s:['T','L'],f:[.9,.5]}],
+  ['worker','wskill','change request','read',{s:['R','L'],f:[.5,.5]}],
+  ['wiki','cskill','knowledge + recipes','read'],
+  ['gskill','plat','log search · DB read','read',{s:['R','B'],f:[.5,.5]}],
+  ['wskill','plat','tickets · trigger','read',{s:['R','L'],f:[.5,.5]}],
+  ['sched','router','pulls history','read',{s:['T','B'],f:[.5,.5]}],
+ ]},
+
+// ---------------- WIKI MAINTAINER ----------------
+sched:{title:'Wiki Maintainer',
+ d:{kind:'Scheduled job',what:'A generic end-of-day scheduler. It polls the day’s oncall ticket history and alarm history, compares what was learned with what the wiki says, and opens update MRs for the wiki, after its question evals pass.',
+  how:['Trigger: cron at end of day.','Collect → compare with the wiki → draft entries → run evals → open MR → review → merge.','Tomorrow’s Oncall and Alarm agents read the updated wiki: the loop closes without anyone remembering to write docs.'],
+  guards:[['prompt','No PII: entries cite only the ticket / alarm id.'],['code','Wiki CI (link check, PII / secret scan, freshness lint) runs on every MR it opens.'],['platform','Human review on the MR before merge.'],['platform','Maintainer bot identity: pushes only to maintainer/* branches and opens MRs. It cannot merge, edit CI config or bypass branch protection; code owners per wiki area approve.'],['code','Evals run before any MR is opened: a drop in score holds the draft instead of opening a PR.']],
+  gotchas:['Past Scenario Runbook entries are hypotheses, not answers: an agent tests an entry against the current evidence, and the Maintainer only updates one when the day’s evidence ties to it.','MR budget: each MR holds at most N entries and the overflow carries to the next day, so a reviewer can actually read it. A P0 or postmortem finding takes a fast path: its own small MR straight away, through the same evals and CI.']},
+ nodes:[
+  {id:'cron',label:'Nightly trigger',sub:'cron',x:20,y:60,w:180,h:80,
+   d:{kind:'Trigger',what:'Runs once a day after the oncall shift ends.'}},
+  {id:'tix',label:'Ticket history',sub:'today’s threads + outcomes',x:20,y:230,w:220,h:90,go:'bot'},
+  {id:'alm',label:'Alarm history',c:'alarm',sub:'today’s alarms + triage notes',x:20,y:400,w:220,h:90,
+   d:{kind:'Input',what:'The Alarm Agent’s output for the day: which alarms fired, what evidence was gathered, how each one was resolved.'}},
+  {id:'collect',label:'1 · Collect',sub:'scrub · group by\nsymptom / service',x:270,y:290,w:150,h:120,
+   d:{kind:'Step',what:'Pull the day’s tickets and alarms and cluster them by symptom and service, so repeats collapse into one candidate.',guards:[['code','Personal data and secrets are stripped from tickets before the model sees them.'],['code','Only history with a human-confirmed outcome (ticket resolved and the agent’s reply rated by the engineer, or alarm triage confirmed) can create or change an entry. Agent-only answers are logged but never promoted, so the wiki cannot reinforce its own mistakes.'],['code','An unrated ticket is skipped: no rating, no learning.']]}},
+  {id:'diff',label:'2 · Compare',sub:'New / Outdated\n/ Review per finding',x:450,y:290,w:150,h:120,
+   d:{kind:'Step',what:'Walk the wiki index for each cluster and compare findings with the wiki claims that were used.',how:['Each finding marked New (no entry) or Outdated (entry contradicted by today’s evidence).','Entries past their review interval, or unused for N days, are flagged Review / Archive for a human to confirm.','No change → nothing to write.']}},
+  {id:'draft',label:'3 · Draft',sub:'Runbooks, recipes,\nrouting + index',x:630,y:290,w:150,h:120,
+   d:{kind:'Step',what:'Write or update wiki entries from the day’s evidence: Scenario Runbook entries from the template (symptom · applies to · root cause · resolution · handoff), log and query recipes, routing, and the matching index rows.',guards:[['prompt','Index-update invariant: every doc change updates its index in the same change.']]}},
+  {id:'evals',label:'4 · Run evals',sub:'question set on\nthe draft branch',x:810,y:290,w:150,h:120,
+   d:{kind:'Step',what:'Applies the draft to a branch and answers the wiki’s fixed runbook-scenario question set against it. The score is compared with main.',how:['Score not lower than main → continue to the MR.','Score lower → no PR is opened; the draft is held for a human.'],guards:[['code','Gate before the PR exists: a regression never reaches a reviewer as a normal MR.']],gotchas:['The question set is not written by the Maintainer, so it cannot grade its own work.']}},
+  {id:'mr',label:'5 · Open MR',sub:'CI → review\n→ merge',x:990,y:290,w:170,h:120,
+   d:{kind:'Step',what:'Opens the MR with the before/after eval score attached. Wiki CI runs on it, then a code owner approves before merge.',how:['At most N entries per MR; overflow carries to the next day.','Fast path: a P0 or postmortem finding opens its own small MR immediately.'],guards:[['code','Wiki CI: link and index check, PII / secret scan, freshness lint.'],['platform','Code-owner approval before merge.']]}},
+  {id:'wiki',label:'AI Wiki',sub:'Runbooks · docs · index',x:450,y:520,w:390,h:100,go:'wiki'},
+ ],
+ edges:[
+  ['cron','collect','','read'],
+  ['tix','collect','','read'],['alm','collect','','read'],
+  ['collect','diff','','read'],['diff','draft','','read'],['draft','evals','','read'],['evals','mr','','read'],
+  ['wiki','diff','current claims','read',{s:['T','B'],f:[.19,.5],lt:.8}],
+  ['mr','wiki','merge','write',{c:[1075,600]}],
+ ]},
+
+// ---------------- WIKI ----------------
+wiki:{title:'AI Wiki',
+ d:{kind:'Knowledge base (git)',what:'Git-hosted Markdown / YAML knowledge for AI agents on a business domain. No service code.',
+  how:['Retrieve: index routing (progressive disclosure), not search. No embeddings anywhere.','Stay fresh: Wiki Maintainer MRs, index-update invariant, Wiki CI on every MR, evals before the Maintainer opens one.','Code detail is read from the service repos at the registry commit; the wiki keeps architecture, direction and context.','Consumers: Oncall Agent, Alarm Agent, Spec Workflow, coding-agent sessions.','The wiki holds facts only: no procedures, tool or MCP calls. All skills (domain, read and write) live in the skills repo and point at wiki entries; reads and writes run behind the platform’s approval.'],
+  guards:[['prompt','Any doc change updates its index in the same change.'],['code','Wiki CI on every MR: link check, PII / secret scan, freshness lint.'],['code','Evals: a fixed set of real runbook-scenario questions is re-run on a change; a lower score than main blocks it.']],
+ },
+ nodes:[
+  {id:'oncall',label:'Oncall Agent',sub:'ticket context',x:20,y:40,w:190,h:80,go:'bot'},
+  {id:'alarm',label:'Alarm Agent',sub:'alarm context',c:'alarm',x:20,y:190,w:190,h:80,kind:'ghost',d:{kind:'Consumer',what:'Pulls runbooks, Scenario Runbook precedents and the service registry as context for each alarm; its alarm history feeds the Wiki Maintainer.'}},
+  {id:'sched',label:'Wiki\nMaintainer',sub:'end-of-day MRs',x:20,y:340,w:190,h:100,go:'sched'},
+  {id:'harness',label:'Spec Workflow',sub:'context · archive',x:20,y:550,w:190,h:90,go:'harness'},
+  {id:'index',label:'Index tree',sub:'AGENTS.md → AI-INDEX\n→ sub-indexes → docs\n\nroutes, holds no detail',x:300,y:140,w:180,h:400,
+   d:{kind:'Main contract',what:'Progressive-disclosure router: root index → sub-indexes → numbered docs. AGENTS.md is the single source of truth for agent rules.',how:['Root index: scenarios (understand domain, take an oncall, find a service, read code).','Knowledge index: change type → doc chain.','Oncall map: boundary → action skill → recipes → Scenario Runbook precedents.'],guards:[['prompt','“Don’t grep the whole repo, navigate from the indexes.”'],['code','Link checker fails on unindexed docs.']],gotchas:['Contract surface: moving it breaks every consumer at once.','Restructures aim to shrink agent context: remove mirrors, merge duplicates.']}},
+  {id:'kbsync',label:'Code sync',sub:'code merge → docs MR',x:800,y:20,w:220,h:62,
+   d:{kind:'Automation',what:'When a code MR merges in a watched repo, the sync opens a docs MR into the wiki. It only opens the MR: Wiki CI and human code-owner review check it like every other wiki MR.',gotchas:['Same gate as the nightly Wiki Maintainer update: nothing reaches the wiki without a reviewed MR.']}},
+  {id:'docs',label:'References',sub:'boundary · data model · recipes',x:520,y:130,w:220,h:90,
+   d:{kind:'Content',what:'Numbered reference docs: overview, glossary, region dispatch, data model, extension hooks, oncall triage, debug recipes.',how:['008 oncall triage: the “is it ours?” boundary.','012 debug recipes.','004.1 extension-hook mappings.'],guards:[['prompt','Numbers are never reused (agents hard-code paths).']]}},
+  {id:'qa',label:'Scenario Runbook',sub:'seeded from real tickets\nfor oncall, alarms, people',x:520,y:240,w:220,h:90,
+   d:{kind:'Content',what:'One runbook entry per recurring scenario, seeded from real historical tickets; new and outdated entries arrive through the Wiki Maintainer’s MR. Where a change is the right fix, the entry records the fact (when it applies, what to check first) and names the write skill in the skills repo. That skill and the platform’s approval gate carry it out; the entry never does.',how:['Template: symptom · applies to · root cause · resolution · handoff.','Provenance labelled: KB-derived vs confirmed against ticket chats.'],gotchas:['Entries are hypotheses, not answers: test them against the current ticket’s evidence before reusing.','Honest metric: adding files doesn’t move adoption; only real deflection does.']}},
+  {id:'reg',label:'Service registry',sub:'service → docs map',x:520,y:350,w:220,h:90,
+   d:{kind:'Content',what:'Where each service lives and which docs describe it. Identify services by the full triple (id + repo path + alias), never by a short name.',gotchas:['The Oncall Agent uses it as its onboarding code scope.']}},
+  {id:'code',label:'Architecture notes',sub:'curated · why, not what',x:800,y:130,w:220,h:90,
+   d:{kind:'Content',what:'Curated cross-service architecture and design-intent notes: what the code cannot say.',gotchas:['These notes cover architecture and direction; code detail is read from the service repos at the registry commit.']}},
+  {id:'svc',label:'Service repos',sub:'read on demand\npinned to registry commit',x:800,y:240,w:220,h:90,
+   d:{kind:'Code source',what:'The service repos themselves. An agent that needs code detail opens the repo at the commit the registry names, instead of reading a generated copy.',how:['Registry gives repo + commit.','Agent greps or reads that checkout.','Each repo keeps a short README / AGENTS.md for its own conventions.'],gotchas:['Needs agent access to checkouts.']}},
+  {id:'proj',label:'projects/',sub:'short ADRs\none per project',x:800,y:350,w:220,h:90,
+   d:{kind:'Content',what:'Short architecture decision records, one per project: the context, the decision and why.',gotchas:['The Archive stage files each project here as an MR under the wiki’s NNN-name convention.']}},
+  {id:'ci',label:'Wiki CI',sub:'every MR · link check\nPII scan · freshness lint',x:800,y:460,w:220,h:100,
+   d:{kind:'CI pipeline',what:'Runs on every MR into the wiki, whoever opens it: link and index check, PII / secret scan, owner and last-reviewed lint.'}},
+  {id:'evals',label:'Evals',sub:'runbook-scenario questions\nregression gate',x:800,y:590,w:220,h:100,
+   d:{kind:'Test set',what:'A fixed set of real runbook-scenario questions with the doc or entry each should reach, kept in the wiki repo. Answered by an agent navigating the indexes, scored against main.',how:['Seeded from confirmed tickets; owned by the wiki’s code owners.','The Wiki Maintainer runs it before it opens an MR; Wiki CI can run it on any MR.','Before/after score is shown on the MR.'],gotchas:['Not generated by the Maintainer, so it cannot grade its own output.','Grow it from missed questions, not from the entries just written.']}},
+ ],
+ edges:[
+  ['index','oncall','','read'],
+  ['index','alarm','','read'],
+  ['sched','index','MR','write'],
+  ['index','harness','','read'],
+  ['index','docs','','read'],['index','qa','','read'],['index','reg','','read'],
+  ['kbsync','docs','docs MR','write'],
+  ['reg','svc','','read'],['ci','index','gates MR','weak'],['evals','index','tests routing','weak'],
+ ]},
+// ---------------- HARNESS ----------------
+harness:{title:'Spec Workflow',
+ d:{kind:'Spec-driven workflow',what:'Skill-based harness that runs a coding agent through a fixed, recorded 6-stage pipeline. No server: SKILL.md contracts + Python scripts inside the engineer’s agent.',
+  how:['Stages are skills pulled from the shared skills repo, the same one the Oncall Agent uses.','Intake picks a flow: standard / bugfix / config.','Orchestrator dispatches one stage at a time; each stage owns its own human confirmations.','Recorder writes local SQLite first; an outbox ships the audit log to the telemetry DB.','Archive files the project back into the wiki as an MR.'],
+  guards:[['code','Python for determinism, the LLM for judgement: agents never hand-edit state.'],['platform','CI on the harness repo runs its contract tests on every change.']]},
+ nodes:[
+  {id:'eng',label:'Engineer',sub:'+ coding agent',x:30,y:200,w:180,h:80,kind:'person',
+   d:{kind:'Entry',what:'Any team engineer in Claude Code / Codex / IDE agent asks to start or continue a project; the orchestrator takes over.',gotchas:['Any follow-up message must re-enter the orchestrator (agents drift after context compaction).']}},
+  {id:'wf',label:'Orchestrator',sub:'one stage at a time · callbacks finish stages · resume / rollback',x:270,y:200,w:620,h:80,
+   d:{kind:'Harness core',what:'Owns current stage, dispatch, callback validation, flow changes, resume and rollback.',how:['Returns one action (recover / ask user / block / dispatch / complete).','Rollback: downstream stages marked rolled back, artifacts invalidated.'],guards:[['code','A callback is the only way to finish a stage (“done”, a green test or a push can’t).'],['prompt','A confirmation is valid only for what was shown.']],gotchas:['Order is scheduling, not dependency: each stage checks its own inputs.']}},
+  {id:'s1',label:'1 Intake',sub:'PRD → project',x:30,y:450,w:135,h:100,
+   d:{kind:'Stage 1',what:'Creates the project from a PRD, tracker item or text.',how:['Two read-only sub-agents in parallel: flow recommender + complexity scorer.','Exactly one confirmation: name, mode, complexity, flow.']}},
+  {id:'s2',label:'2 Tech design',sub:'clarify → design',x:206,y:450,w:135,h:100,
+   d:{kind:'Stage 2',what:'Clarify from business sources, then design (scope + a sequence diagram per feature point) and break it into tasks.md and a test plan: tests, each with its scenarios.'}},
+  {id:'s3',label:'3 Env setup',sub:'resources → pre-prod',x:382,y:450,w:160,h:100,
+   d:{kind:'Stage 3',what:'Turns a requirement’s declared resources into a ready pre-prod environment, through the write skills in the skills repo.',how:['Discover components → one key-config confirmation → create branch → dispatch write skills by dependency layer → poll until ready.'],guards:[['code','Unknown mutation → read-only reconcile, never replay.'],['code','Credential-shaped inputs rejected; tokens redacted.'],['platform','Platforms apply their own permissions: DB release tickets are never started by the agent, A/B stays a draft.']]}},
+  {id:'s4',label:'4 Coding',sub:'plan → code → CR',x:583,y:450,w:135,h:100,
+   d:{kind:'Stage 4',what:'context → plan → implement → verify → independent-context code review → deliver.',guards:[['code','Refuses force / rebase / amend.'],['code','Creates no MR: human review and merge stay outside the agent.'],['code','Unit-test results are recorded; failures gate delivery until fixed or explicitly waived.']]}},
+  {id:'s5',label:'5 API testing',sub:'run tests → report',x:760,y:450,w:135,h:100,
+   d:{kind:'Stage 5',what:'Runs the API tests and scenarios from the test plan and writes a report.',guards:[['code','Coding loop: at most 3 rollbacks per project, counted in the project’s state database. The 4th failure stops for a human.']],gotchas:['A confirmed code defect rolls back to Coding. An environment issue rolls back to Env setup instead. An issue that is neither stops for a human. The issues are stored first, then the stage restarts.']}},
+  {id:'s7',label:'6 Archive',sub:'wiki MR · audit',x:937,y:450,w:135,h:100,
+   d:{kind:'Stage 6',what:'Closes the project: wiki MR, tracker advance, telemetry reconciliation.',guards:[['code','Never pushes master.']],gotchas:['A wrong working directory is detected and reported before archiving.','Filed as a wiki MR under the wiki’s own review gate.']}},
+  {id:'wiki',label:'AI Wiki',sub:'user-supplied reference\nindex → page, read-only',x:907,y:30,w:220,h:90,go:'wiki'},
+  {id:'sk',label:'Skills repo',sub:'read skills · write skills\nCI · config · DB release · A/B',x:650,y:30,w:220,h:90,
+   d:{kind:'Skills repo',what:'The shared, team-maintained repo the orchestrator loads each stage’s skills from. It holds the read skills a stage uses to inspect platforms and the write skills it uses to change pre-prod.',how:['Read skills: generic, read-only (for example log search and DB read), each returning a bounded summary.','CI write skill: dev task and pre-prod lanes.','Config write skill: pre-prod config lane only.','DB write skill: release ticket that is never started.','A/B write skill: new layer and unpublished draft only.'],guards:[['platform','Every write skill calls its platform with the caller’s scoped token; the platform checks the permission, so a skill cannot exceed it.'],['prompt','Defence in depth: write skills load only on a change request; read skills load by default.']]}},
+  {id:'plat',label:'Platforms',sub:'CI · config · DB release · A/B',x:400,y:30,w:180,h:90,kind:'ghost',
+   d:{kind:'Platforms',what:'CI/CD platform, config centre (pre-prod lanes), DB change-release platform, A/B experiment platform.'}},
+  {id:'rec',label:'State recording',sub:'recorder · outbox · telemetry',x:1050,y:200,w:220,h:80,
+   d:{kind:'Workflow core',what:'Local success never depends on the remote store: state is written to local SQLite in a transaction, intents go to an outbox table in the same transaction, and a background worker ships them to the remote telemetry DB (MongoDB).',
+  how:['Receives the orchestrator’s synced audit log: every stage transition, including rollbacks and the coding-loop count.','Archive reconciles the telemetry DB with the local state.','Feeds the telemetry dashboard: weekly active engineers and per-stage status.','Statuses: unstarted / progressing / waiting_user / blocked / failed / finished / skipped / rolled back.','Delivery is at least once: each audit entry has a sequence number, and the telemetry DB ignores repeats.','Next call first recovers any unfinished transaction.'],
+  guards:[['code','Issue kind is a closed list: code_defect, env_issue or needs_human. The recorder rejects any other value.'],['code','Revision guard within a run; start-time guard across runs.'],['platform','Authenticated telemetry gateway: every request carries a per-client token.']]}},
+  {id:'proj',label:'Project folder',sub:'PRD · tech doc · tasks · test plan\nproject files · SQLite state',x:160,y:30,w:250,h:90,
+   d:{kind:'Local store',what:'One folder per project on the engineer’s machine. It holds the PRD, the tech design, tasks.md, the test plan, the project files and a local SQLite database, so any stage can resume from it.',how:['Stages read the PRD and tech design from it and write their outputs back.','Tech design creates tasks.md (the task checklist) and the test plan (tests, each with its scenarios). Both are kept apart from the database, which records only their paths.','One local SQLite database holds every stage’s status, the coding-loop count and the issues, so a rollback is a single transaction.','One append-only audit log for the whole project records every stage event, tagged by stage and loop round, so the state can be rebuilt from it. It is a table in the same database.','The orchestrator syncs the audit log to state recording, which ships it to the remote telemetry DB (MongoDB).','A read-only state summary is generated from the database for people and agent context. It is never read back.'],guards:[['code','Written only through the orchestrator’s recorder, never hand-edited.']],
+   schema:[{name:'audit_log',desc:'One row per workflow event, in the local SQLite database. Appended only by the recorder.',
+    cols:[['seq','INTEGER','PK, auto-increment. Gives the order and is the dedupe key for delivery.'],['ts','TEXT','UTC time, ISO 8601.'],['project_id','TEXT','Which project.'],['stage','INTEGER','1 to 6.'],['round','INTEGER','Coding-loop round. 0 until the first rollback.'],['event','TEXT','For example started, failed, issue_stored, rolled_back.'],['status','TEXT','Stage status after the event: unstarted / progressing / waiting_user / blocked / failed / finished / skipped / rolled back.'],['detail','TEXT','Short JSON note. For issue_stored it must hold kind and summary.']],
+    keys:['PK (seq)','IDX (project_id, seq): replay in order'],
+    rowCols:['seq','stage','round','event','status','detail'],
+    rows:[['40','5','2','started','progressing',''],['41','5','2','failed','failed',''],['42','5','2','issue_stored','failed','{"kind":"code_defect","summary":"order API 500 on empty cart"}'],['43','5','3','rolled_back','rolled back',''],['44','4','3','started','progressing','']]},
+   {name:'outbox',desc:'One row per audit_log row still to ship to the remote telemetry DB. Written in the same transaction as the audit row.',
+    cols:[['id','INTEGER','PK, auto-increment.'],['audit_seq','INTEGER','The audit_log.seq row to ship. UNIQUE.'],['shipped_at','TEXT','Empty until the telemetry DB confirms. Set by the worker.'],['attempts','INTEGER','Send tries so far.']],
+    keys:['PK (id)','UNIQUE (audit_seq)','IDX (shipped_at): find unsent rows'],
+    rowCols:['id','audit_seq','shipped_at','attempts'],
+    rows:[['1','40','2026-11-08T10:32:06Z','1'],['2','41','2026-11-08T10:32:06Z','1'],['3','42','','0']]}]}},
+ ],
+ edges:[
+  ['eng','wf','starts project','read',{s:['R','L'],f:[.33,.33]}],
+  ['wf','s1','dispatch','read'],
+  ['s1','s2','','read'],['s2','s3','','read'],['s3','s4','','read'],['s4','s5','','read'],['s5','s7','','read'],['s5','s4','coding loop · max 3','read',{s:['B','B']}],
+  ['wf','wiki','wiki context','read',{s:['R','L'],f:[.3,.5]}],
+  ['wf','sk','loads stage skills','read',{s:['T','B'],f:[.88,.5]}],
+  ['wf','proj','reads · writes','write',{s:['T','B'],f:[.03,.58]}],
+  ['sk','plat','reads · writes','write'],
+  ['s7','rec','reconcile','read'],
+  ['wf','rec','sync audit log','read',{s:['R','L'],f:[.65,.65]}],
+  ['s7','wiki','archive MR','write',{s:['T','B'],f:[.54,.5]}],
+ ]},
+
+};
+
+// ---------------------------------------------------------------------------
+// RENDER
+// ---------------------------------------------------------------------------
+// Spacing: the hand-placed layouts above are tight. SPREAD moves boxes (and edge bend points) apart on
+// every layer by the same factors, keeping box sizes, then grows the canvas to fit. 1 = original layout.
+const SPREAD={x:1.14,y:1.2};
+
+// Layer bands, same look as the translation-pipeline diagram: a tinted rounded band behind each
+// group of boxes, headed by a LAYER name and a one-line subtitle. Boxes listed in `m` define the
+// band's extent. Boxes not listed (external systems, portals to other layers) stay outside any band.
+// Tints: green = entry / inputs · purple = agents / pipeline · blue = knowledge / state · cyan = workflow / owners.
+const TINT={entry:'#42d094', agent:'#8B65FF', know:'#5d9eff', flow:'#00deed'};
+const BANDS={
+ root:[ {l:'AGENT LAYER',s:'answer · maintain · triage',c:TINT.agent,m:['oncall','sched','alarm']},
+        {l:'KNOWLEDGE LAYER',s:'one agent-readable wiki, in git',c:TINT.know,m:['skills','wiki'],keep:true},
+        {l:'WORKFLOW LAYER',s:'spec-driven delivery',c:TINT.flow,m:['harness']} ],
+ bot:[  {l:'ENTRY',s:'chat thread',c:TINT.entry,m:['chat'],keep:true},
+        {l:'SUPERVISOR LAYER',s:'route · merge · answer',c:TINT.agent,m:['router'],keep:true},
+        {l:'WORKER LAYER',s:'one per thread · closes after 1 hour',c:TINT.agent,m:['worker','ext'],keep:true},
+        {l:'KNOWLEDGE · SKILLS · PLATFORMS',s:'source of truth · skills · tools',c:TINT.know,m:['cskill','wskill','oskill','gskill','wiki','plat'],padT:30} ],
+ sched:[{l:'INPUTS',s:'trigger · histories',c:TINT.entry,m:['cron','tix','alm'],tall:true},
+        {l:'MAINTAINER PIPELINE',s:'nightly · five steps',c:TINT.agent,m:['collect','diff','draft','evals','mr']},
+        {l:'KNOWLEDGE LAYER',s:'the wiki it updates',c:TINT.know,m:['wiki']} ],
+ wiki:[ {l:'CONSUMERS',s:'who reads · who writes',c:TINT.entry,m:['oncall','alarm','sched','harness']},
+        {l:'ROUTING LAYER',s:'index, no detail',c:TINT.agent,m:['index']},
+        {l:'CURATED KNOWLEDGE',s:'references · runbooks · registry',c:TINT.know,m:['docs','qa','reg']},
+        {l:'CODE · GOVERNANCE',s:'notes · repos · sync · CI · evals',c:TINT.flow,m:['kbsync','code','svc','proj','ci','evals']} ],
+ harness:[{l:'CONTROL LAYER',s:'engineer · orchestrator',c:TINT.agent,m:['eng','wf']},
+        {l:'STAGE LAYER',s:'one stage at a time',c:TINT.flow,m:['s1','s2','s3','s4','s5','s7'],padB:30},
+        {l:'KNOWLEDGE LAYER',s:'skills · wiki',c:TINT.know,m:['sk','wiki']},
+        {l:'TELEMETRY LAYER',s:'recorded per stage',c:TINT.entry,m:['rec']} ]};
+// Groups: a dashed frame drawn around boxes that live inside one repo (computed after layout).
+const GROUPS={bot:[{l:'SKILLS REPO',s:'team-maintained',m:['cskill','wskill','oskill','gskill']}]};
+const GRP_PAD=14, GRP_HDR=34;
+const ALIGN_Y=new Set(['root','bot','wiki']);   // these layers read left to right: their bands share one height
+const BAND_PAD=22, BAND_HDR=64, EDGE_MARGIN=14, BAND_GAP=26, ROW_GAP=90;   // ROW_GAP: gap between stacked layers
+
+for(const [lid,lay] of Object.entries(L)){
+  for(const n of lay.nodes){ n.x=Math.round(n.x*SPREAD.x); n.y=Math.round(n.y*SPREAD.y); }
+  for(const e of lay.edges){ const c=e[4]&&e[4].c; if(c) e[4].c=[Math.round(c[0]*SPREAD.x),Math.round(c[1]*SPREAD.y)]; }
+  // band rectangles from their member boxes
+  const byId=Object.fromEntries(lay.nodes.map(n=>[n.id,n]));
+  lay.bands=(BANDS[lid]||[]).map(b=>{
+    const ms=b.m.map(id=>byId[id]);
+    return {...b,x:Math.min(...ms.map(n=>n.x))-BAND_PAD, y:Math.min(...ms.map(n=>n.y))-BAND_HDR-(b.padT||0),
+            r:Math.max(...ms.map(n=>n.x+n.w))+BAND_PAD, b:Math.max(...ms.map(n=>n.y+n.h))+BAND_PAD+(b.padB||0)};   // padB: extra room under the boxes for lines
+  });
+  if(ALIGN_Y.has(lid)){ const y0=Math.min(...lay.bands.map(b=>b.y)), y1=Math.max(...lay.bands.map(b=>b.b)); lay.bands.forEach(b=>{b.y=y0;b.b=y1;}); }
+  // spread boxes through their band: where a band is taller than its boxes need, even out the gaps
+  if(ALIGN_Y.has(lid)) for(const b of lay.bands){
+    if(b.keep) continue;                                               // band opts out: keep boxes where placed
+    const ms=b.m.map(id=>byId[id]).sort((p,q)=>p.y-q.y);
+    if(ms.some((n,i)=>i&&n.y<ms[i-1].y+ms[i-1].h)) continue;          // side-by-side boxes: leave as placed
+    const top=b.y+BAND_HDR, gap=((b.b-BAND_PAD)-top-ms.reduce((s,n)=>s+n.h,0))/(ms.length+1);
+    if(gap<0) continue;
+    let y=top+gap; for(const n of ms){ n.y=Math.round(y); y+=n.h+gap; }
+  }
+  // even gaps between layers: shift whole bands (with their boxes and link bend points) so every gap in a
+  // layer is the same size. Left-to-right layers equalise the gaps between columns; stacked layers
+  // equalise the gaps between rows (bands that overlap vertically form one row).
+  lay.flow=ALIGN_Y.has(lid)?'h':'v';
+  const shiftBands=(bs,ax,d)=>{ // bs: bands, d: shift per band index
+    const dn=new Map();
+    bs.forEach((b,i)=>{ if(!d[i]) return; b.m.forEach(id=>dn.set(id,d[i])); b[ax]+=d[i]; b[ax==='x'?'r':'b']+=d[i]; });
+    lay.nodes.forEach(n=>{ const v=dn.get(n.id); if(v) n[ax]+=v; });
+    lay.edges.forEach(e=>{ const o=e[4]; if(o&&o.c){ const v=((dn.get(e[0])||0)+(dn.get(e[1])||0))/2; o.c[ax==='x'?0:1]+=Math.round(v); } });
+  };
+  const evenGaps=(items,lo,hi,ax,floor,exact)=>{ // items sorted by start; shift each so all gaps equal the target
+    const gaps=items.slice(1).map((it,i)=>it[lo]-items[i][hi]);
+    const target=exact?floor:Math.max(floor,...gaps); let acc=0;
+    return items.map((it,i)=>{ if(i) acc+=target-gaps[i-1]; return acc; });
+  };
+  if(lay.flow==='h'){
+    const bs=[...lay.bands].sort((p,q)=>p.x-q.x);
+    const d=evenGaps(bs,'x','r','x',BAND_GAP*2); shiftBands(bs,'x',d);
+  } else if(lay.bands.length>1){
+    const rows=[]; [...lay.bands].filter(b=>!b.tall).sort((p,q)=>p.y-q.y).forEach(b=>{ const r=rows.find(r=>b.y<r.b&&b.b>r.y); if(r){r.bs.push(b); r.b=Math.max(r.b,b.b);} else rows.push({y:b.y,b:b.b,bs:[b]}); });
+    const d=evenGaps(rows,'y','b','y',ROW_GAP,true);
+    shiftBands(rows.flatMap(r=>r.bs),'y',rows.flatMap((r,i)=>r.bs.map(()=>d[i])));
+    // columns inside a row sequence (e.g. inputs beside a pipeline): same gap between them
+    const bs=[...lay.bands].sort((p,q)=>p.x-q.x);
+    if(lid==='sched'){
+      const cols=[]; bs.forEach(b=>{ const c=cols.find(c=>b.x<c.r&&b.r>c.x); if(c){c.bs.push(b);c.r=Math.max(c.r,b.r);} else cols.push({x:b.x,r:b.r,bs:[b]}); });
+      if(cols.length>1){ const dx=evenGaps(cols,'x','r','x',ROW_GAP,true); shiftBands(cols.flatMap(c=>c.bs),'x',cols.flatMap((c,i)=>c.bs.map(()=>dx[i]))); }
+    }
+  }
+  // keep a small margin: slide the whole layer so no band starts off-canvas
+  const dx=Math.max(0,EDGE_MARGIN-Math.min(...lay.bands.map(b=>b.x))), dy=Math.max(0,EDGE_MARGIN-Math.min(...lay.bands.map(b=>b.y)));
+  lay.nodes.forEach(n=>{n.x+=dx;n.y+=dy;});
+  lay.edges.forEach(e=>{const o=e[4]; if(o&&o.c) o.c=[o.c[0]+dx,o.c[1]+dy];});
+  lay.bands.forEach(b=>{b.x+=dx;b.r+=dx;b.y+=dy;b.b+=dy;});
+  lay.groups=(GROUPS[lid]||[]).map(gr=>{
+    const ms=gr.m.map(id=>byId[id]);
+    return {...gr,x:Math.min(...ms.map(n=>n.x))-GRP_PAD, y:Math.min(...ms.map(n=>n.y))-GRP_HDR,
+            r:Math.max(...ms.map(n=>n.x+n.w))+GRP_PAD, b:Math.max(...ms.map(n=>n.y+n.h))+GRP_PAD};
+  });
+}
+const allNodes=Object.values(L).flatMap(l=>l.nodes), allBands=Object.values(L).flatMap(l=>l.bands);
+const NS='http://www.w3.org/2000/svg',
+  VW=Math.max(...allNodes.map(n=>n.x+n.w),...allBands.map(b=>b.r))+EDGE_MARGIN,
+  VH=Math.max(...allNodes.map(n=>n.y+n.h),...allBands.map(b=>b.b))+EDGE_MARGIN;
+document.getElementById('s').setAttribute('viewBox',`0 0 ${VW} ${VH}`);
+
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------------------------------------------------------------------------
+// EDGE ROUTING: right-angle routes around the boxes, like the translation-pipeline diagram.
+// Each edge leaves / enters a box side at a spread-out port; a small A* search on an 8px lattice
+// finds the shortest path with the fewest bends that doesn't cross any other box.
+// ---------------------------------------------------------------------------
+const GRID=8, CLEAR=8, TURN=3, DX=[1,0,-1,0], DY=[0,1,0,-1];   // directions: right, down, left, up
+const SIDE_DIR={R:0,B:1,L:2,T:3};
+function routeLayer(lay){
+  if(lay.routes) return lay.routes;
+  const GW=Math.ceil(VW/GRID)+2, GH=Math.ceil(VH/GRID)+2;
+  const core=new Uint32Array(GW*GH), halo=new Uint32Array(GW*GH), used=new Uint16Array(GW*GH);
+  const bit=Object.fromEntries(lay.nodes.map((n,i)=>[n.id,1<<i]));
+  lay.nodes.forEach(n=>{
+    for(let gy=Math.floor((n.y-CLEAR)/GRID); gy<=Math.ceil((n.y+n.h+CLEAR)/GRID); gy++)
+      for(let gx=Math.floor((n.x-CLEAR)/GRID); gx<=Math.ceil((n.x+n.w+CLEAR)/GRID); gx++){
+        if(gx<0||gy<0||gx>=GW||gy>=GH) continue;
+        const px=gx*GRID, py=gy*GRID, k=gy*GW+gx;
+        if(px>=n.x&&px<=n.x+n.w&&py>=n.y&&py<=n.y+n.h) core[k]|=bit[n.id]; else halo[k]|=bit[n.id];
+      }
+  });
+  const g=new Float32Array(GW*GH*4), prev=new Int32Array(GW*GH*4);
+  const byId=Object.fromEntries(lay.nodes.map(n=>[n.id,n]));
+  const snap=(v,lo,hi)=>Math.min(hi,Math.max(lo,Math.round(v/GRID)*GRID));
+  const port=(n,side,f)=>{
+    if(side==='R'||side==='L') return [side==='R'?n.x+n.w:n.x, snap(n.y+n.h*f,n.y+12,n.y+n.h-12)];
+    return [snap(n.x+n.w*f,n.x+12,n.x+n.w-12), side==='B'?n.y+n.h:n.y];
+  };
+  const lead=(p,side)=>{ // first lattice point clear of the box, straight out from the port
+    const L=CLEAR+1;
+    return side==='R'?[Math.ceil((p[0]+L)/GRID),Math.round(p[1]/GRID)]:side==='L'?[Math.floor((p[0]-L)/GRID),Math.round(p[1]/GRID)]
+          :side==='B'?[Math.round(p[0]/GRID),Math.ceil((p[1]+L)/GRID)]:[Math.round(p[0]/GRID),Math.floor((p[1]-L)/GRID)];
+  };
+  function astar(S,E,dir0,allow,commit){
+    g.fill(Infinity);
+    const heap=[]; // [f,state]
+    const push=it=>{heap.push(it); let i=heap.length-1; while(i>0){const p=(i-1)>>1; if(heap[p][0]<=heap[i][0])break; [heap[p],heap[i]]=[heap[i],heap[p]]; i=p;}};
+    const pop=()=>{const top=heap[0], last=heap.pop(); if(heap.length){heap[0]=last; let i=0; for(;;){let l=2*i+1,r=l+1,m=i; if(l<heap.length&&heap[l][0]<heap[m][0])m=l; if(r<heap.length&&heap[r][0]<heap[m][0])m=r; if(m===i)break; [heap[m],heap[i]]=[heap[i],heap[m]]; i=m;}} return top;};
+    const h=(x,y)=>Math.abs(x-E[0])+Math.abs(y-E[1]);
+    const s0=(S[1]*GW+S[0])*4+dir0; g[s0]=0; prev[s0]=-1; push([h(S[0],S[1]),s0]);
+    let steps=0;
+    while(heap.length&&steps++<400000){
+      const [f,s]=pop(), d=s&3, k=s>>2, gx=k%GW, gy=(k/GW)|0;
+      if(gx===E[0]&&gy===E[1]){
+        const pts=[]; let cs=s; while(cs>=0){const kk=cs>>2; pts.push([(kk%GW)*GRID,((kk/GW)|0)*GRID]); if(commit) used[kk]++; cs=prev[cs];}
+        return {cost:g[s], pts:pts.reverse()};
+      }
+      if(f-h(gx,gy)>g[s]+1e-6) continue;
+      for(let nd=0;nd<4;nd++){
+        if(nd===((d+2)&3)) continue;
+        const nx=gx+DX[nd], ny=gy+DY[nd]; if(nx<0||ny<0||nx>=GW||ny>=GH) continue;
+        const nk=ny*GW+nx, goal=nx===E[0]&&ny===E[1];
+        if(!goal&&(core[nk]!==0||(halo[nk]&~allow)!==0)) continue;
+        const ng=g[s]+1+used[nk]*0.5+(nd!==d?TURN:0), ns=nk*4+nd;
+        if(ng<g[ns]){g[ns]=ng; prev[ns]=s; push([ng+h(nx,ny),ns]);}
+      }
+    }
+    return null;
+  }
+  const compress=pts=>pts.filter((p,i)=>!i||i===pts.length-1||!((p[0]-pts[i-1][0])*(pts[i+1][1]-p[1])===(p[1]-pts[i-1][1])*(pts[i+1][0]-p[0])));
+  function run(e,sa,sb,fa,fb,commit){
+    const A=byId[e[0]], B=byId[e[1]], pa=port(A,sa,fa), pb=port(B,sb,fb), S=lead(pa,sa), E=lead(pb,sb);
+    const r=astar(S,E,SIDE_DIR[sa],bit[e[0]]|bit[e[1]],commit);
+    if(!r) return null;
+    const ptsAll=[pa,...r.pts.map(p=>[p[0],p[1]]),pb];
+    return {cost:r.cost, pts:compress(ptsAll.filter((p,i)=>!i||p[0]!==ptsAll[i-1][0]||p[1]!==ptsAll[i-1][1]))};
+  }
+  // pass 1: pick the best pair of sides for every edge (ports at side centres)
+  const choice=lay.edges.map(e=>{
+    if(e[4]&&e[4].s) return {sa:e[4].s[0],sb:e[4].s[1]};   // forced sides, e.g. {s:['T','B']}
+    const A=byId[e[0]], B=byId[e[1]], dx=(B.x+B.w/2)-(A.x+A.w/2), dy=(B.y+B.h/2)-(A.y+A.h/2);
+    const hA=dx>=0?'R':'L', hB=dx>=0?'L':'R', vA=dy>=0?'B':'T', vB=dy>=0?'T':'B';
+    const ph=lay.flow==='h'?0:25, pv=lay.flow==='v'?0:25;     // prefer the layer's reading direction
+    const cands=[[hA,hB,ph],[vA,vB,pv],[hA,vB,12],[vA,hB,12],[hA,hA,10],[hB,hB,10],[vA,vA,10],[vB,vB,10]];
+    let best=null;
+    for(const [sa,sb,pen] of cands){ const r=run(e,sa,sb,.5,.5,false); if(r&&(!best||r.cost+pen<best.c)) best={sa,sb,c:r.cost+pen}; }
+    return best||{sa:hA,sb:hB};
+  });
+  // pass 2: spread edges that share a box side along it, ordered by where they go, then route for real
+  const slots={};
+  lay.edges.forEach((e,i)=>{
+    const A=byId[e[0]], B=byId[e[1]];
+    for(const [role,node,other,side] of [['a',A,B,choice[i].sa],['b',B,A,choice[i].sb]]){
+      const key=node.id+'|'+side, o=(side==='L'||side==='R')?other.y+other.h/2:other.x+other.w/2;
+      (slots[key]=slots[key]||[]).push({i,role,o});
+    }
+  });
+  const frac={};
+  for(const list of Object.values(slots)){ list.sort((p,q)=>p.o-q.o||p.i-q.i); list.forEach((s,k)=>{frac[s.i+s.role]=(k+1)/(list.length+1);}); }
+  lay.edges.forEach((e,i)=>{ if(e[4]&&e[4].f){ frac[i+'a']=e[4].f[0]; frac[i+'b']=e[4].f[1]; } });   // forced port positions
+  lay.routes=lay.edges.map((e,i)=>{
+    const c=choice[i], r=run(e,c.sa,c.sb,frac[i+'a'],frac[i+'b'],true);
+    if(r) return r.pts;
+    const A=byId[e[0]], B=byId[e[1]];            // fallback: plain elbow
+    return [[A.x+A.w/2,A.y+A.h/2],[B.x+B.w/2,A.y+A.h/2],[B.x+B.w/2,B.y+B.h/2]];
+  });
+  return lay.routes;
+}
+// label goes on the longest segment: above it if horizontal, beside it if vertical
+function labelAt(pts,t=.5){
+  let best=0, bi=0;
+  for(let i=0;i<pts.length-1;i++){ const d=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]); if(d>best){best=d;bi=i;} }
+  const [x1,y1]=pts[bi], [x2,y2]=pts[bi+1], mx=x1+(x2-x1)*t, my=y1+(y2-y1)*t;   // t: where along the segment (edge opt lt)
+  return Math.abs(x2-x1)>=Math.abs(y2-y1)?{x:mx,y:my-9,a:'middle'}:{x:mx+9,y:my+4,a:'start'};
+}
+const stage=document.getElementById('stage');
+let path=['root'], cur=null, busy=false;
+
+// parent lookup + labels for breadcrumbs
+const PARENT={};
+for(const [lid,lay] of Object.entries(L)) for(const n of lay.nodes) if(n.child){PARENT[n.child]=lid;}
+function pathTo(id){const p=[id]; while(PARENT[p[0]]) p.unshift(PARENT[p[0]]); return p;}
+
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e;}
+function hexA(h,a){return h+Math.round(a*255).toString(16).padStart(2,'0');}
+
+function clip(n,tx,ty){ // point on rect border from center toward (tx,ty)
+  const cx=n.x+n.w/2, cy=n.y+n.h/2, dx=tx-cx, dy=ty-cy;
+  if(!dx&&!dy) return [cx,cy];
+  const s=Math.min(Math.abs((n.w/2+4)/(dx||1e-9)),Math.abs((n.h/2+4)/(dy||1e-9)));
+  return [cx+dx*s, cy+dy*s];
+}
+
+function marker(col){
+  const id='m'+col.slice(1);
+  if(!document.getElementById(id)){
+    const m=el('marker',{id,viewBox:'0 0 10 10',refX:9,refY:5,markerUnits:'userSpaceOnUse',markerWidth:12,markerHeight:12,orient:'auto-start-reverse'},document.querySelector('#s defs'));
+    el('path',{d:'M0,0 L10,5 L0,10 z',fill:col},m);
+  }
+  return id;
+}
+function render(lid){
+  const lay=L[lid], g=el('g',{});
+  const byId=Object.fromEntries(lay.nodes.map(n=>[n.id,n]));
+  const bg=el('g',{},g), eg=el('g',{},g), hg=el('g',{},g), ng=el('g',{},g), lg=el('g',{},g);
+  for(const b of lay.bands){
+    el('rect',{x:b.x,y:b.y,width:b.r-b.x,height:b.b-b.y,rx:16,fill:b.c+'0f',stroke:b.c+'38'},bg);
+    // headers sit above the edges (dark outline) so a line crossing a band never hides its name
+    const ol={'paint-order':'stroke',stroke:'#0f1114','stroke-width':4,'stroke-linejoin':'round'};
+    const t=el('text',{...ol,x:b.x+18,y:b.y+27,'font-size':14,'font-weight':800,'letter-spacing':1.5,fill:b.c},hg); t.textContent=b.l;
+    const s=el('text',{...ol,x:b.x+18,y:b.y+45,'font-size':12.5,fill:'#9a9ea6'},hg); s.textContent=b.s;
+  }
+  for(const gr of lay.groups||[]){
+    el('rect',{x:gr.x,y:gr.y,width:gr.r-gr.x,height:gr.b-gr.y,rx:12,fill:'#ffffff08',stroke:'#989ead','stroke-width':1.4,'stroke-dasharray':'3 4'},bg);
+    const t=el('text',{x:gr.x+12,y:gr.y+16,'font-size':12,'font-weight':800,'letter-spacing':1.2,fill:'#c9ccd4'},bg); t.textContent=gr.l+' · '+gr.s;
+  }
+  // Edges: grey right-angle routes. Hover or select a box and its links turn cyan with dots flowing along them.
+  const ctx={lay,nodes:[],edges:[],hover:null,sel:null};
+  g._ctx=ctx;
+  const routes=routeLayer(lay);
+  lay.edges.forEach(([a,b,label,style],i)=>{
+    const pts=routes[i], d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
+    const path=el('path',{d,fill:'none','stroke-linejoin':'round'},eg);
+    const dots=el('g',{display:'none','pointer-events':'none'},eg);
+    if(!REDUCED&&(style==='read'||style==='write')){
+      let len=0; for(let k=1;k<pts.length;k++) len+=Math.hypot(pts[k][0]-pts[k-1][0],pts[k][1]-pts[k-1][1]);
+      const dur=Math.max(1.6,len/110);
+      for(let k=0;k<2;k++){
+        const c=el('circle',{r:5,fill:'#00eafa',filter:'url(#glow)'},dots);
+        el('animateMotion',{dur:dur.toFixed(2)+'s',begin:'-'+(k*dur/2).toFixed(2)+'s',repeatCount:'indefinite',path:d},c);
+      }
+    }
+    let text=null;
+    if(label){
+      const L=labelAt(pts,(lay.edges[i][4]||{}).lt);
+      text=el('text',{x:L.x,y:L.y,'text-anchor':L.a,'font-size':13,'paint-order':'stroke',stroke:'#0f1114','stroke-width':4,'stroke-linejoin':'round'},lg);
+      text.textContent=label;
+    }
+    ctx.edges.push({a,b,style,path,dots,text});
+  });
+  for(const n of lay.nodes){
+    const col=colorOf(lid,n), clickable=!!(n.child||n.go||n.d);
+    const ng1=el('g',{class:'node'+(clickable?' click':'')},ng);
+    ctx.nodes.push({id:n.id,g:ng1});
+    ng1.addEventListener('pointerenter',()=>{ctx.hover=n.id; applyFocus(ctx);});
+    ng1.addEventListener('pointerleave',()=>{ctx.hover=null; applyFocus(ctx);});
+    const dash=n.go||n.kind==='ghost'?'6 5':'';
+    if(n.kind==='stack'){ for(const k of [10,5]) el('rect',{x:n.x+k,y:n.y-k,width:n.w,height:n.h,rx:12,fill:'#1c2024',stroke:hexA(col,.5)},ng1); }
+    el('rect',{class:'box',x:n.x,y:n.y,width:n.w,height:n.h,rx:n.kind==='person'?n.h/2:12,fill:n.go?'#15181c':hexA(col,n.child?.22:.14),stroke:col,'stroke-width':n.child?2.6:1.4,'stroke-dasharray':dash},ng1);
+    if(n.child) el('rect',{x:n.x+5,y:n.y+5,width:n.w-10,height:n.h-10,rx:9,fill:'none',stroke:hexA(col,.35),'stroke-width':1},ng1);
+    const big=n.child&&lid==='root', lines=n.label.split('\n'), subs=(n.sub||'').split('\n').filter((s,i,a)=>s||a.length>1);
+    const fs=big?24:(n.w<160?13.5:15), ss=big?14:12, lh=fs*1.2, slh=ss*1.35;
+    const tot=lines.length*lh+(n.sub?subs.length*slh+6:0);
+    let y=n.y+n.h/2-tot/2+fs*.85;
+    for(const ln of lines){const t=el('text',{x:n.x+n.w/2,y,'text-anchor':'middle','font-size':fs,'font-weight':700,fill:'#ffffff'},ng1); t.textContent=ln; y+=lh;}
+    if(n.sub){ y+=6-lh+ss*1.1; for(const s of subs){const t=el('text',{x:n.x+n.w/2,y,'text-anchor':'middle','font-size':ss,fill:'#ffffff',opacity:.65},ng1); t.textContent=s; y+=slh;} }
+    if(n.child){const t=el('text',{x:n.x+n.w-12,y:n.y+n.h-11,'text-anchor':'end','font-size':big?14:12,'font-weight':700,fill:col},ng1); t.textContent='⊕ open';}
+    if(n.go){const t=el('text',{x:n.x+n.w-10,y:n.y+18,'text-anchor':'end','font-size':12,'font-weight':700,fill:col},ng1); t.textContent='↗';}
+    if(clickable) ng1.addEventListener('click',ev=>{ev.stopPropagation(); onNode(lid,n,ng1,ctx);});
+  }
+  stage.appendChild(g);
+  applyFocus(ctx);
+  return g;
+}
+
+// Focus = the selected box, else the hovered one. Its links go cyan and carry dots; the rest fade back.
+function applyFocus(ctx){
+  const f=ctx.sel||ctx.hover;
+  const rel=f?new Set([f,...ctx.edges.flatMap(e=>e.a===f?[e.b]:e.b===f?[e.a]:[])]):null;
+  for(const {id,g} of ctx.nodes) g.classList.toggle('dim',!!rel&&!rel.has(id));
+  for(const e of ctx.edges){
+    const on=!rel||(rel.has(e.a)&&rel.has(e.b)&&(e.a===f||e.b===f)), hot=!!rel&&on, col=hot?'#00eafa':'#b5b9c4';
+    e.path.setAttribute('stroke',col);
+    e.path.setAttribute('stroke-opacity',on?(hot?.95:.55):.08);
+    e.path.setAttribute('stroke-width',hot?2.6:e.style==='write'?3:1.7);
+    e.path.setAttribute('stroke-dasharray',e.style==='designed'?'7 6':e.style==='dormant'?'0.1 6':'');
+    e.path.setAttribute('stroke-linecap',e.style==='dormant'?'round':'butt');
+    e.path.setAttribute('marker-end',`url(#${marker(col)})`);
+    e.dots.setAttribute('display',hot?'inline':'none');
+    if(e.text){ e.text.setAttribute('opacity',on?1:0); e.text.setAttribute('fill',hot?'#00eafa':'rgba(255,255,255,.7)'); e.text.setAttribute('font-weight',hot?700:500); }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// PANEL
+// ---------------------------------------------------------------------------
+const panel=document.getElementById('panel');
+function fitPanel(){panel.style.bottom=document.getElementById('legend').offsetHeight+'px';}
+fitPanel(); addEventListener('resize',fitPanel);
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function schemaHtml(t){
+  let h=`<div class="stag">Table schema</div><h2><code>${esc(t.name)}</code></h2><p>${esc(t.desc)}</p><h4>Columns</h4><div class="ex-tbl"><table><tr><th>column</th><th>type</th><th>note</th></tr>${t.cols.map(c=>`<tr><td><b>${esc(c[0])}</b></td><td>${esc(c[1])}</td><td style="white-space:normal;min-width:200px">${esc(c[2])}</td></tr>`).join('')}</table></div>`;
+  if(t.keys) h+=`<h4>Keys</h4><ul>${t.keys.map(k=>`<li>${esc(k)}</li>`).join('')}</ul>`;
+  if(t.rows) h+=`<h4>Sample rows (illustrative)</h4><div class="ex-tbl"><table><tr>${t.rowCols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>${t.rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</table></div>`;
+  return h;
+}
+function openSchema(t){document.getElementById('sc').innerHTML=schemaHtml(t);document.body.classList.add('schema');}
+function closeSchema(){document.body.classList.remove('schema');}
+function showPanel(title,d,own,extra){
+  d=d||{};
+  let h=`<h2>${esc(title)}</h2><div class="kind">${esc(d.kind||'')}</div>`;
+  if(extra) h+=extra;
+  if(d.what) h+=`<p>${esc(d.what)}</p>`;
+  if(d.how&&d.how.length) h+=`<h4>How it works</h4><ul>${d.how.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  const schemas=d.schema?(Array.isArray(d.schema)?d.schema:[d.schema]):[];
+  if(schemas.length) h+=`<h4>Table schema</h4><div class="sbtns">${schemas.map((t,i)=>`<button class="sbtn" data-sch="${i}"><code>${esc(t.name)}</code> ▸</button>`).join('')}</div>`;
+  if(d.link) h+=`<p><a class="jl" data-go="${esc(d.link[1])}" style="color:#7cc4ff;cursor:pointer;text-decoration:underline">${esc(d.link[0])} ↗</a></p>`;
+  if(d.guards&&d.guards.length) h+=`<h4>Guardrails</h4><ul>${d.guards.map(([k,x])=>`<li><span class="g ${k}">${k}</span>${esc(x)}</li>`).join('')}</ul>`;
+  if(d.gotchas&&d.gotchas.length) h+=`<h4>Nuances</h4><ul>${d.gotchas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  if(d.equiv) h+=`<h4>Industry equivalent</h4><p>${esc(d.equiv)}</p>`;
+  panel.innerHTML=h; panel.scrollTop=0;
+  panel.querySelectorAll('.sbtn').forEach(b=>b.onclick=()=>openSchema(schemas[+b.dataset.sch]));
+  panel.querySelectorAll('a.jl').forEach(a=>a.onclick=()=>{if(!busy) jump(a.dataset.go);});
+}
+function showLayerPanel(){const lay=L[cur]; showPanel(lay.title,lay.d,lay.d.own,`<p style="opacity:.6;font-size:12px">You’re inside this layer. Click a component for details.</p>`);}
+
+function onNode(lid,n,gEl,ctx){
+  if(busy) return;
+  if(n.child) return drill(n);
+  if(n.go) return jump(n.go);
+  stage.querySelectorAll('rect.box').forEach(r=>r.removeAttribute('filter'));
+  ctx.sel=n.id; applyFocus(ctx);
+  showPanel(n.label.replace(/\n/g,' '),n.d,n.own);
+  gEl.querySelector('rect.box').setAttribute('filter','drop-shadow(0 0 8px #ffffff66)');
+}
+
+// ---------------------------------------------------------------------------
+// NAVIGATION + ZOOM ANIMATION
+// ---------------------------------------------------------------------------
+function fitM(n){ // matrix that maps full layer into node rect (aspect fit)
+  const s=Math.min(n.w/VW,n.h/VH); return {s,tx:n.x+(n.w-VW*s)/2,ty:n.y+(n.h-VH*s)/2};
+}
+function inv(m){return {s:1/m.s,tx:-m.tx/m.s,ty:-m.ty/m.s};}
+const ID={s:1,tx:0,ty:0};
+function lerp(a,b,t){return {s:a.s+(b.s-a.s)*t,tx:a.tx+(b.tx-a.tx)*t,ty:a.ty+(b.ty-a.ty)*t};}
+function setM(g,m,o){g.setAttribute('transform',`translate(${m.tx},${m.ty}) scale(${m.s})`); g.setAttribute('opacity',o);}
+function animate(oldG,newG,oFrom,oTo,nFrom,nTo,done){
+  busy=true; const t0=performance.now(), D=520;
+  (function step(now){
+    let t=Math.min(1,(now-t0)/D); const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    if(oldG) setM(oldG,lerp(oFrom,oTo,e),1-e);
+    setM(newG,lerp(nFrom,nTo,e),e);
+    if(t<1) requestAnimationFrame(step); else {if(oldG) oldG.remove(); busy=false; done&&done();}
+  })(t0);
+}
+let curG=null;
+function drill(n){
+  const m=fitM(n), newG=render(n.child);
+  const oldG=curG; curG=newG; path.push(n.child); cur=n.child; ui();
+  animate(oldG,newG,ID,inv(m),m,ID);
+}
+function up(){
+  if(busy||path.length<2) return;
+  const child=path.pop(), parent=path[path.length-1];
+  const n=L[parent].nodes.find(x=>x.child===child), m=fitM(n);
+  const newG=render(parent), oldG=curG; curG=newG; cur=parent; ui();
+  animate(oldG,newG,ID,m,inv(m),ID);
+}
+function jump(lid){ // crossfade to any layer
+  if(busy) return; path=pathTo(lid); cur=lid;
+  const newG=render(lid), oldG=curG; curG=newG; ui();
+  animate(oldG,newG,ID,{s:.92,tx:VW*.04,ty:VH*.04},{s:1.06,tx:-VW*.03,ty:-VH*.03},ID);
+}
+function goPath(i){ if(busy) return; if(i===path.length-1) return; if(i===path.length-2) return up(); jump(path[i]); }
+function ui(){
+  const c=document.getElementById('crumbs');
+  c.innerHTML=path.map((id,i)=>i===path.length-1?`<span class="cur">${esc(L[id].title)}</span>`:`<a data-i="${i}">${esc(L[id].title)}</a><span class="sep">›</span>`).join('');
+  c.querySelectorAll('a').forEach(a=>a.onclick=()=>goPath(+a.dataset.i));
+  document.getElementById('up').disabled=path.length<2;
+  showLayerPanel();
+}
+document.getElementById('up').onclick=up;
+document.getElementById('schema').addEventListener('click',e=>{ if(e.target.id==='schema'||e.target.id==='sclose') closeSchema(); });
+document.getElementById('s').addEventListener('click',()=>{ if(!busy){stage.querySelectorAll('rect.box').forEach(r=>r.removeAttribute('filter')); if(curG&&curG._ctx){curG._ctx.sel=null; applyFocus(curG._ctx);} showLayerPanel();} });
+addEventListener('keydown',e=>{ if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault(); if(document.body.classList.contains('schema')) closeSchema(); else up();} });
+
+// boot from hash: #l=wiki opens that layer (used by the deck's episodes)
+const hl=location.hash.match(/l=(\w+)/);
+cur=hl&&L[hl[1]]?hl[1]:'root'; path=pathTo(cur); curG=render(cur); ui();
+</script>
+</body></html>

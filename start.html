@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Kendrew's Presentation</title><link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/coupangplay-tokens.css">
+<style>
+/* Official Coupang Play colour tokens + deck aliases (--blue, --bg, --fg…) live in assets/coupangplay-tokens.css.
+   Below: deck-only extras. Sizes scaled ~1.25× for 1080p screen share. */
+:root{
+  --purple:#8B65FF;--green:#42D6A4;           /* section accents (not brand tokens) */
+  --rail:var(--color-base-blue-gray-900);     /* poster/thumb placeholder fill */
+  --on-accent:#001624;                        /* dark text on the bright section-accent badges */
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:Pretendard,"SF Pro Text",Inter,ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1680px;margin:0 auto;padding:0 64px}
+button{font:inherit;color:inherit}
+.view{display:none}.view.on{display:block;animation:fadein .28s var(--ease)}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+
+/* Header */
+header{position:sticky;top:0;z-index:5;height:72px;background:rgba(15,17,20,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--line-subtle)}
+header .wrap{height:100%;display:flex;align-items:center;gap:40px}
+/* Profile avatar (top right) + details card. Avatar = Coupang Play's blue smiley profile icon (ref: assets/reference/coupangplay-profile-icons.png) */
+.profile{margin-left:auto;position:relative}
+.avatar{all:unset;cursor:pointer;width:38px;height:38px;border-radius:9px;display:block;background:var(--blue);
+  box-shadow:0 0 0 2px transparent;transition:box-shadow .15s}
+.avatar svg{width:100%;height:100%;display:block}
+.avatar:hover,.avatar[aria-expanded="true"]{box-shadow:0 0 0 2px var(--fg)}
+.menu{display:none;position:absolute;right:0;top:calc(100% + 14px);width:380px;padding:22px 24px;border-radius:12px;background:var(--color-base-blue-gray-900);
+  border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.55);animation:fadein .2s var(--ease)}
+.menu.on{display:block}
+.menu .who{display:flex;align-items:center;gap:14px;padding-bottom:16px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.menu .who .avatar{width:52px;height:52px;border-radius:12px;cursor:default}
+.menu .who b{display:block;font-size:19px;font-weight:850}
+.menu .who small{display:block;font-size:14px;color:var(--fg3);margin-top:2px}
+.menu dl{display:grid;grid-template-columns:104px 1fr;gap:10px 14px;margin:0;font-size:15px;line-height:1.4}
+.menu dt{color:var(--fg3);font-weight:650}
+.menu dd{margin:0;font-weight:600}
+.brand{all:unset;cursor:pointer;font-weight:900;font-size:20px;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.brand img{height:26px;width:auto;display:block}
+nav{display:flex;gap:32px;height:100%}
+nav a{position:relative;display:flex;align-items:center;font-size:17px;font-weight:700;color:var(--fg3);text-decoration:none;transition:color .12s}
+nav a:hover,nav a.on{color:var(--fg)}
+nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--blue)}
+kbd{font:inherit;font-size:13px;padding:1px 7px;border-radius:4px;border:1px solid var(--line-strong);color:var(--fg2)}
+
+/* Shared: badges, buttons, hero */
+.badges{display:flex;gap:8px;margin-bottom:18px}
+.badge{padding:5px 9px;border-radius:4px;font-size:12px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.badge.solid{background:var(--accent);color:var(--on-accent)}
+.badge.subtle{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.badge.outline{border:1px solid var(--line-strong);color:var(--fg2)}
+.btns{display:flex;gap:12px}
+.btn{all:unset;cursor:pointer;min-height:52px;padding:0 24px;border-radius:8px;display:inline-flex;align-items:center;gap:10px;font-size:17px;font-weight:800;transition:background .12s,transform .12s}
+.btn.primary{background:var(--blue);color:var(--on)}
+.btn.primary:hover{background:var(--blue-400)}
+.btn.primary:active{background:var(--blue-600);transform:scale(.97)}
+.btn.secondary{background:rgba(255,255,255,.14);backdrop-filter:blur(12px)}
+.btn.secondary:hover{background:rgba(255,255,255,.22)}
+.btn:focus-visible,.card:focus-visible,.ep-row:focus-visible{box-shadow:0 0 0 3px rgba(0,168,255,.34)}
+.hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line-subtle)}
+.hero .art{position:absolute;inset:0 0 0 52%}
+.hero .art svg{width:100%;height:100%}
+.hero .art img{width:100%;height:100%;object-fit:cover;object-position:right center;display:block}   /* home banner poster; poster content sits on the right */
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 50%,rgba(15,17,20,.5) 62%,rgba(15,17,20,0) 78%),linear-gradient(0deg,var(--bg) 0%,rgba(15,17,20,0) 30%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;justify-content:center}
+.hero h1{font-size:64px;font-weight:900;line-height:1.04;letter-spacing:-.045em;margin:0 0 18px;max-width:820px}
+.hero .logline{font-size:21px;font-weight:600;line-height:1.5;color:var(--fg2);max-width:720px;margin:0 0 26px}
+
+/* Home */
+#home .hero{height:560px}
+#home .hero::after{background:linear-gradient(90deg,var(--bg) 42%,rgba(15,17,20,.5) 52%,rgba(15,17,20,0) 64%),linear-gradient(0deg,var(--bg) 0%,rgba(15,17,20,0) 30%)}   /* narrower side fade than title pages, so the poster's left column stays clear at 1440px */
+/* Visual agenda (shown in the "Today's agenda" clip): one chip per section, in talk order */
+.agenda{display:flex;gap:10px;margin:0 0 28px;max-width:820px}
+.agenda button{all:unset;cursor:pointer;flex:1;min-width:0;padding:10px 12px 11px;border-radius:8px;background:rgba(255,255,255,.06);border-top:3px solid var(--accent);transition:background .12s}
+.agenda button:hover{background:rgba(255,255,255,.12)}
+.agenda button:focus-visible{box-shadow:0 0 0 3px rgba(0,168,255,.34)}
+.agenda .an{display:block;font-size:12px;font-weight:850;letter-spacing:.07em;color:var(--accent)}
+.agenda .at{display:block;font-size:15px;font-weight:750;line-height:1.25;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agenda .am{display:block;font-size:13px;font-weight:600;color:var(--fg3);margin-top:2px}
+section.rail{padding:34px 0 6px}
+.rail h2{font-size:26px;font-weight:800;margin:0 0 18px;display:flex;align-items:baseline;gap:12px}
+.rail h2 small{font-size:15px;font-weight:600;color:var(--fg3)}
+.rail h2 a{margin-left:auto;font-size:15px;font-weight:700;color:var(--fg3);text-decoration:none}
+.rail h2 a:hover{color:var(--fg)}
+.row{display:grid;gap:20px}
+.row.posters{grid-template-columns:repeat(2,minmax(0,560px))}
+/* "Main events": the two long sections as plain 2:3 posters. No rank numbers: a two-item "Top X" chart read as odd and the rank only repeated talk order */
+.row.features{display:flex;gap:20px}
+.row.features .poster{width:360px;aspect-ratio:4/5}   /* bigger than the 270px base so the row holds its own next to Trending; PNGs rendered for 360px (render.sh) */
+.poster{all:unset;cursor:pointer;display:block;position:relative;width:270px;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--rail);transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
+.poster:hover{transform:translateY(-4px) scale(1.015);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.poster:focus-visible{box-shadow:0 0 0 3px rgba(0,168,255,.34)}
+.poster .pic{position:absolute;left:0;right:0;top:12%;height:46%}
+.poster .pic svg{width:100%;height:100%}
+.poster .pic.img{inset:0;height:auto}
+.poster .pic img,.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.poster:has(.pic.img)::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 6%,rgba(15,17,20,.8) 28%,rgba(15,17,20,0) 50%);pointer-events:none}
+.poster .badge,.poster .t{z-index:1}
+.poster .badge{position:absolute;left:12px;top:12px}
+.poster .t{position:absolute;left:18px;right:64px;bottom:20px;font-size:26px;font-weight:900;line-height:1.1;letter-spacing:-.02em}
+.poster .t small{display:block;font-size:14px;font-weight:650;letter-spacing:0;color:var(--fg3);margin-top:6px}
+.card{all:unset;cursor:pointer;display:block;background:var(--card);border-radius:12px;overflow:hidden;transition:transform .22s var(--ease),box-shadow .22s var(--ease)}
+.card:hover{transform:translateY(-4px) scale(1.015);box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.thumb{position:relative;aspect-ratio:16/9;background:var(--rail)}
+.thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(15,17,20,.88) 0%,rgba(15,17,20,0) 58%)}
+.thumb .over{position:absolute;left:18px;right:64px;bottom:14px;z-index:1;font-size:22px;font-weight:850;line-height:1.2}
+.thumb .tl{position:absolute;left:14px;top:12px;z-index:1;display:flex;gap:6px}
+.card .body{padding:14px 18px 18px;font-size:15px;color:var(--fg3);font-weight:600;line-height:1.45}
+/* Video-length pill on rail art (streaming-thumbnail style), top-right: badge is top-left, title bottom */
+.dur{position:absolute;right:12px;bottom:16px;z-index:2;background:rgba(0,0,0,.72);color:#fff;font-size:13px;font-weight:750;letter-spacing:.02em;padding:4px 7px;border-radius:5px;font-variant-numeric:tabular-nums}
+.badges .dur{position:static;align-self:center}   /* home banner: same pill, inline in the badge row */
+/* Duration pill sits bottom-right on every card (streaming convention; keeps the top-right free for art such as the bridge LIVE score). Titles leave room for it */
+.poster .dur{bottom:22px}
+.thumb .over{right:70px}
+footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
+
+/* Title page */
+#title .hero{height:620px}
+.meta{display:grid;grid-template-columns:96px 1fr;gap:8px 18px;max-width:780px;font-size:17px;line-height:1.5;margin:0 0 30px}
+.meta dt{color:var(--fg3);font-weight:650}
+.meta dd{margin:0;font-weight:550}
+.back{all:unset;cursor:pointer;font-size:15px;font-weight:700;color:var(--fg3);margin-bottom:22px}
+.back:hover{color:var(--fg)}
+.ep-list{display:flex;flex-direction:column;gap:4px;padding-bottom:48px}
+.ep-row{all:unset;cursor:pointer;display:grid;grid-template-columns:44px 220px 1fr auto;gap:22px;align-items:center;padding:14px 16px;border-radius:12px;transition:background .12s}
+.ep-row:hover{background:var(--card)}
+.ep-row .n{font-size:26px;font-weight:850;color:var(--fg3);text-align:center}
+.ep-row .thumb{border-radius:8px;overflow:hidden}
+.ep-row .thumb::after{background:rgba(15,17,20,.25)}
+.ep-row .t{font-size:20px;font-weight:750;line-height:1.3}
+.ep-row .s{font-size:15px;color:var(--fg3);margin-top:4px;font-weight:550}
+.ep-row .m{font-size:15px;color:var(--fg3);font-weight:650}
+/* Title pages are on screen while a section is introduced: screen-share sizes (presentation_style_reference.md Part 3) */
+#title .hero .logline{font-size:26px}
+#title .hero{height:auto;min-height:620px}   /* grow when a section has many rows, instead of clipping */
+#title .hero .wrap{min-height:620px;padding-top:48px;padding-bottom:48px}
+#title .meta{grid-template-columns:130px 1fr;max-width:780px;font-size:22px;gap:10px 22px}   /* 780px keeps text clear of the hero art (starts at 52%) */
+#title .ep-row .t{font-size:24px}
+#title .ep-row .s{font-size:18px}
+#title .ep-row .m{font-size:17px}
+
+/* Player (design layer placeholder) */
+#player{position:fixed;inset:0;z-index:20;background:#000}
+#player .top{position:absolute;left:0;right:0;top:0;padding:28px 40px;display:flex;align-items:center;gap:20px;background:linear-gradient(180deg,rgba(0,0,0,.8),transparent)}
+/* Top bar = quiet signpost (part number, section, time). The headline lives once, on the stage. */
+#player .top .t{font-size:17px;font-weight:750;color:var(--fg2)}
+/* Stage: headline top-left, evidence below it (assertion-evidence layout). Sizes for a 1080p screen share. */
+#player .stage{position:absolute;inset:120px 0 110px;margin:0 auto;width:min(1500px,calc(100vw - 160px));display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:16px;color:var(--fg3);font-size:24px}
+#player .stage{animation:fadein .3s var(--ease)}
+/* top-aligned: a timeline split across two parts keeps its line at the same height on both screens */
+/* an already-seen part appears fully built with no fade or reveal */
+#player .stage.back,#player .stage.back [data-step]{animation:none;transition:none}
+#player .stage.top{justify-content:flex-start;padding-top:90px}
+#player .stage b{font-size:56px;line-height:1.1;color:var(--fg);font-weight:850;letter-spacing:-.025em;max-width:22ch}
+#player .stage > span:not(.badge){font-size:28px;line-height:1.35;color:var(--fg2);font-weight:550;max-width:52ch}
+#player .stage .meta{margin:26px 0 0;max-width:1300px;grid-template-columns:130px 1fr;font-size:30px;line-height:1.35;color:var(--fg);gap:20px 36px}
+#player .stage .meta dt{font-size:22px;padding-top:6px}
+#player .stage .meta .grp{grid-column:1/-1;font-size:22px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent,#fff)}
+#player .stage .meta .grp:not(:first-child){margin-top:14px}
+/* stack: each row is a heading with its text as a subtitle underneath (for rows whose titles are too long for the 130px key column) */
+#player .stage .stack{margin:30px 0 0;display:flex;flex-direction:column;gap:34px;max-width:1300px}
+#player .stage .stack .h{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.02em;color:var(--fg)}
+#player .stage .stack .sub{font-size:28px;font-weight:550;line-height:1.35;color:var(--fg2);margin-top:8px}
+#player .stage .agenda{margin:26px 0 0;width:min(1200px,100%);max-width:none}
+#player .stage .foot{margin-top:28px;font-size:28px;font-weight:600;color:var(--fg2)}
+#player .stage table{margin-top:26px;border-collapse:collapse;max-width:1500px;font-size:24px;color:var(--fg2);text-align:left}
+#player .stage th{font-size:16px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:12px 24px 12px 0;border-bottom:2px solid var(--line-strong)}
+#player .stage td{padding:18px 24px 18px 0;border-bottom:1px solid var(--line);font-weight:600;line-height:1.4;vertical-align:top}
+#player .stage .cmp{margin-top:30px;width:100%;display:flex;flex-direction:column;gap:12px}
+#player .cmp .ch,#player .cmp .cr{display:grid;grid-template-columns:430px 1fr 130px 190px;column-gap:36px;align-items:center}
+#player .cmp .ch{font-size:15px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:0 28px}
+#player .cmp .cr{padding:18px 28px;border-radius:16px;border:2px solid var(--line);background:rgba(255,255,255,.03)}
+#player .cmp .cr.pick{border-color:var(--green);background:color-mix(in srgb,var(--green) 10%,transparent)}
+#player .cmp .cnt{font-size:27px;font-weight:800;color:var(--fg);line-height:1.15}
+#player .cmp .cns{font-size:18px;font-weight:600;color:var(--fg3);margin-top:6px;line-height:1.3}
+#player .cmp .cr.pick .cns{color:var(--green)}
+#player .cmp .cbar{height:20px;border-radius:6px;background:rgba(255,255,255,.14);min-width:10px;overflow:hidden}
+#player .cmp .cbar i{display:block;height:100%;background:var(--fg3)}
+#player .cmp .cr.pick .cbar i{background:var(--green)}
+#player .cmp .cv{font-size:22px;font-weight:700;color:var(--fg2);margin-top:8px}
+#player .cmp .cq{font-size:38px;font-weight:850;color:var(--fg)}
+#player .cmp .cp{font-size:26px;font-weight:750;color:var(--fg2)}
+#player .cmp .cr.pick .cv,#player .cmp .cr.pick .cp{color:var(--green)}
+#player .stage .tree{margin-top:22px;display:grid;grid-template-columns:auto auto;column-gap:40px;row-gap:4px;align-items:baseline;font-size:22px;color:var(--fg2)}
+#player .stage .tree code{font:600 21px/1.5 "SF Mono",ui-monospace,Menlo,monospace;color:var(--fg);white-space:pre}
+#player .stage .tree span{font-weight:600}
+#player .stage .tree .hl{font:inherit;font-weight:900;color:#fff}
+/* flow: a linear diagram, source → step → fan-out to N markets. Each column is one reveal step. */
+#player .stage .tl-h{position:relative;margin-top:48px;width:100%;display:grid;grid-template-columns:repeat(var(--n,4),1fr);column-gap:32px}
+#player .tl-line{position:absolute;left:0;right:0;top:42px;height:4px;border-radius:2px;background:var(--accent);opacity:.55}
+#player .tl-ph{position:relative}
+#player .tl-when{font-size:16px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);height:30px}
+#player .tl-dot{width:28px;height:28px;border-radius:50%;background:var(--accent);border:5px solid #0C0E13;box-sizing:content-box;margin:-1px 0 0 -5px}
+#player .tl-t{font-size:30px;font-weight:850;color:var(--fg);line-height:1.15;margin:22px 0 14px}
+#player .tl-ph ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+#player .tl-ph li{font-size:21px;line-height:1.35;font-weight:600;color:var(--fg2);padding-left:18px;position:relative}
+#player .tl-ph li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+#player .stage .flow{margin-top:56px;display:flex;align-items:center}
+#player .flow .node{border:2px solid var(--accent);border-radius:16px;padding:22px 30px;min-width:270px;background:rgba(255,255,255,.03)}
+#player .flow .nt{font-size:34px;font-weight:800;color:var(--fg);line-height:1.15}
+#player .flow .ns{font-size:20px;font-weight:600;color:var(--fg3);margin-top:8px}
+#player .flow svg{flex:none;display:block}
+#player .flow svg path{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+#player .flow svg polygon{fill:var(--accent)}
+#player .flow .col{display:flex;align-items:center}
+#player .flow .posts{position:relative;display:flex;flex-direction:column;gap:24px}
+#player .flow .posts .node{min-width:0;padding:0 26px;height:var(--bh);display:flex;flex-direction:column;justify-content:center}
+#player .flow .posts .ns{font-size:17px;margin-top:4px}
+#player .flow .posts .nt{font-size:26px}
+#player .flow .cap{position:absolute;bottom:100%;left:0;margin-bottom:18px;white-space:nowrap}
+/* screens: drafted client mock-ups, one card per step, each revealed in turn. UI items come from JSON (see partScreens). */
+#player .stage .screens{margin-top:34px;display:flex;align-items:stretch;gap:0;width:100%}
+#player .screens .arw{flex:none;align-self:center;width:44px;text-align:center;color:var(--accent);font-size:28px;font-weight:800}
+#player .screens .scr{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+#player .screens .lbl{font-size:15px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+#player .screens .ui{flex:1;background:#14171C;border:1px solid var(--line-strong);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;font-size:17px;color:var(--fg);min-height:330px}
+#player .screens .ui .h{font-size:20px;font-weight:800}
+#player .screens .ui .note{font-size:15px;color:var(--fg3);line-height:1.4}
+#player .screens .ui .btn2{align-self:flex-start;padding:9px 18px;border-radius:9px;font-weight:750;font-size:16px;background:var(--accent);color:#fff}
+#player .screens .ui .btn2.ghost{background:none;border:1px solid var(--line-strong);color:var(--fg2)}
+#player .screens .ui .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600}
+#player .screens .ui .tg{width:40px;height:22px;border-radius:11px;background:var(--line-strong);position:relative;flex:none}
+#player .screens .ui .tg::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+#player .screens .ui .tg.on{background:var(--accent)}#player .screens .ui .tg.on::after{left:21px}
+#player .screens .ui .ck{width:20px;height:20px;border-radius:5px;border:2px solid var(--line-strong);flex:none;display:grid;place-items:center;font-size:13px;font-weight:900}
+#player .screens .ui .ck.on{background:var(--accent);border-color:var(--accent)}
+#player .screens .ui .vid{display:flex;gap:12px;padding:10px;border:1px solid var(--line);border-radius:12px}
+#player .screens .ui .th{width:46px;height:64px;border-radius:7px;flex:none;background:linear-gradient(160deg,var(--accent),#1d2230)}
+#player .screens .ui .vt{font-weight:700;font-size:16px}
+#player .screens .ui .vm{font-size:14px;color:var(--fg3);margin-top:2px}
+#player .screens .ui .acts{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+#player .screens .ui .act{font-size:13px;font-weight:700;padding:3px 10px;border-radius:7px;border:1px solid var(--line-strong);color:var(--fg2)}
+#player .screens .api{font:600 14px/1.4 "SF Mono",ui-monospace,Menlo,monospace;color:var(--fg3)}
+#player .screens .api b{font:inherit;color:var(--accent);font-weight:700}
+/* stat: one big number + what it measures + a source line, for evidence slides. {n, label, cite, url?} */
+#player .stage .stat{margin-top:20px;display:flex;flex-direction:column;gap:10px;max-width:1400px}
+#player .stage .stat .n{font-size:110px;line-height:1;font-weight:850;letter-spacing:-.04em;color:var(--accent);font-variant-numeric:tabular-nums}
+#player .stage .stat .l{font-size:32px;line-height:1.3;font-weight:650;color:var(--fg)}
+#player .stage .stat cite{font-style:normal;font-size:18px;color:var(--fg3);margin-top:4px}
+#player .stage .stat cite a{color:inherit}
+#player .stage .stat .k{margin-top:22px;padding-left:20px;border-left:4px solid var(--accent);font-size:30px;line-height:1.3;font-weight:750;color:var(--fg)}
+/* pyramid: stacked trapezoid tiers (top = narrowest), each with a question and cadence to its right, a cost axis on the left, a loop line below. */
+#player .stage .pyr{margin-top:34px;display:flex;gap:24px}
+#player .pyr-axis{position:relative;width:150px;flex:none}
+#player .pyr-axis::before{content:"";position:absolute;right:10px;top:14px;bottom:4px;width:3px;border-radius:2px;background:var(--accent);opacity:.6}
+#player .pyr-axis::after{content:"";position:absolute;right:4px;top:0;border:8px solid transparent;border-bottom:14px solid var(--accent);border-top:0;opacity:.8}
+#player .pyr-axis span{position:absolute;right:32px;white-space:nowrap;text-align:right;font-size:17px;font-weight:850;letter-spacing:.05em;text-transform:uppercase;color:var(--fg2);line-height:1.3}
+#player .pyr-axis .hi{top:4px}
+#player .pyr-axis .lo{bottom:0}
+#player .pyr-rows{display:flex;flex-direction:column;gap:10px}
+#player .pyr-row{display:grid;grid-template-columns:680px 1fr;column-gap:48px;align-items:center}
+#player .pyr-tier{height:128px;box-sizing:border-box;padding-bottom:18px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;background:color-mix(in srgb,var(--accent) var(--o),#0C0E13);color:#fff}
+#player .pyr-tier .n{font-size:24px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
+#player .pyr-tier .h{font-size:18px;font-weight:650;opacity:.85;margin-top:6px}
+#player .pyr-txt .q{font-size:30px;font-weight:800;color:var(--fg);line-height:1.2}
+#player .pyr-txt .w{font-size:16px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-top:10px}
+#player .stage .pyr-loop{margin:34px 0 0 174px;padding-left:20px;border-left:4px solid var(--accent);font-size:26px;line-height:1.3;font-weight:750;color:var(--fg)}
+#player .stage .pyr-loop i{font-style:normal;color:var(--accent);margin-right:12px}
+#player .stage > .btn{margin-top:22px}
+/* Builds: → reveals one row at a time before moving to the next part. Hidden rows keep their space, so nothing jumps. */
+#player [data-step]{opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+#player [data-step].in{opacity:1;transform:none}
+/* Idle (no mouse for 2.5s): buttons and cursor fade; part label and progress stay as signposts */
+#player.idle{cursor:none}
+#player .pbtn{transition:opacity .4s}
+#player.idle .pbtn{opacity:0}
+/* B = blank screen, to pull attention back to the speaker */
+#black{position:fixed;inset:0;z-index:60;background:#000;display:none}
+#black.on{display:block}
+#player .top .diag{position:absolute;right:40px;top:30px}
+#player .top .diag kbd,#diagram kbd{font:inherit;font-size:12px;opacity:.7;margin-left:4px}
+#diagram{position:fixed;inset:0;z-index:40;background:var(--bg);display:none;flex-direction:column}
+#diagram.on{display:flex;animation:fadein .28s var(--ease)}
+#diagram .bar{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--line);border-top:3px solid var(--accent)}
+#diagram .bar img{height:22px;margin-right:6px}
+#diagram .bar b{font-size:17px;font-weight:800}
+#diagram .bar span{font-size:14px;color:var(--fg3);margin-left:auto}
+#diagram iframe{flex:1;width:100%;border:0;background:var(--bg)}
+#player .bottom{position:absolute;left:0;right:0;bottom:0;padding:24px 40px 32px;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);display:flex;align-items:center;gap:18px}
+.segs{flex:1;display:flex;gap:4px}
+.segs button{all:unset;cursor:pointer;height:5px;border-radius:3px;background:var(--line-strong)}
+.segs button.done{background:var(--fg3)}
+.segs button.cur{background:var(--accent)}
+.pbtn{all:unset;cursor:pointer;font-size:15px;font-weight:750;color:var(--fg2);padding:8px 12px;border-radius:8px;background:rgba(255,255,255,.1)}
+.pbtn:hover{background:rgba(255,255,255,.2)}
+
+/* Small screens (phones, narrow windows). Same layout and content, scaled down: wide slide widgets scroll sideways
+   inside the slide, and the slide itself scrolls when it is taller than the screen. Desktop (screen share) is untouched. */
+@media (max-width:900px){
+  .wrap{padding:0 16px}
+  header{height:56px}
+  header .wrap{gap:16px}
+  .brand img{height:20px}
+  nav{gap:18px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+  nav::-webkit-scrollbar{display:none}
+  nav a{font-size:15px;white-space:nowrap;flex:none}
+  .profile{margin-left:0;flex:none}
+  .avatar{width:32px;height:32px}
+  .menu{position:fixed;right:16px;top:64px;width:auto;left:16px;max-width:380px;margin-left:auto}
+  .menu dl{grid-template-columns:96px 1fr;font-size:14px}
+  /* hero: art becomes a faded backdrop behind the text */
+  .hero .art{inset:0;opacity:.35}
+  .hero::after,#home .hero::after{background:linear-gradient(0deg,var(--bg) 0%,rgba(15,17,20,.6) 60%,rgba(15,17,20,.3) 100%)}
+  #home .hero,#title .hero{height:auto;min-height:0}
+  .hero .wrap,#title .hero .wrap{min-height:0;padding-top:36px;padding-bottom:36px}
+  .hero h1{font-size:38px;margin-bottom:12px}
+  .hero .logline,#title .hero .logline{font-size:17px;margin-bottom:20px}
+  .btns{flex-wrap:wrap}
+  .btn{min-height:46px;padding:0 18px;font-size:15px}
+  .badges{flex-wrap:wrap}
+  .agenda{flex-wrap:wrap}
+  .agenda button{flex:1 1 calc(50% - 10px)}
+  /* rails scroll sideways, streaming-app style */
+  .rail h2{font-size:22px}
+  .row.features,.row.posters{display:flex;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px 8px}
+  .row.features::-webkit-scrollbar,.row.posters::-webkit-scrollbar{display:none}
+  .row.features .poster{width:240px;flex:none}
+  .row.posters .card{width:280px;flex:none}
+  .poster .t{font-size:22px}
+  .thumb .over{font-size:18px}
+  #title .meta,.meta{grid-template-columns:90px 1fr;font-size:16px;gap:8px 14px}
+  .ep-row,#title .ep-row{grid-template-columns:22px 96px 1fr auto;gap:12px;padding:10px 4px}
+  .ep-row .n{font-size:18px}
+  #title .ep-row .t{font-size:16px}
+  #title .ep-row .s{font-size:14px}
+  #title .ep-row .m{font-size:13px}
+  /* player */
+  #player .top{padding:12px 16px;gap:10px}
+  #player .top .t{font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #player .top .diag{position:static;order:3;margin-left:auto;flex:none}
+  #player .bottom{padding:12px 16px 16px;gap:10px}
+  .pbtn{font-size:14px;padding:8px 10px;flex:none}
+  #player .stage{inset:64px 0 64px;width:calc(100vw - 32px);justify-content:flex-start;overflow-y:auto;overflow-x:hidden;padding:12px 0 24px;gap:10px;font-size:16px}
+  #player .stage.top{padding-top:12px}
+  #player .stage b{font-size:28px}
+  #player .stage > span:not(.badge){font-size:17px}
+  #player .stage > *{flex:none;max-width:100%}
+  #player .stage .meta{margin-top:14px;grid-template-columns:90px 1fr;font-size:17px;gap:12px 14px}
+  #player .stage .meta dt{font-size:13px;padding-top:3px}
+  #player .stage .meta .grp{font-size:14px}
+  #player .stage .stack{margin-top:14px;gap:18px}
+  #player .stage .stack .h{font-size:21px}
+  #player .stage .stack .sub{font-size:16px;margin-top:4px}
+  #player .stage .agenda{margin-top:14px}
+  /* wide widgets: keep their layout, scroll sideways */
+  #player .stage table,#player .stage .tree,#player .stage .cmp,#player .stage .flow,#player .stage .screens,#player .stage .pyr{overflow-x:auto;width:100%}
+  #player .stage table{display:block;font-size:14px;margin-top:14px}
+  #player .stage th{font-size:12px;padding:8px 14px 8px 0;white-space:nowrap}
+  #player .stage td{padding:10px 14px 10px 0;min-width:140px}
+  #player .stage .tree{margin-top:14px;font-size:14px;column-gap:20px}
+  #player .stage .tree code{font-size:13px}
+  #player .stage .cmp{margin-top:16px}
+  #player .cmp .ch,#player .cmp .cr{grid-template-columns:220px 160px 60px 90px;column-gap:16px;width:max-content}
+  #player .cmp .ch{font-size:11px;padding:0 14px}
+  #player .cmp .cr{padding:12px 14px;border-radius:12px}
+  #player .cmp .cnt{font-size:17px}
+  #player .cmp .cns{font-size:13px}
+  #player .cmp .cv{font-size:14px}
+  #player .cmp .cq{font-size:24px}
+  #player .cmp .cp{font-size:16px}
+  #player .stage .flow{margin-top:16px;padding:8px 0}
+  #player .stage .flow:has(.cap){padding-top:90px}
+  #player .flow .node{min-width:150px;padding:12px 16px;border-radius:12px}
+  #player .flow .nt{font-size:18px}
+  #player .flow .ns{font-size:13px}
+  #player .flow .posts{gap:24px}
+  #player .flow .posts .node{padding:0 14px}
+  #player .flow .posts .nt{font-size:16px}
+  #player .flow .posts .ns{font-size:12px}
+  #player .flow svg{transform:scaleX(.6);margin:0 -14px}
+  #player .stage .screens{margin-top:16px}
+  #player .screens .scr{flex:none;width:240px}
+  #player .screens .arw{width:32px;font-size:22px}
+  #player .screens .ui{min-height:0;font-size:15px}
+  /* timeline: phases stack vertically */
+  #player .stage .tl-h{margin-top:16px;grid-template-columns:1fr;row-gap:22px}
+  #player .tl-line{display:none}
+  #player .tl-when{font-size:12px;height:auto}
+  #player .tl-dot{display:none}
+  #player .tl-t{font-size:20px;margin:4px 0 8px}
+  #player .tl-ph li{font-size:15px}
+  #player .tl-ph ul{gap:8px}
+  #player .stage .stat .n{font-size:64px}
+  #player .stage .stat .l{font-size:19px}
+  #player .stage .stat cite{font-size:13px}
+  #player .stage .stat .k{font-size:18px;margin-top:12px}
+  #player .stage .pyr{margin-top:16px;gap:10px}
+  #player .pyr-axis{width:84px}
+  #player .pyr-axis span{font-size:11px;right:24px;white-space:normal;width:60px}
+  #player .pyr-rows{flex:none}
+  #player .pyr-row{grid-template-columns:300px 220px;column-gap:16px}
+  #player .pyr-tier{height:84px;padding-bottom:10px}
+  #player .pyr-tier .n{font-size:15px}
+  #player .pyr-tier .h{font-size:12px}
+  #player .pyr-txt .q{font-size:16px}
+  #player .pyr-txt .w{font-size:11px}
+  #player .stage .pyr-loop{margin:16px 0 0;font-size:16px}
+  #diagram .bar{padding:10px 16px;gap:10px}
+  #diagram .bar span{display:none}
+  #diagram .bar b{font-size:14px;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+</style></head><body>
+
+<header><div class="wrap">
+  <button class="brand" data-go="">‹i›</button>
+  <nav id="nav"></nav>
+  <div class="profile"><button class="avatar" id="avatar" aria-label="Profile" aria-expanded="false"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14.5" cy="16" r="2.2" fill="#fff"/><circle cx="25.5" cy="16" r="2.2" fill="#fff"/><path d="M12.5 22.5 Q20 31 27.5 22.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    <div class="menu" id="menu"></div></div>
+</div></header>
+
+<main id="home" class="view"></main>
+<main id="title" class="view"></main>
+<div id="player" class="view"></div>
+<div id="black"></div>
+<div id="diagram"><div class="bar"><img src="assets/coupangplay-logo.webp" alt="Coupang Play"><b></b><span>Esc to close</span><button class="pbtn" data-close>✕ Close</button></div><iframe title="Diagram"></iframe></div>
+
+<script type="module">
+// ── Content (edit here) ─────────────────────────────────────────────────────
+
+// All page text lives in content/: site.json (talk order, home banner, profile, rails, posters) + one JSON per section
+// (title page rows, parts, player content). Edit the JSON, not this file. Text marked [?: …] is still to be written.
+// fetch() is blocked on file://, so serve this folder: `python3 -m http.server` then open http://localhost:8000/start.html
+const json = f => fetch(`content/${f}.json`, {cache: 'no-store'}).then(   // no-store: JSON edits show on a normal refresh
+  r => { if (!r.ok) throw Error(`content/${f}.json: ${r.status}`); return r.json(); });
+let SITE, TALK;
+try { SITE = await json('site'); TALK = await Promise.all(SITE.talk.map(json)); }
+catch (err) { document.getElementById('home').innerHTML = `<div class="wrap" style="padding:80px 64px">Couldn't load content/*.json (${err.message}). Serve this folder over http, e.g. <code>python3 -m http.server</code>.</div>`;
+  document.getElementById('home').classList.add('on'); throw err; }
+const {hero: HERO, profile: PROFILE, top: TOP, trending: TRENDING, posters: POSTER} = SITE;
+
+// Static artwork per section: the shape of the idea, in the section's colour. viewBox 800×450.
+const ART = {
+  me: c => `<circle cx="400" cy="200" r="70" fill="${c}"/><path d="M270 400 C290 300 510 300 530 400" fill="${c}" fill-opacity=".75"/>
+    <circle cx="400" cy="225" r="150" fill="none" stroke="${c}" stroke-opacity=".25" stroke-width="3"/>`,
+  pipeline: c => `<g fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"><path d="M120 225 H330" stroke-opacity=".9"/>
+      <path d="M330 225 C430 225 450 110 560 110 H700" stroke-opacity=".7"/><path d="M330 225 H700" stroke-opacity=".7"/>
+      <path d="M330 225 C430 225 450 340 560 340 H700" stroke-opacity=".7"/></g>
+    <circle cx="120" cy="225" r="26" fill="${c}"/>
+    <g fill="${c}" fill-opacity=".85"><rect x="690" y="92" width="36" height="36" rx="8"/><rect x="690" y="207" width="36" height="36" rx="8"/><rect x="690" y="322" width="36" height="36" rx="8"/></g>
+    <circle cx="330" cy="225" r="10" fill="#F7F9FC"/>`,
+  knowledge: c => `<g stroke="${c}" stroke-width="3" stroke-opacity=".6"><path d="M400 225 L170 120 M400 225 L170 330 M400 225 L630 120"/></g>
+    <path d="M400 225 C520 300 600 300 630 330" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round"/>
+    <g fill="${c}"><ellipse cx="400" cy="190" rx="70" ry="22"/><rect x="330" y="190" width="140" height="80"/><ellipse cx="400" cy="270" rx="70" ry="22"/></g>
+    <ellipse cx="400" cy="190" rx="70" ry="22" fill="#F7F9FC" fill-opacity=".25"/>
+    <g fill="${c}" fill-opacity=".8"><circle cx="170" cy="120" r="20"/><circle cx="170" cy="330" r="20"/><circle cx="630" cy="120" r="20"/></g>
+    <circle cx="630" cy="330" r="22" fill="#F7F9FC"/>`,
+  agenda: c => `<g fill="${c}">${[0,1,2,3].map(k => `<rect x="${150+k*130}" y="175" width="110" height="100" rx="10" fill-opacity="${1-k*.2}"/>`).join('')}</g>`,
+  bridge: c => `<path d="M170 300 C250 110 550 110 630 300" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="170" cy="300" r="40" fill="${c}" fill-opacity=".5"/><circle cx="630" cy="300" r="40" fill="${c}"/>`,
+  close: c => `<g fill="${c}"><rect x="220" y="140" width="360" height="26" rx="13"/><rect x="220" y="212" width="290" height="26" rx="13" fill-opacity=".75"/><rect x="220" y="284" width="330" height="26" rx="13" fill-opacity=".5"/></g>`,
+};
+const posterImg = p => `<img src="assets/posters/${POSTER[p.id]}.png" alt="">`;
+const art = (id, c, fit = 'slice') => `<svg viewBox="0 0 800 450" preserveAspectRatio="xMidYMid ${fit}"><rect width="800" height="450" fill="#0C0E13"/>${ART[id](c)}</svg>`;
+
+// ── Views ───────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const SECTIONS = TALK.filter(p => !p.clip);   // the four sections with a title page; intro clips are not numbered
+const byId = Object.fromEntries(TALK.map(p => [p.id, {...p, n:SECTIONS.indexOf(p) + 1}]));   // n = Part number
+const nextOf = p => !p.clip && SECTIONS[p.n] && byId[SECTIONS[p.n].id];
+const agendaChips = (ids = SECTIONS.map(q => q.id)) => `<div class="agenda">${ids.map(id => byId[id]).map((q, j) => { const r = byId[q.id]; return `<button data-step="${j}" data-go="${r.id}" style="--accent:${r.accent}"><span class="an">PART ${r.n}</span><span class="at">${r.nav}</span><span class="am">${r.time}</span></button>`; }).join('')}</div>`;
+const dur = p => p.time.replace(/^~?\s*([\d.]+)\s*min$/, '$1m');
+const mins = m => m < 1 ? `${Math.round(m * 60)}s` : `${m} min`;
+
+const badges = p => `<div class="badges"><span class="badge solid">Part ${p.n}</span><span class="badge subtle">${p.kind}</span><span class="badge outline">${p.time}</span></div>`;
+const nextBtn = (p, cls) => { const q = nextOf(p); return q ? `<button class="${cls}" data-go="${q.id}">Next: ${q.title} ›</button>` : ''; };
+const featurePoster = p => `  <button class="poster" data-go="${p.id}" style="--accent:${p.accent}"><span class="badge solid">${p.kind}</span>
+    ${POSTER[p.id] ? `<div class="pic img">${posterImg(p)}</div>` : `<div class="pic">${art(p.id, p.accent, 'meet')}</div>`}<span class="dur">${dur(p)}</span><div class="t">${p.title}</div></button>`;
+const tileCard = p => `<button class="card" data-go="${p.id}" style="--accent:${p.accent}">
+  <div class="thumb">${POSTER[p.id] ? posterImg(p) : art(p.id, p.accent)}<div class="tl"><span class="badge solid">${p.kind}</span></div><span class="dur">${dur(p)}</span><div class="over">${p.title}</div></div>
+  <div class="body">${p.logline}</div></button>`;
+
+function renderHome(){
+  const h = HERO;
+  document.documentElement.style.setProperty('--accent', h.accent);
+  $('home').innerHTML = `<div class="hero"><div class="art">${POSTER[h.art] ? `<img src="assets/posters/${POSTER[h.art]}.png" alt="">` : art(h.art, h.accent)}</div><div class="wrap">
+      <div class="badges"><span class="badge solid">${h.kind}</span><span class="dur">${dur(h)}</span></div>
+      <h1>${h.title}</h1><p class="logline">${h.logline}</p>
+      <div class="btns"><button class="btn primary" data-go="me/1">▶&nbsp;Introduction</button><button class="btn secondary" data-go="me/3">▶&nbsp;Today's agenda</button></div></div></div>
+    <div class="wrap">
+      <section class="rail"><h2>Main events</h2><div class="row features">${TOP.map(id => featurePoster(byId[id])).join('')}</div></section>
+      <section class="rail"><h2>Trending</h2><div class="row posters">${TRENDING.map(id => tileCard(byId[id])).join('')}</div></section></div>`;
+}
+
+function renderTitle(p){
+  document.documentElement.style.setProperty('--accent', p.accent);
+  $('title').innerHTML = `<div class="hero"><div class="art">${art(p.id, p.accent)}</div><div class="wrap">
+      <button class="back" data-go="">‹ Home</button>${badges(p)}<h1>${p.title}</h1><p class="logline">${p.logline}</p>
+      <dl class="meta">${p.rows.map(([k, v, c]) => `${k ? `<dt>${k}</dt>` : ''}<dd style="${k ? '' : 'grid-column:1/-1;'}${c ? `color:${c}` : ''}">${v}</dd>`).join('')}</dl>
+      <div class="btns"><button class="btn primary" data-go="${p.id}/1">▶&nbsp;Start</button>${p.diagram ? `<button class="btn secondary" data-diagram="${p.id}">◫&nbsp;Diagram</button>` : ''}${nextBtn(p, 'btn secondary')}</div></div></div>
+    <div class="wrap"><section class="rail"><h2>Parts <small>${p.parts.length} parts · ${p.time}</small></h2><div class="ep-list">
+      ${p.parts.map((e, i) => `<button class="ep-row" data-go="${p.id}/${i + 1}"><span class="n">${i + 1}</span>
+        <div class="thumb">${e.poster ? `<img src="assets/posters/${e.poster}.png" alt="">` : art(p.id, p.accent)}</div>
+        <div><div class="t">${e.t}${e.key ? ' <span class="badge subtle" style="vertical-align:3px;margin-left:6px">Key part</span>' : ''}</div><div class="s">${e.s}</div></div>
+        <span class="m">${mins(e.min)}</span></button>`).join('')}</div></section></div>`;
+}
+
+// Player = one part of a section. Placeholder until the designs are built: replace .stage with the real content.
+// Sections: the last part hands over to the next section's title page. Intro clips: Back and the end both return home.
+// Furthest slide reached this session. Any slide at or before it appears fully built with no fade or reveal; only new ground animates.
+let maxPos = -1, lastKey = '', lastSeen = false, lastPos = -1;
+function renderPlayer(p, i){
+  const pos = TALK.findIndex(q => q.id === p.id) * 1000 + i, key = `${p.id}/${i}`;
+  if (key !== lastKey) { lastSeen = pos <= maxPos || pos < lastPos; lastKey = key; lastPos = pos; }   // moving to an earlier slide is always instant, even if this page load never showed it (e.g. after a refresh)   // the router renders a part twice (hash change plus direct call): keep the first answer
+  const seen = lastSeen; maxPos = Math.max(maxPos, pos);
+  const e = p.parts[i], last = i === p.parts.length - 1, out = p.clip ? '' : p.id;
+  const body = e.stack ? `<div class="stack">${e.rows.map(([k, v], j) => `<div data-step="${j}"><div class="h">${k}</div><div class="sub">${v}</div></div>`).join('')}</div>`
+    : e.rows ? `<dl class="meta">${(() => { let j = 0; return e.rows.map(([k, v]) => k === '#' ? `<div class="grp" data-step="${j}">${v}</div>` : `<dt data-step="${j}">${k}</dt><dd data-step="${j++}">${v}</dd>`).join(''); })()}</dl>`
+    : e.chips ? agendaChips(e.chips) : e.tree ? partTree(e.tree) : e.flow ? partFlow(e.flow) : e.screens ? partScreens(e.screens) : e.compare ? partCompare(e.compare) : e.stat ? partStat(e.stat) : e.timeline ? partTimeline(e.timeline, e.edge) : e.pyramid ? partPyramid(e.pyramid) : '';
+  const end = p.clip ? `<button class="pbtn" data-go="">Home ›</button>` : nextBtn(p, 'pbtn');
+  document.documentElement.style.setProperty('--accent', p.accent);
+  // A part with `view` (e.g. v=posting&c=sched) gets a button that opens the section's diagram popup at that spot.
+  const dia = e.view && p.diagram ? `<button class="btn secondary" data-diagram="${p.id}" data-view="${e.view}">◫&nbsp;Open diagram</button>` : '';
+  $('player').innerHTML = `<div class="stage${e.edge ? ' top' : ''}${seen ? ' back' : ''}"${seen ? ' data-seen="1"' : ''}>${e.hideTitle ? '<b style="visibility:hidden">&nbsp;</b>' : `<b>${e.t}</b>`}${e.s ? `<span>${e.s}</span>` : ''}${body}${e.foot ? `<div class="foot">${e.foot}</div>` : ''}${e.table ? partTable(e.table) : ''}${dia}</div>
+    <div class="top">${p.diagram ? `<button class="pbtn diag" data-diagram="${p.id}"${e.view ? ` data-view="${e.view}"` : ''}>◫ Diagram <kbd>D</kbd></button>` : ''}<button class="pbtn" data-go="${out}">‹ ${p.clip ? 'Home' : 'Back'}</button><div class="t">${p.clip ? '' : `Part ${p.n}.${i + 1} · `}${p.title} · ${mins(e.min)}</div></div>
+    <div class="bottom">${i > 0 ? `<button class="pbtn" data-go="${p.id}/${i}">‹ Prev</button>` : ''}
+      <div class="segs">${p.parts.map((x, j) => `<button data-go="${p.id}/${j + 1}" class="${j < i ? 'done' : j === i ? 'cur' : ''}" style="flex:${x.min * 100} 1 0" title="${x.t}"></button>`).join('')}</div>
+      ${!last ? `<button class="pbtn" data-go="${p.id}/${i + 2}">Next ›</button>` : end}</div>`;
+  steps = 1 + Math.max(-1, ...[...$('player').querySelectorAll('[data-step]')].map(el => +el.dataset.step));
+  showSteps(seen ? steps : 0);
+  furthest[key] = Math.max(furthest[key] || 0, seen ? steps : 0);   // most rows ever revealed on this part
+  clearInterval(autoT);
+  if (e.auto){   // auto: ms per step. Steps reveal on their own after load, so → and ← skip the part instead of stepping through it.
+    const els = [...$('player').querySelectorAll('[data-step]')], n = steps, show = k => els.forEach(el => el.classList.toggle('in', +el.dataset.step < k));
+    steps = 0; step = 0;
+    if (seen) show(n);
+    else { let k = 0; show(0); autoT = setInterval(() => { show(++k); if (k >= n) clearInterval(autoT); }, e.auto); }
+  }
+}
+// Windows smaller than the 1080p screen share: shrink the slide's content until it fits the stage, instead of clipping it.
+// Phones (≤900px) use the scrolling layout in the CSS instead. Hidden build rows still take space, so the fit covers the fully built slide.
+function fitStage(){
+  const st = $('player').querySelector('.stage'); if (!st) return;
+  const kids = [...st.children]; kids.forEach(c => c.style.zoom = '');
+  if (innerWidth <= 900 || !kids.length) return;
+  const cs = getComputedStyle(st), availH = st.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), availW = st.clientWidth;
+  const w = Math.max(...kids.map(c => c.scrollWidth));   // widest row at full size
+  let z = Math.min(1, availW / w);
+  for (let pass = 0; pass < 3; pass++){   // text reflows after zooming, so measure the height again
+    kids.forEach(c => c.style.zoom = z < 1 ? z : '');
+    const h = kids.at(-1).getBoundingClientRect().bottom - kids[0].getBoundingClientRect().top;
+    if (h <= availH * 1.005) break;
+    z = Math.max(.4, z * availH / h);
+  }
+}
+addEventListener('resize', () => { if ($('player').classList.contains('on')) fitStage(); });
+let step = 0, steps = 0, autoT;
+const furthest = {};   // part key -> most rows ever revealed. Reveal animates only past this mark; going back, or re-revealing seen rows, is instant
+const setStepsInstant = k => { const st = $('player').querySelector('.stage'); st.classList.add('back'); showSteps(k); st.offsetHeight; if (!st.dataset.seen) st.classList.remove('back'); };
+const revealNext = () => { const key = lastKey, k = step + 1; if (k > (furthest[key] || 0)) { showSteps(k); furthest[key] = k; } else setStepsInstant(k); };
+const showSteps = k => { step = k; $('player').querySelectorAll('[data-step]').forEach(el => el.classList.toggle('in', +el.dataset.step < k)); };
+
+// stat: {n, label, cite, url?, takeaway?}. The cite belongs to the number; the takeaway is our own claim, revealed on →.
+const partStat = ({n, label, cite, url, takeaway}) => `<div class="stat"><div class="n">${n}</div><div class="l">${label}</div>
+  <cite>Source: ${url ? `<a href="${url}" target="_blank" rel="noopener">${cite}</a>` : cite}</cite>
+  ${takeaway ? `<div class="k" data-step="0">${takeaway}</div>` : ''}</div>`;
+const partTable = ([head, ...rows]) => `<table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+  <tbody>${rows.map((r, j) => `<tr data-step="${j}">${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+// compare: {max, items:[{name, note, lo, hi, cost, q, per, pick?}]}. One row per option: bar = cost per minute (faint to `hi`, solid to `lo`, so a range
+// reads as a range), then quality and cost per quality point. The `pick` row is highlighted.
+const partCompare = ({items, max}) => `<div class="cmp"><div class="ch"><span>Approach</span><span>Cost per minute of video</span><span>Quality</span><span>$ per quality pt</span></div>
+  ${items.map((x, j) => `<div class="cr${x.pick ? ' pick' : ''}" data-step="${j}"><div><div class="cnt">${x.name}</div><div class="cns">${x.note}</div></div>
+    <div><div class="cbar" style="width:${x.hi / max * 100}%"><i style="width:${x.lo / x.hi * 100}%"></i></div><div class="cv">${x.cost}</div></div>
+    <div class="cq">${x.q}</div><div class="cp">${x.per}</div></div>`).join('')}</div>`;
+// pyramid: {axis: [top label, bottom label], tiers:[[name, how, question, cadence], …] listed top to bottom, loop?}. Builds reveal the base first, then up, then the loop.
+// Each tier is a slice of one trapezoid: its clip-path uses the pyramid's half-width at the tier's top and bottom edge, so the sides line up.
+const partPyramid = ({axis, tiers, loop}) => {
+  const n = tiers.length, h = 128, g = 10, H = n * h + (n - 1) * g, apex = 9, half = y => apex + (50 - apex) * y / H;
+  const rows = tiers.map(([name, how, q, when], k) => {
+    const t = half(k * (h + g)), b = half(k * (h + g) + h), o = 85 - k * 24;
+    return `<div class="pyr-row" data-step="${n - 1 - k}"><div class="pyr-tier" style="--o:${o}%;clip-path:polygon(${50 - t}% 0,${50 + t}% 0,${50 + b}% 100%,${50 - b}% 100%)">
+      <div class="n">${name}</div><div class="h">${how}</div></div><div class="pyr-txt"><div class="q">${q}</div><div class="w">${when}</div></div></div>`;
+  }).join('');
+  const [hi, lo] = [].concat(axis);
+  return `<div class="pyr"><div class="pyr-axis" data-step="0"><span class="hi">${hi}</span>${lo ? `<span class="lo">${lo}</span>` : ''}</div><div class="pyr-rows">${rows}</div></div>
+    ${loop ? `<div class="pyr-loop" data-step="${n}"><i>↺</i>${loop}</div>` : ''}`;
+};
+// tree rows: [path, note, group?]. Rows sharing a group number reveal together; default is one row per step.
+const partTree = rows => `<div class="tree">${rows.map(([path, note, g], j) => `<code data-step="${g ?? j}">${path}</code><span data-step="${g ?? j}">${note}</span>`).join('')}</div>`;
+// screens: [{t, api, ui:[item, …]}, …]. Items: ["h", text] · ["note", text] · ["button", label, ghost?] · ["toggle", label, on]
+// · ["check", label, on] · ["video", title, meta, [action, …]]. Drafted mock-ups, not real product UI.
+const uiItem = ([k, a, b, c]) => k === 'h' ? `<div class="h">${a}</div>` : k === 'note' ? `<div class="note">${a}</div>`
+  : k === 'button' ? `<span class="btn2${b ? ' ghost' : ''}">${a}</span>`
+  : k === 'toggle' ? `<div class="row">${a}<span class="tg${b ? ' on' : ''}"></span></div>`
+  : k === 'check' ? `<div class="row" style="justify-content:flex-start"><span class="ck${b ? ' on' : ''}">${b ? '✓' : ''}</span>${a}</div>`
+  : k === 'video' ? `<div class="vid"><span class="th"></span><div><div class="vt">${a}</div><div class="vm">${b}</div>${c?.length ? `<div class="acts">${c.map(x => `<span class="act">${x}</span>`).join('')}</div>` : ''}</div></div>` : '';
+const partScreens = list => `<div class="screens">${list.map((x, j) => `${j ? `<span class="arw" data-step="${j}">→</span>` : ''}<div class="scr" data-step="${j}">
+  <div class="lbl">${j + 1} · ${x.t}</div><div class="ui">${x.ui.map(uiItem).join('')}</div>${x.api ? `<div class="api"><b>API</b> ${x.api}</div>` : ''}</div>`).join('')}</div>`;
+// flow: {nodes:[[title, sub], …], fan:[market, …]}. Nodes are joined by arrows; the last node fans out into one box per market.
+const arrow = `<svg width="90" height="24" viewBox="0 0 90 24"><path d="M6 12 H74"/><polygon points="72,4 86,12 72,20"/></svg>`;
+const fanArrows = (n, bh) => { const h = n * bh + (n - 1) * 24, mid = h / 2;
+  return `<svg width="130" height="${h}" viewBox="0 0 130 ${h}">${Array.from({length:n}, (_, k) => { const y = bh / 2 + k * (bh + 24);
+    return `<path d="M6 ${mid} C60 ${mid} 60 ${y} 112 ${y}"/><polygon points="110,${y - 8} 124,${y} 110,${y + 8}"/>`; }).join('')}</svg>`; };
+// fanIn: the boxes sit on the left and their arrows point into the single node on the right.
+const fanInArrows = (n, bh) => { const h = n * bh + (n - 1) * 24, mid = h / 2;
+  return `<svg width="130" height="${h}" viewBox="0 0 130 ${h}">${Array.from({length:n}, (_, k) => { const y = bh / 2 + k * (bh + 24);
+    return `<path d="M6 ${y} C60 ${y} 60 ${mid} 112 ${mid}"/>`; }).join('')}<polygon points="110,${mid - 8} 124,${mid} 110,${mid + 8}"/></svg>`; };
+// left: an optional node before the fanIn boxes; their arrows point back to it.
+const fanLeftArrows = (n, bh) => { const h = n * bh + (n - 1) * 24, mid = h / 2;
+  return `<svg width="130" height="${h}" viewBox="0 0 130 ${h}">${Array.from({length:n}, (_, k) => { const y = bh / 2 + k * (bh + 24);
+    return `<path d="M124 ${y} C70 ${y} 70 ${mid} 20 ${mid}"/>`; }).join('')}<polygon points="22,${mid - 8} 8,${mid} 22,${mid + 8}"/></svg>`; };
+const flowNode = ([t, s]) => `<div class="node"><div class="nt">${t}</div>${s ? `<div class="ns">${s}</div>` : ''}</div>`;
+// fan items: "Italy" or ["Italy", "sub line"]; boxes grow when any has a sub line.
+const partFlow = ({nodes, fan, fanIn, left, after}) => { const last = nodes.length - 1, items = (fan || []).map(m => [].concat(m)), bh = items.some(m => m[1]) ? 92 : 64;
+  return `<div class="flow">${nodes.map((n, j) => j < last || !fan ? `<div class="col" data-step="${j}">${j ? arrow : ''}${flowNode(n)}</div>`
+    : nodes.length === 1   // a lone node is the source of the fan: draw it as a box, not a caption
+      ? `<div class="col" data-step="${j}">${fanIn ? `${left ? flowNode(left) + fanLeftArrows(items.length, bh) : ''}<div class="posts" style="--bh:${bh}px">${items.map(flowNode).join('')}</div>${fanInArrows(items.length, bh)}${flowNode(n)}`
+          : `${flowNode(n)}${fanArrows(items.length, bh)}<div class="posts" style="--bh:${bh}px">${items.map(flowNode).join('')}</div>`}</div>`
+      : `<div class="col" data-step="${j}">${fanArrows(items.length, bh)}<div class="posts" style="--bh:${bh}px">${n[0] ? `<div class="cap">${flowNode(n).replace('class="node"', 'class="node" style="border:0;background:none;padding:0"')}</div>` : ''}
+        ${items.map(flowNode).join('')}</div></div>`).join('')}${after ? `<div class="col" data-step="${last + 1}">${fanInArrows(items.length, bh)}${flowNode(after)}</div>` : ''}</div>`; };
+
+// timeline: [{when, t, pts:[…]}]. One horizontal line with a dot per phase; phases reveal left to right.
+// edge: "left" and/or "right" runs the line out to the screen edge, so a timeline can continue across two parts.
+const partTimeline = (list, edge = '') => `<div class="tl-h" style="--n:${list.length}"><div class="tl-line" style="${edge.includes('left') ? 'left:calc((100% - 100vw) / 2);' : ''}${edge.includes('right') ? 'right:calc((100% - 100vw) / 2)' : ''}"></div>${list.map((x, j) => `<div class="tl-ph" data-step="${j}"><div class="tl-when">${x.when}</div><div class="tl-dot"></div>
+  <div class="tl-t">${x.t}</div><ul>${x.pts.map(p => `<li>${p}</li>`).join('')}</ul></div>`).join('')}</div>`;
+
+// ── Router: '' home · '#pipeline' title page · '#pipeline/6' player ───────────
+function route(){
+  const [id, n] = location.hash.slice(1).split('/'), p = byId[id], i = p && (n || p.clip) ? clampPart(p, +(n || 1) - 1) : null;
+  const view = !p ? 'home' : i == null ? 'title' : 'player';
+  if (view !== 'player') { lastKey = ''; lastPos = -1; }   // leaving the player: the next slide is judged on its own, not as a step back
+  if (view === 'home') renderHome(); else if (view === 'title') renderTitle(p); else renderPlayer(p, i);
+  for (const v of ['home', 'title', 'player']) $(v).classList.toggle('on', v === view);
+  if (view === 'player') fitStage();   // after the player is visible, so it can be measured
+  // The intro clips play from the home banner, so they light up "Home" rather than getting their own tabs.
+  $('nav').innerHTML = `<a href="#" class="${!p || p.clip ? 'on' : ''}">Home</a>`
+    + SECTIONS.map(q => `<a href="#${q.id}" class="${p && p.id === q.id ? 'on' : ''}">${q.nav}</a>`).join('');
+  if (view !== 'player') { scrollTo(0, 0); lastKey = ''; }
+}
+const clampPart = (p, i) => Math.max(0, Math.min(p.parts.length - 1, isNaN(i) ? 0 : i));
+const go = h => { location.hash = h; if (!h) history.replaceState(null, '', location.pathname); route(); };
+
+// Diagram overlay: the project's interactive diagram, opened in place over the title page or player (no new tab).
+const BUILD = Date.now();
+const openDiagram = (id, view) => { const p = byId[id], d = $('diagram'); if (!p?.diagram) return;
+  d.style.setProperty('--accent', p.accent); d.querySelector('b').textContent = `${p.title} · diagram`;
+  const src = p.diagram + '?v=' + BUILD + (view ? '#' + view : ''), f = d.querySelector('iframe');   // ?v: diagram edits show on a normal refresh
+  if (f.dataset.src !== src) { const nf = f.cloneNode(); nf.src = nf.dataset.src = src; f.replaceWith(nf); }   // same view: keep where you left it
+  d.classList.add('on'); };
+const closeDiagram = () => $('diagram').classList.remove('on');
+const diagramOpen = () => $('diagram').classList.contains('on');
+addEventListener('hashchange', () => { closeDiagram(); toggleMenu(false); });
+
+const menuOpen = () => $('menu').classList.contains('on');
+const toggleMenu = (on = !menuOpen()) => { $('menu').classList.toggle('on', on); $('avatar').setAttribute('aria-expanded', on); };
+$('menu').innerHTML = `<div class="who"><span class="avatar"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="14.5" cy="16" r="2.2" fill="#fff"/><circle cx="25.5" cy="16" r="2.2" fill="#fff"/><path d="M12.5 22.5 Q20 31 27.5 22.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></span><div><b>${PROFILE.name}</b><small>${PROFILE.full}</small></div></div>
+  <dl>${PROFILE.rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+
+document.addEventListener('click', e => {
+  if (e.target.closest('#avatar')) return toggleMenu();
+  if (menuOpen() && !e.target.closest('#menu')) toggleMenu(false);
+  const dg = e.target.closest('[data-diagram]'); if (dg) return openDiagram(dg.dataset.diagram, dg.dataset.view);
+  if (e.target.closest('[data-close]')) return closeDiagram();
+  const t = e.target.closest('[data-go]'); if (t){ e.preventDefault(); go(t.dataset.go); return; }
+  // Touch screens have no arrow keys: a tap on the slide does what → does. Mouse clicks stay inert so a screen-share click can't advance by accident.
+  if (TOUCH.matches && e.target.closest('#player.on') && !e.target.closest('a,button,.top,.bottom')) advance();
+});
+const TOUCH = matchMedia('(pointer: coarse)');
+// Home: Enter plays the intro, 1–4 open a section (talk order). Title: Enter start, N next, Esc home.
+// Player: → reveals the next row, then moves to the next part (→ on the last part goes to the next section);
+// ← goes straight to the previous part (shown fully built, no reveal). Esc back to the title page.
+// Intro clips: → on the last part and Esc both return home.
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const [id, n] = location.hash.slice(1).split('/'), p = byId[id];
+  if ($('black').classList.contains('on')) { if (e.key === 'b' || e.key === 'B' || e.key === 'Escape') $('black').classList.remove('on'); return; }
+  if (menuOpen()) { if (e.key === 'Escape') toggleMenu(false); return; }
+  if (diagramOpen()) { if (e.key === 'Escape' || e.key === 'd' || e.key === 'D') closeDiagram(); return; }
+  if (e.key === 'b' || e.key === 'B') return $('black').classList.add('on');
+  if ((e.key === 'd' || e.key === 'D') && p?.diagram) return openDiagram(id, n && p.parts[clampPart(p, +n - 1)].view);
+  if (!p){
+    if (e.key >= '1' && e.key <= String(SECTIONS.length)) go(SECTIONS[+e.key - 1].id);
+    else if (e.key === 'Enter' && !e.target.closest('a,button')) go('me/1');
+    return;
+  }
+  if (!n && !p.clip){
+    if (e.key === 'Escape') go('');
+    else if (e.key === 'Enter' && !e.target.closest('a,button')) go(`${id}/1`);
+    else if ((e.key === 'n' || e.key === 'N') && nextOf(p)) go(nextOf(p).id);
+    return;
+  }
+  const i = clampPart(p, +(n || 1) - 1);
+  if (e.key === 'Escape') go(p.clip ? '' : id);
+  else if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); advance(); }
+  else if (e.key === 'ArrowLeft' && i > 0) go(`${id}/${i}`);
+});
+// → / tap in the player: reveal the next row, else go to the next part (or the next section / home after the last part).
+function advance(){
+  const [id, n] = location.hash.slice(1).split('/'), p = byId[id]; if (!p) return;
+  const i = clampPart(p, +(n || 1) - 1);
+  if (step < steps) revealNext();
+  else if (i < p.parts.length - 1) go(`${id}/${i + 2}`); else if (p.clip) go(''); else if (nextOf(p)) go(nextOf(p).id);
+}
+addEventListener('hashchange', route);
+let idleT; addEventListener('mousemove', () => { $('player').classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => $('player').classList.add('idle'), 2500); });
+document.querySelector('.brand').innerHTML = '<img src="assets/coupangplay-logo.webp" alt="Coupang Play">';
+route();
+</script>
+</body></html>

@@ -1,0 +1,408 @@
+{
+  "id": "knowledge",
+  "diagram": "ai-knowledge-layer/diagram-layers.html",
+  "accent": "#8B65FF",
+  "nav": "AI knowledge layer",
+  "title": "AI knowledge layer",
+  "time": "~25 min",
+  "kind": "Platform",
+  "logline": "Software patterns, applied to AI workflows",
+  "rows": [],
+  "parts": [
+    {
+      "t": "Problem",
+      "s": "",
+      "poster": "knowledge-1",
+      "min": 2,
+      "stat": {
+        "n": "15.4%",
+        "label": "of merged AI-agent pull requests still needed a reviewer to step in",
+        "cite": "Peralta et al., arXiv 2026",
+        "url": "https://arxiv.org/abs/2605.22534",
+        "takeaway": "Agents fail on what they don't know. Team context improves accuracy"
+      }
+    },
+    {
+      "t": "The wiki",
+      "s": "",
+      "poster": "knowledge-2",
+      "min": 3.5,
+      "key": true,
+      "view": "l=wiki",
+      "rows": [
+        [
+          "Ingest",
+          "Daily scheduler, code sync, project archive. All arrive as merge requests"
+        ],
+        [
+          "Gates",
+          "Wiki CI, evals, then a code owner approves"
+        ],
+        [
+          "Contents",
+          "Facts only"
+        ]
+      ]
+    },
+    {
+      "t": "Design decisions",
+      "s": "",
+      "poster": "knowledge-3",
+      "min": 2,
+      "table": [
+        [
+          "Decision",
+          "<span style=\"color:#22c55e\">✓</span> Chosen",
+          "<span style=\"color:#ef4444\">✗</span> Rejected"
+        ],
+        [
+          "Retrieval",
+          "Index navigation: the agent follows the index to the right doc",
+          "RAG adds an index to refresh and ranking to tune. Fine-tuning needs a retrain on every change"
+        ],
+        [
+          "Code detail",
+          "Stays in the service repo",
+          "A copy in the wiki goes stale quickly"
+        ],
+        [
+          "Skills",
+          "All skills live in a separate skills repo",
+          "Procedures would mix with facts. Skills need their own review and tests"
+        ]
+      ]
+    },
+    {
+      "t": "Who reads it",
+      "s": "",
+      "poster": "knowledge-4",
+      "min": 2,
+      "view": "l=root",
+      "flow": {
+        "fanIn": true,
+        "left": [
+          "Skills repo",
+          "loaded on demand: procedures and tool calls"
+        ],
+        "nodes": [
+          [
+            "AI Wiki",
+            "one source of truth"
+          ]
+        ],
+        "fan": [
+          [
+            "Oncall agent",
+            "ticket context"
+          ],
+          [
+            "Alarm agent",
+            "alarm context"
+          ],
+          [
+            "Dev workflow",
+            "stage context"
+          ]
+        ]
+      }
+    },
+    {
+      "t": "Skill design",
+      "s": "",
+      "poster": "knowledge-5",
+      "min": 1,
+      "tree": [
+        [
+          "my-skill/",
+          "",
+          0
+        ],
+        [
+          "├── SKILL.md",
+          "Prompt and metadata",
+          0
+        ],
+        [
+          "├── scripts/",
+          "Deterministic Python tools the agent runs",
+          0
+        ],
+        [
+          "├── references/",
+          "Docs loaded on demand",
+          0
+        ],
+        [
+          "├── assets/",
+          "Templates and boilerplate",
+          0
+        ],
+        [
+          "└── tests/",
+          "",
+          1
+        ],
+        [
+          "    ├── unit/",
+          "Fast tests for scripts/",
+          1
+        ],
+        [
+          "    ├── fixtures/",
+          "Immutable world: frozen sessions, canned API payloads, dummy repo. <b class=\"hl\">1 fixture : N scenarios</b>",
+          1
+        ],
+        [
+          "    ├── scenarios/",
+          "YAML specs: happy_path, edge_cases, adversarial. Many scenarios reuse one fixture",
+          1
+        ],
+        [
+          "    ├── simulations/",
+          "Agent harness: run_evals.py (game master), eval_judges.py (tiered grader)",
+          1
+        ],
+        [
+          "    ├── .runs/",
+          "Git-ignored output: <b class=\"hl\">history.jsonl</b> ledger, failures/ only on a fail",
+          1
+        ],
+        [
+          "    └── prune_runs.py",
+          "Keep failed runs for 30 days",
+          1
+        ]
+      ]
+    },
+    {
+      "t": "Skill simulation",
+      "s": "",
+      "poster": "knowledge-6",
+      "min": 1,
+      "timeline": [
+        {
+          "when": "Step 0",
+          "t": "Sandbox",
+          "pts": [
+            "Git worktree in /tmp",
+            "Seeded from environment templates"
+          ]
+        },
+        {
+          "when": "Step 1",
+          "t": "Load fixture",
+          "pts": [
+            "Frozen agent session",
+            "DB seeds or mock registries",
+            "1 fixture : N scenarios"
+          ]
+        },
+        {
+          "when": "Step 2",
+          "t": "Fork",
+          "pts": [
+            "Fork the frozen agent session",
+            "Each run gets its own copy, so scenarios never affect each other"
+          ]
+        },
+        {
+          "when": "Step 3",
+          "t": "Apply scenario",
+          "pts": [
+            "Sets how the test starts and who the user is",
+            "Per-scenario caps on simulation turns and tokens"
+          ]
+        }
+      ],
+      "edge": "right",
+      "auto": 200
+    },
+    {
+      "t": "Skill simulation (cont.)",
+      "s": "",
+      "poster": "knowledge-7",
+      "min": 1,
+      "timeline": [
+        {
+          "when": "Step 4",
+          "t": "Simulate",
+          "pts": [
+            "Agent acts, simulated user replies",
+            "Safety gate blocks hallucinated or forbidden tools",
+            "Fixtures supply mocked tool results",
+            "Circuit breaker stops on goal, error or limit"
+          ]
+        },
+        {
+          "when": "Step 5",
+          "t": "Tiered grading",
+          "pts": [
+            "Tier 1: schema checks (tool request, agent response)",
+            "Tier 2: state invariants (tool sequence, file diffs, DB changes)",
+            "Tier 3: rubric-based LLM judge, templated response"
+          ]
+        },
+        {
+          "when": "Step 6",
+          "t": "Record and clean up",
+          "pts": [
+            "Metrics to history.jsonl",
+            "Pass deletes the sandbox",
+            "Fail keeps trajectory, diff and judge scores in .runs/failures/",
+            "Prune: keep failed runs for 30 days"
+          ]
+        }
+      ],
+      "edge": "left",
+      "hideTitle": true,
+      "auto": 200
+    },
+    {
+      "t": "Guardrails",
+      "s": "Least privilege for agents",
+      "poster": "knowledge-8",
+      "min": 3.5,
+      "rows": [
+        [
+          "The real control",
+          "Skills call the platform with scoped auth tokens (bot or user's)"
+        ],
+        [
+          "Prod untouched",
+          "Writes limited to staging environment. DB writes via tickets, A/B changes as drafts"
+        ],
+        [
+          "Never replay",
+          "Never retry blind: read the state first"
+        ]
+      ]
+    },
+    {
+      "t": "Definition of done",
+      "s": "Spec workflow: done is a gate in code, not the agent's word",
+      "poster": "knowledge-9",
+      "min": 2,
+      "view": "l=harness",
+      "rows": [
+        [
+          "Problem",
+          "Agents declare victory early and drift after context compaction"
+        ],
+        [
+          "Mechanism",
+          "Stage state lives in code. Only a validated callback moves a stage forward"
+        ],
+        [
+          "Failure",
+          "Every transition is logged, so a bad run can be resumed or rolled back. After 3 rollbacks, a human steps in"
+        ]
+      ]
+    },
+    {
+      "t": "Self-improvement",
+      "s": "Controlled feedback loop",
+      "poster": "knowledge-10",
+      "min": 3.5,
+      "view": "l=sched",
+      "rows": [
+        [
+          "Daily",
+          "Daily batch MR from the day's oncall/alarm incidents"
+        ],
+        [
+          "Per scenario",
+          "KB gap check on solved issues: the agent proposes, a human confirms. The engineer rates each agent reply at ticket close"
+        ],
+        [
+          "Bounded",
+          "Capped MR size, human merge and a git history that can be reverted"
+        ]
+      ]
+    },
+    {
+      "t": "Evals",
+      "s": "Three levels, like a test pyramid",
+      "poster": "knowledge-11",
+      "min": 1,
+      "pyramid": {
+        "axis": [
+          "Costly<br>Real use",
+          "Cheap<br>Fast"
+        ],
+        "tiers": [
+          [
+            "Outcome",
+            "3 tickets per class",
+            "Does it solve real tickets?",
+            "Every release · pass rate per class"
+          ],
+          [
+            "Skill",
+            "Simulated scenarios",
+            "Does the procedure behave?",
+            "Every skill change"
+          ],
+          [
+            "Repo",
+            "Runbook questions",
+            "Can an agent find the right doc?",
+            "Every wiki MR"
+          ]
+        ],
+        "loop": "Each bad real run becomes a regression case at the lowest level that can catch it"
+      }
+    },
+    {
+      "t": "Future direction",
+      "s": "",
+      "poster": "knowledge-12",
+      "min": 1,
+      "rows": [
+        [
+          "Frontend",
+          "Automated browser-based testing. Frontend support for the Spec Workflow"
+        ],
+        [
+          "LangGraph",
+          "Spec Workflow and oncall agents run as graphs. Checkpoints give pause, resume and rollback, and an approval is an interrupt"
+        ],
+        [
+          "Auto&#8209;triage",
+          "Automate Oncall Agent replies, no @ needed, so every ticket gets a reply to rate"
+        ]
+      ]
+    },
+    {
+      "t": "Impact and retro",
+      "s": "",
+      "poster": "knowledge-13",
+      "min": 1.5,
+      "rows": [
+        [
+          "#",
+          "Impact"
+        ],
+        [
+          "Adoption",
+          "~100 weekly active engineers on the workflow since October, up from 20+"
+        ],
+        [
+          "Oncall",
+          "~300 tickets condensed into 15 recurring issue classes"
+        ],
+        [
+          "#",
+          "Lessons"
+        ],
+        [
+          "Gate, don't automate",
+          "Human-gated write-back worked better than full automation. One human yes per MR keeps the wiki trusted"
+        ],
+        [
+          "Test on real traces",
+          "Static tests don't prove model behaviour, so bad runs from real traces became the regression set"
+        ]
+      ]
+    }
+  ]
+}
