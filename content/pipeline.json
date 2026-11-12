@@ -189,26 +189,6 @@
         ["Result", "+8% average seller revenue"],
         ["Reliability", "~95% of translated videos posted. Sellers kept them through the review window"]
       ]
-    },
-    {
-      "t": "Retrospectives",
-      "s": "",
-      "min": 3,
-      "poster": "pipeline-11",
-      "rows": [
-        ["Blind spot", "Posted videos flowed back into our candidate pool and got translated again. An AI-origin flag fixed it. Now I ask of every output: can this come back as input?"],
-        ["Metrics", "I launched with technical metrics but no business metrics, and only added those after release. Next time I'd define both before launch"]
-      ]
-    },
-    {
-      "t": "Enhancements",
-      "s": "",
-      "min": 1.5,
-      "poster": "pipeline-12",
-      "rows": [
-        ["Tiered quality", "Match model cost to video value. Top videos get premium lip-sync, the long tail gets a cheaper tier, and seller feedback can move a video up a tier"],
-        ["Uplift ranking", "Rank by expected revenue in the target market, not past revenue in the source market. Learn it from how posted translations perform per market and category"]
-      ]
     }
   ]
 }

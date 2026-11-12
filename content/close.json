@@ -53,7 +53,7 @@
       "stack": true
     },
     {
-      "t": "What I'm exploring",
+      "t": "Interests and exploration",
       "s": "",
       "poster": "close-3",
       "min": 1,
@@ -75,7 +75,7 @@
     },
     {
       "t": "My first six months",
-      "s": "A draft built on assumptions. Correct me where I'm wrong",
+      "s": "",
       "poster": "bridge-1",
       "min": 7,
       "key": true,
@@ -112,7 +112,7 @@
           "when": "Month 6",
           "t": "Ready",
           "pts": [
-            "Ready for the next big match or on-sale",
+            "Ready to handle big livestreams",
             "Department-wide AI tooling",
             "Drive business impact and product optimizations"
           ]
@@ -121,7 +121,7 @@
     },
     {
       "t": "Why Coupang Play",
-      "s": "A natural next step",
+      "s": "",
       "poster": "bridge-2",
       "min": 2,
       "stack": true,

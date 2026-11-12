@@ -191,6 +191,10 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .tl-t{font-size:30px;font-weight:850;color:var(--fg);line-height:1.15;margin:22px 0 14px}
 #player .tl-ph ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
 #player .tl-ph li{font-size:21px;line-height:1.35;font-weight:600;color:var(--fg2);padding-left:18px;position:relative}
+#player .bead{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 14px 4px rgba(93,158,255,.8);
+  offset-rotate:0deg;animation:bead 9s linear infinite;opacity:0}
+@keyframes bead{0%{offset-distance:0%;opacity:0}6%{opacity:.9}94%{opacity:.9}100%{offset-distance:100%;opacity:0}}
+@media (prefers-reduced-motion:reduce),(max-width:900px){#player .bead{display:none}}
 #player .tl-ph li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--accent)}
 #player .stage .flow{margin-top:56px;display:flex;align-items:center}
 #player .flow .node{border:2px solid var(--accent);border-radius:16px;padding:22px 30px;min-width:270px;background:rgba(255,255,255,.03)}
@@ -287,17 +291,17 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .stage .stat cite{font-style:normal;font-size:18px;color:var(--fg3);margin-top:4px}
 #player .stage .stat cite a{color:inherit}
 #player .stage .stat .k{margin-top:22px;padding-left:20px;border-left:4px solid var(--accent);font-size:30px;line-height:1.3;font-weight:750;color:var(--fg)}
-/* pyramid: stacked trapezoid tiers (top = narrowest), each with a question and cadence to its right, a cost axis on the left, a loop line below. */
+/* pyramid: inverted, stacked trapezoid tiers (top = widest, cheapest), each with a question and cadence to its right, a cost axis on the left, a loop line below. */
 #player .stage .pyr{margin-top:34px;display:flex;gap:24px}
 #player .pyr-axis{position:relative;width:150px;flex:none}
-#player .pyr-axis::before{content:"";position:absolute;right:10px;top:14px;bottom:4px;width:3px;border-radius:2px;background:var(--accent);opacity:.6}
-#player .pyr-axis::after{content:"";position:absolute;right:4px;top:0;border:8px solid transparent;border-bottom:14px solid var(--accent);border-top:0;opacity:.8}
+#player .pyr-axis::before{content:"";position:absolute;right:10px;top:4px;bottom:14px;width:3px;border-radius:2px;background:var(--accent);opacity:.6}
+#player .pyr-axis::after{content:"";position:absolute;right:4px;bottom:0;border:8px solid transparent;border-top:14px solid var(--accent);border-bottom:0;opacity:.8}
 #player .pyr-axis span{position:absolute;right:32px;white-space:nowrap;text-align:right;font-size:18px;font-weight:850;letter-spacing:.05em;text-transform:uppercase;color:var(--fg2);line-height:1.3}
 #player .pyr-axis .hi{top:4px}
 #player .pyr-axis .lo{bottom:0}
 #player .pyr-rows{display:flex;flex-direction:column;gap:10px}
 #player .pyr-row{display:grid;grid-template-columns:680px 1fr;column-gap:48px;align-items:center}
-#player .pyr-tier{height:128px;box-sizing:border-box;padding-bottom:18px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;background:color-mix(in srgb,var(--accent) var(--o),var(--bg));color:#fff}
+#player .pyr-tier{height:128px;box-sizing:border-box;padding-top:18px;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;background:color-mix(in srgb,var(--accent) var(--o),var(--bg));color:#fff}
 #player .pyr-tier .n{font-size:24px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
 #player .pyr-tier .h{font-size:18px;font-weight:650;opacity:.85;margin-top:6px}
 #player .pyr-txt .q{font-size:30px;font-weight:800;color:var(--fg);line-height:1.2}
@@ -307,6 +311,8 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .stage > .btn{margin-top:22px}
 @media (min-width:901px){#player .stage > .btn{margin-top:28px;min-height:72px;padding:0 36px;font-size:24px;border-radius:10px}}   /* slide buttons: canvas label scale, not the home-page size */
 /* Builds: → reveals one row at a time before moving to the next part. Hidden rows keep their space, so nothing jumps. */
+#player .stage [data-step]{transition:opacity .45s var(--ease)}
+#player .stage .held{opacity:0}
 /* Idle (no mouse for 2.5s): buttons and cursor fade; part label and progress stay as signposts */
 #player.idle{cursor:none}
 #player .pbtn{transition:opacity .4s}
@@ -321,6 +327,47 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .nextep:focus-visible{box-shadow:0 0 0 3px rgba(0,128,255,.4)}
 @keyframes nextfill{to{transform:scaleX(1)}}
 @media (prefers-reduced-motion:reduce){#player .nextep .fill{animation:none;transform:scaleX(1)}}
+/* Optional part background (`bg` in the part JSON). "bigbang": one bright origin top right, rays and debris flying out,
+   so "one source of truth" reads as everything starting from one point. Kept faint so row text stays readable. */
+#player .bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;--o:88% 22%;
+  -webkit-mask:linear-gradient(transparent,#000 9%,#000 85%,transparent),linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-composite:source-in;
+          mask:linear-gradient(transparent,#000 9%,#000 85%,transparent) intersect,linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}   /* fade the edges so letterboxing shows no hard line */
+#player .bg-bigbang{
+  background:
+    radial-gradient(circle at var(--o),#fff 0,rgba(255,255,255,.85) 5px,rgba(93,158,255,.45) 28px,rgba(93,158,255,.14) 160px,rgba(93,158,255,.05) 380px,transparent 640px),
+    radial-gradient(circle at var(--o),transparent 250px,rgba(93,158,255,.10) 262px,transparent 300px),
+    radial-gradient(circle at var(--o),transparent 520px,rgba(93,158,255,.06) 530px,transparent 570px),
+    radial-gradient(circle at 74% 12%,rgba(255,255,255,.7) 0 2px,transparent 3px),
+    radial-gradient(circle at 80% 38%,rgba(255,255,255,.6) 0 2px,transparent 3px),
+    radial-gradient(circle at 95% 34%,rgba(93,158,255,.8) 0 3px,transparent 4px),
+    radial-gradient(circle at 66% 30%,rgba(93,158,255,.6) 0 2px,transparent 3px),
+    radial-gradient(circle at 92% 8%,rgba(255,255,255,.5) 0 2px,transparent 3px),
+    radial-gradient(circle at 58% 8%,rgba(93,158,255,.5) 0 2px,transparent 3px),
+    radial-gradient(circle at 70% 52%,rgba(255,255,255,.35) 0 2px,transparent 3px),
+    radial-gradient(circle at 97% 60%,rgba(93,158,255,.45) 0 2px,transparent 3px);
+  animation:bang 1.4s cubic-bezier(.16,1,.3,1) both;transform-origin:var(--o)}
+#player .bg-bigbang::before{content:"";position:absolute;inset:0;
+  background:repeating-conic-gradient(from 3deg at var(--o),rgba(93,158,255,.13) 0 .6deg,transparent .6deg 7deg);
+  -webkit-mask:radial-gradient(circle at var(--o),#000 40px,rgba(0,0,0,.5) 300px,transparent 900px);
+          mask:radial-gradient(circle at var(--o),#000 40px,rgba(0,0,0,.5) 300px,transparent 900px)}
+@keyframes bang{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+/* Entry only: a white flash at the origin that becomes a shockwave ring and fades, while the scene grows out behind it */
+#player .bg-bigbang{animation-delay:.12s}
+#player .shock{position:absolute;pointer-events:none;left:88%;top:22%;width:0;height:0;border-radius:50%;border:3px solid #fff;
+  transform:translate(-50%,-50%);opacity:0;animation:shock 1.4s ease-out forwards}
+@keyframes shock{
+  0%{width:0;height:0;opacity:1;background:#fff;border-color:#fff;box-shadow:0 0 0 0 rgba(255,255,255,0)}
+  8%{width:44px;height:44px;opacity:1;background:#fff;border-color:#fff;box-shadow:0 0 120px 60px rgba(255,255,255,.9)}
+  30%{width:520px;height:520px;opacity:.9;background:rgba(255,255,255,0);border-color:rgba(255,255,255,.8);box-shadow:0 0 60px 8px rgba(93,158,255,.35)}
+  100%{width:1700px;height:1700px;opacity:0;background:rgba(255,255,255,0);border-color:rgba(93,158,255,.7);box-shadow:0 0 40px 0 rgba(93,158,255,0)}}
+/* "loop": a ring on the right with four clockwise arrowheads (one per feedback source) and a dot travelling round it */
+#player .bg-loop{animation:fadein .8s var(--ease) both}
+#player .bg-loop svg{position:absolute;inset:0;width:100%;height:100%}
+#player .bg-loop .orb{transform-box:view-box;transform-origin:1710px 560px;animation:orbit 16s linear infinite}
+@keyframes orbit{to{transform:rotate(360deg)}}
+#player .bg.back{animation:none}
+@media (prefers-reduced-motion:reduce){#player .bg,#player .bg .orb{animation:none}#player .shock{display:none}}
+@media (max-width:900px){#player :is(.bg,.shock){display:none}}
 /* B = blank screen, to pull attention back to the speaker */
 #black{position:fixed;inset:0;z-index:60;background:#000;display:none}
 #black.on{display:block}
@@ -568,12 +615,28 @@ function renderPlayer(p, i){
   // A part with `view` (e.g. v=posting&c=sched) gets a button that opens the section's diagram popup at that spot.
   const dia = e.view && p.diagram ? `<button class="btn secondary" data-diagram="${p.id}" data-view="${e.view}">◫&nbsp;Expand diagram</button>` : '';
   const two = n => String(n).padStart(2, '0');
-  $('player').innerHTML = `<div class="canvas"><div class="stage${e.edge ? ' edge' : ''}${seen ? ' back' : ''}"${seen ? ' data-seen="1"' : ''}>${e.hideTitle ? '<b style="visibility:hidden">&nbsp;</b>' : `<b>${e.t}</b>`}${e.s ? `<span>${e.s}</span>` : '<span class="empty"></span>'}${body}${e.foot ? `<div class="foot">${e.foot}</div>` : ''}${e.table ? partTable(e.table) : ''}${dia}</div>
+  // Background art for a part's `bg` (CSS-only backgrounds such as bigbang need no entry). Coordinates are canvas pixels.
+  const BG_ART = {
+    loop: (() => {
+      const cx = 1710, cy = 560, r = 190, a = 'rgba(93,158,255,';
+      const heads = [45, 135, 225, 315].map(d => { const t = d * Math.PI / 180;
+        return `<path d="M-16,-14 L6,0 L-16,14" transform="translate(${cx + r * Math.sin(t)},${cy - r * Math.cos(t)}) rotate(${d})" fill="none" stroke="${a}.55)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`; }).join('');
+      return `<svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><defs><radialGradient id="lg"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#5d9eff"/><stop offset="1" stop-color="#5d9eff" stop-opacity="0"/></radialGradient></defs>
+        <circle cx="${cx}" cy="${cy}" r="${r + 60}" fill="none" stroke="${a}.06)" stroke-width="2"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${a}.22)" stroke-width="3"/>
+        <circle cx="${cx}" cy="${cy}" r="${r - 70}" fill="none" stroke="${a}.08)" stroke-width="2" stroke-dasharray="6 14"/>
+        ${heads}<g class="orb"><circle cx="${cx}" cy="${cy - r}" r="34" fill="url(#lg)" opacity=".7"/><circle cx="${cx}" cy="${cy - r}" r="6" fill="#fff"/></g></svg>`;
+    })(),
+  };
+  $('player').innerHTML = `<div class="canvas">${e.bg ? `<div class="bg bg-${e.bg}${seen ? ' back' : ''}">${BG_ART[e.bg] || ''}</div>${e.bg === 'bigbang' && !seen ? '<div class="shock"></div>' : ''}` : ''}<div class="stage${e.edge ? ' edge' : ''}${seen ? ' back' : ''}"${seen ? ' data-seen="1"' : ''}>${e.hideTitle ? '<b style="visibility:hidden">&nbsp;</b>' : `<b>${e.t}</b>`}${e.s ? `<span>${e.s}</span>` : '<span class="empty"></span>'}${body}${e.foot ? `<div class="foot">${e.foot}</div>` : ''}${e.table ? partTable(e.table) : ''}${dia}</div>
     ${last ? nextBtn(p) : ''}<div class="sfoot"><span>${p.clip ? '' : `Episode ${i + 1} · `}${p.title}</span>
       <div class="segs">${p.parts.map((x, j) => `<button data-go="${p.id}/${j + 1}" class="${j < i ? 'done' : j === i ? 'cur' : ''}" style="flex:1 1 0" title="${x.t}"></button>`).join('')}</div>
       <span>${two(slideNo(p, i))} / ${two(TOTAL)}</span></div></div>
     <div class="top"><button class="pbtn" data-go="${out}">‹ ${p.clip ? 'Kendrew' : 'Back'}</button><span class="sp"></span>
       ${i > 0 ? `<button class="pbtn" data-go="${p.id}/${i}">‹ Prev</button>` : ''}${!last ? `<button class="pbtn" data-go="${p.id}/${i + 2}">Next ›</button>` : ''}</div>`;
+  // `hold: N` keeps every element with data-step ≥ N hidden until the first →. A slide already seen shows everything.
+  if (e.beads) requestAnimationFrame(() => requestAnimationFrame(snakeBeads));   // after fitStage has settled the layout
+  if (e.hold && !seen) $('player').querySelectorAll('.stage [data-step]').forEach(el => +el.dataset.step >= e.hold && el.classList.add('held'));
 }
 // The canvas scales as a whole to the window. If a slide's body is still taller or wider than the body region, shrink the body until it fits.
 // Phones (≤900px) use the scrolling layout in the CSS instead.
@@ -619,13 +682,13 @@ const partCompare = ({items, max}) => `<div class="cmp"><div class="ch"><span>Ap
   ${items.map((x, j) => `<div class="cr${x.pick ? ' pick' : ''}" data-step="${j}"><div><div class="cnt">${x.name}</div><div class="cns">${x.note}</div></div>
     <div><div class="cbar" style="width:${x.hi / max * 100}%"><i style="width:${x.lo / x.hi * 100}%"></i></div><div class="cv">${x.cost}</div></div>
     <div class="cq">${x.q}</div><div class="cp">${x.per}</div></div>`).join('')}</div>`;
-// pyramid: {axis: [top label, bottom label], tiers:[[name, how, question, cadence], …] listed top to bottom, loop?}. Builds reveal the base first, then up, then the loop.
+// pyramid: {axis: [top label, bottom label], tiers:[[name, how, question, cadence], …] listed top (cheapest, widest) to bottom, loop?}. Drawn inverted. Builds reveal top down, then the loop.
 // Each tier is a slice of one trapezoid: its clip-path uses the pyramid's half-width at the tier's top and bottom edge, so the sides line up.
 const partPyramid = ({axis, tiers, loop}) => {
-  const n = tiers.length, h = 128, g = 10, H = n * h + (n - 1) * g, apex = 9, half = y => apex + (50 - apex) * y / H;
+  const n = tiers.length, h = 128, g = 10, H = n * h + (n - 1) * g, apex = 9, half = y => 50 - (50 - apex) * y / H;
   const rows = tiers.map(([name, how, q, when], k) => {
-    const t = half(k * (h + g)), b = half(k * (h + g) + h), o = 85 - k * 24;
-    return `<div class="pyr-row" data-step="${n - 1 - k}"><div class="pyr-tier" style="--o:${o}%;clip-path:polygon(${50 - t}% 0,${50 + t}% 0,${50 + b}% 100%,${50 - b}% 100%)">
+    const t = half(k * (h + g)), b = half(k * (h + g) + h), o = 37 + k * 24;
+    return `<div class="pyr-row" data-step="${k}"><div class="pyr-tier" style="--o:${o}%;clip-path:polygon(${50 - t}% 0,${50 + t}% 0,${50 + b}% 100%,${50 - b}% 100%)">
       <div class="n">${name}</div><div class="h">${how}</div></div><div class="pyr-txt"><div class="q">${q}</div><div class="w">${when}</div></div></div>`;
   }).join('');
   const [hi, lo] = [].concat(axis);
@@ -666,13 +729,15 @@ const fanLeftArrows = (n, bh) => { const h = n * bh + (n - 1) * 24, mid = h / 2;
     return `<path d="${d}"/>${beads(d, Math.hypot(104, y - mid))}`; }).join('')}<polygon points="22,${mid - 8} 8,${mid} 22,${mid + 8}"/></svg>`; };
 const flowNode = ([t, s]) => `<div class="node"><div class="nt">${t}</div>${s ? `<div class="ns">${s}</div>` : ''}</div>`;
 // fan items: "Italy" or ["Italy", "sub line"]; boxes grow when any has a sub line.
-const partFlow = ({nodes, fan, fanIn, left, after}) => { const last = nodes.length - 1, items = (fan || []).map(m => [].concat(m)), bh = items.some(m => m[1]) ? 92 : 64;
+// next: [[title, sub], …] nodes chained with arrows after everything else (e.g. after a fanIn node).
+const partFlow = ({nodes, fan, fanIn, left, after, next = []}) => { const last = nodes.length - 1, items = (fan || []).map(m => [].concat(m)), bh = items.some(m => m[1]) ? 92 : 64;
   return `<div class="flow">${nodes.map((n, j) => j < last || !fan ? `<div class="col" data-step="${j}">${j ? arrow : ''}${flowNode(n)}</div>`
     : nodes.length === 1   // a lone node is the source of the fan: draw it as a box, not a caption
       ? `<div class="col" data-step="${j}">${fanIn ? `${left ? flowNode(left) + fanLeftArrows(items.length, bh) : ''}<div class="posts" style="--bh:${bh}px">${items.map(flowNode).join('')}</div>${fanInArrows(items.length, bh)}${flowNode(n)}`
           : `${flowNode(n)}${fanArrows(items.length, bh)}<div class="posts" style="--bh:${bh}px">${items.map(flowNode).join('')}</div>`}</div>`
       : `<div class="col" data-step="${j}">${fanArrows(items.length, bh)}<div class="posts" style="--bh:${bh}px">${n[0] ? `<div class="cap">${flowNode(n).replace('class="node"', 'class="node" style="border:0;background:none;padding:0"')}</div>` : ''}
-        ${items.map(flowNode).join('')}</div></div>`).join('')}${after ? `<div class="col" data-step="${last + 1}">${fanInArrows(items.length, bh)}${flowNode(after)}</div>` : ''}</div>`; };
+        ${items.map(flowNode).join('')}</div></div>`).join('')}${after ? `<div class="col" data-step="${last + 1}">${fanInArrows(items.length, bh)}${flowNode(after)}</div>` : ''}
+    ${next.map((x, i) => `<div class="col" data-step="${last + 1 + !!after + i}">${arrow}${flowNode(x)}</div>`).join('')}</div>`; };
 
 // arch: {title, views:{overview:{h, stages?, bands, nodes, edges}, <id>:{title, …}}}. One architecture diagram in slide style; clicking a ⊕ node
 // swaps in that node's view (same slide, so slide count and timing stay put). The crumb or Esc goes back to the overview.
@@ -760,7 +825,16 @@ const tlPhase = (x, j, style = '') => `<div class="tl-ph" data-step="${j}"${styl
 const partSnake = (list, n) => { const top = list.slice(0, n), bot = list.slice(n), gap = 32, skip = n - bot.length;
   return `<div class="tl-snake"><div class="tl-h" style="--n:${n}"><div class="tl-line"></div><div class="tl-turn"></div>${top.map((x, j) => tlPhase(x, j)).join('')}</div>`
     + `<div class="tl-h rev" style="--n:${n}"><div class="tl-line" style="left:calc((100% - ${(n - 1) * gap}px) / ${n} * ${skip} + ${skip * gap}px)"></div>${bot.map((x, k) => tlPhase(x, n + k, `grid-row:1;grid-column:${n - k}`)).join('')}</div></div>`; };
-
+// beads: two small dots travel the whole snake (top row, the turn, bottom row), passing under the phase dots.
+// The path is measured from the rendered lines, in the snake's own coordinates, so it matches the CSS geometry.
+function snakeBeads(){
+  const sn = $('player').querySelector('.tl-snake'); if (!sn) return;
+  const [top, rev] = sn.querySelectorAll('.tl-h'), W = top.offsetWidth, R = 46, x2 = W + 54;
+  const y1 = 44, y2 = rev.offsetTop + 44, xe = rev.querySelector('.tl-line').offsetLeft;
+  const d = `M0,${y1} H${x2 - R} A${R},${R} 0 0 1 ${x2},${y1 + R} V${y2 - R} A${R},${R} 0 0 1 ${x2 - R},${y2} H${xe}`;
+  sn.querySelectorAll('.bead').forEach(b => b.remove());
+  [0, -4.5].forEach(delay => sn.insertAdjacentHTML('afterbegin', `<i class="bead" style="offset-path:path('${d}');animation-delay:${delay}s"></i>`));
+}
 // ── Router: '' home · '#pipeline' title page · '#pipeline/6' player ───────────
 function route(){
   const [id, n] = location.hash.slice(1).split('/'), p = byId[id], i = p && (n || p.clip) ? clampPart(p, +(n || 1) - 1) : null;
@@ -831,7 +905,7 @@ document.addEventListener('click', e => {
 const TOUCH = matchMedia('(pointer: coarse)');
 // Home: Enter plays the intro, 1–4 open a section (talk order). Title: Enter start, N next, Esc home.
 // Player: → moves to the next part (→ on the last part goes to the next section); ← goes to the previous part.
-// Every part shows all its content at once (no row-by-row reveal). Esc back to the title page.
+// Every part shows all its content at once, except a part with `hold`, where the first → reveals the held rows. Esc back to the title page.
 // Intro clips: → on the last part and Esc both return home.
 addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -860,6 +934,8 @@ addEventListener('keydown', e => {
 // → / tap in the player: go to the next part (or the next section / home after the last part).
 function advance(){
   const [id, n] = location.hash.slice(1).split('/'), p = byId[id]; if (!p) return;
+  const held = $('player').querySelectorAll('.stage .held');
+  if (held.length) return held.forEach(el => el.classList.remove('held'));   // first → reveals what `hold` kept back
   const i = clampPart(p, +(n || 1) - 1);
   if (i < p.parts.length - 1) go(`${id}/${i + 2}`); else go(nextOf(p) ? `${nextOf(p).id}/1` : '');
 }

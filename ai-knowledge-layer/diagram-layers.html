@@ -57,6 +57,11 @@ body.schema #schema{display:flex}
 .node.dim{opacity:.22}
 .node.click:hover .box{filter:brightness(1.35)}
 .node text{pointer-events:none}
+/* Side panel hidden (SHOW_PANEL=false): diagram takes the full width, legend runs along the bottom */
+body.nopanel #panel{display:none}
+body.nopanel #wrap{right:0}
+body.nopanel #legend{left:0;width:auto;display:flex;flex-wrap:wrap;gap:4px 22px;border-left:0}
+body.nopanel #legend .full{grid-column:auto}
 </style></head>
 <body>
 <div id="bar">
@@ -89,6 +94,8 @@ body.schema #schema{display:flex}
 </div>
 
 <script>
+const SHOW_PANEL = false;   // false: the side panel is hidden and leaf boxes open nothing. Panel content is kept.
+if (!SHOW_PANEL) document.body.classList.add('nopanel');
 // ---------------------------------------------------------------------------
 // DATA. Each layer: title, d (panel shown on entering), nodes, edges.
 // node: id,label,sub,x,y,w,h,own(built|evolved|others),child(layer id),go(portal layer id),kind(ghost|person|stack),d(panel)
@@ -114,13 +121,13 @@ root:{title:'AI Harness',
   how:['Arrows show which way knowledge flows: wiki → agents is context; the scheduler pulls the histories and writes updates to the wiki.','Skills repo is shared: the Oncall Agent and the Spec Workflow stages both load their skills from it.','Oncall Agent and Alarm Agent use the wiki as context; their history is the scheduler’s input.','Wiki Maintainer: diffs the day’s tickets and alarms (nightly) and the week’s merged code changes (weekly) against the wiki and opens an update MR.','Spec Workflow: uses the wiki as context at each stage; its Archive stage files each project back.','The wiki is plain Markdown + YAML in git: index routing, no vector DB.'],
   gotchas:['This is the team’s own wiki, covering every domain the team owns.','Success is judged on real outcomes (MTTR, deflection), not on how much content is added.']},
  nodes:[
-  {id:'oncall',label:'Oncall Agent',sub:'answers oncall questions\nin chat',x:30,y:50,w:270,h:140,child:'bot'},
-  {id:'sched',label:'Wiki Maintainer',sub:'nightly + weekly scheduler\nhistories + code → wiki',x:30,y:280,w:270,h:120,child:'sched'},
-  {id:'alarm',label:'Alarm Agent',sub:'triages monitoring alarms',c:'alarm',x:30,y:500,w:270,h:140,
+  {id:'oncall',label:'Oncall Agent',sub:'answers in chat',x:30,y:50,w:270,h:140,child:'bot'},
+  {id:'sched',label:'Wiki Maintainer',sub:'nightly + weekly MRs',x:30,y:280,w:270,h:120,child:'sched'},
+  {id:'alarm',label:'Alarm Agent',sub:'triages alarms',c:'alarm',x:30,y:500,w:270,h:140,
    d:{kind:'Agent',what:'Picks up monitoring alarms, pulls the matching runbook / known issue from the wiki, and gathers evidence (logs, metrics, recent deploys) before a human acts.',how:['Same building blocks as the Oncall Agent: same runtime, same wiki, read-only evidence tools.','The difference is the trigger and the output: an alarm starts it, and it writes a triage note instead of a chat answer.','Context: wiki runbooks, Scenario Runbook precedents, service registry.','Output: alarm triage note + its outcome, kept as alarm history.','Alarm history is one of the Wiki Maintainer’s two inputs.'],link:['See the Oncall Agent diagram','bot']}},
-  {id:'wiki',label:'AI Wiki',sub:'the team’s agent-readable\nknowledge, in git',x:465,y:235,w:270,h:210,child:'wiki'},
-  {id:'harness',label:'Spec Workflow',sub:'PRD → design → env → code\n→ tests → archive',x:900,y:235,w:270,h:210,child:'harness'},
-  {id:'skills',label:'Skills repo',sub:'shared · team-maintained\nOncall Agent + Spec Workflow',x:465,y:30,w:270,h:110,
+  {id:'wiki',label:'AI Wiki',sub:'team knowledge, in git',x:465,y:157,w:270,h:420,child:'wiki'},
+  {id:'harness',label:'Spec Workflow',sub:'PRD → code → archive',x:900,y:235,w:270,h:210,child:'harness'},
+  {id:'skills',label:'Skills repo',sub:'shared · team-maintained',x:465,y:30,w:270,h:110,
    d:{kind:'Skills repo',what:'The shared, team-maintained repo that the Oncall Agent and the Spec Workflow stages both load their skills from.',how:['Read skills: generic, read-only (for example log search and DB read), each returning a bounded summary.','Domain skills, one folder per domain: when to use it, what to check, which wiki entry and recipe to open (for example a candidate eligibility check, a translation task trace, a slot calendar lookup). They point at wiki entries and hold no copied facts.','Write skills: change pre-prod or config through the platforms, loaded only on a change request.'],guards:[['platform','Every skill calls its platform with a scoped token; the platform enforces least privilege.']]}},
  ],
  edges:[
@@ -142,27 +149,27 @@ bot:{title:'Oncall Agent',
  nodes:[
   {id:'chat',label:'Chat thread',sub:'@bot',x:20,y:145,w:150,h:80,kind:'person',
    d:{kind:'Entry',what:'The requester’s thread in the oncall group. The answer comes back here, conclusion first, with SQL / logs hidden unless asked.',guards:[['prompt','Privacy hard stop before any tool call.'],['platform','The asker’s identity is propagated to every tool call, so their own permissions apply.']],gotchas:['Triggered by an explicit @mention, so the requester stays in control of what the bot sees.']}},
-  {id:'router',label:'Routing platform',sub:'hosts the router agent\nstores ticket history',x:220,y:115,w:220,h:140,
+  {id:'router',label:'Routing platform',sub:'router agent · ticket history',x:220,y:115,w:220,h:140,
    d:{kind:'Routing platform',what:'The platform that hosts the router agent and stores ticket history. The router agent is the entry point: privacy and language gates, classify by full business intent, start a worker for the thread, or reuse its live one (and call other teams’ routers over agent-to-agent calls), check worker output, write the final answer.',
     how:['Each answered thread (question, evidence, conclusion, handoff) is stored as ticket history. The Wiki Maintainer pulls the day’s history at end of day.','Open an attempt ledger: max 1 worker launch per turn.','Treat worker output as evidence; live / code evidence wins conflicts.','If a handoff is needed, read the live routing doc once.','Causal-conclusion gate, then conclusion-first answer.'],
     guards:[['prompt','One worker launch per turn (circuit breaker) + static test.'],['prompt','Presentation firewall: hide SQL, rows, logs unless asked.'],['prompt','Handoff is a recommendation only.']],
     gotchas:['Route by full business intent, never by IDs alone.','“A wait timeout is not a result”: the router never answers on a timeout.']}},
-  {id:'worker',label:'Worker agent',sub:'loads a domain skill\nreturns a summary\nstays alive 1 hour, then closes',x:510,y:135,w:220,h:100,
+  {id:'worker',label:'Worker agent',sub:'loads a domain skill',x:510,y:135,w:220,h:100,
    d:{kind:'Worker agent',what:'A generic agent the router agent starts for an oncall thread. Follow-up messages in the thread reach the same worker while it is alive. It loads the matching domain skill, follows it into the wiki, runs the generic read skills and returns a short result. The worker stays alive for 1 hour, then closes.',how:['Same runtime as the router; differs by prompt, tool allowlist and workspace.','Return format is fixed: conclusion, evidence, blockers. No raw rows or logs.','The routing platform keeps no context: raw logs and query results stay in the worker.'],guards:[['code','Read-only tool allowlist: no restart, rollback or deploy capability is granted.'],['code','Log search and DB reads return bounded summaries, not raw output.']],gotchas:['Auth failure ≠ “no data”: retry once, then report the blocker.']}},
-  {id:'cskill',label:'Content skill',sub:'domain skill · read-only redirect\nto wiki content entries',x:810,y:40,w:260,h:90,
+  {id:'cskill',label:'Content skill',sub:'read-only · points to wiki',x:810,y:40,w:260,h:90,
    d:{kind:'Domain skill',what:'Answers seller-content questions. A thin procedure: when to use it, which wiki entries to open, which generic read skills to call. Domain facts and log recipes stay in the wiki.',how:['Points at the wiki’s content entries and recipes (referenced, never copied).','Needs a seller id; bounded SELECTs over its content tables, using the wiki’s query through the generic DB-read skill.','Passes the wiki’s log recipe (service, error codes, window) to the generic log-search skill.','Read-only: changes go through the separate write skills, which load only on a change request.'],guards:[['prompt','Wiki docs are evidence sources, never its write area.']]}},
-  {id:'wskill',label:'Write skills',sub:'gated · loaded only on a change\nrequest (config · DB row · timer)',x:810,y:140,w:260,h:90,
+  {id:'wskill',label:'Write skills',sub:'gated · change requests only',x:810,y:140,w:260,h:90,
    d:{kind:'Domain skill',what:'The bot’s only write paths: allowlist change, a DB row change and a serverless timer trigger. Separate from the content skill so a read-only question never loads them.',how:['Each action goes through another platform’s ticket or trigger, never a direct write.','Draft first, preview, then apply on explicit request.'],guards:[['platform','Release pipeline’s human approval node.'],['code','Draft helper only previews unless --apply is passed.'],['platform','Timer-trigger path requires a second-person approval before it runs.']]}},
-  {id:'oskill',label:'Onboarding skill',sub:'domain skill\nsame flow as content',x:810,y:240,w:260,h:90,kind:'ghost',
+  {id:'oskill',label:'Onboarding skill',sub:'same flow as content',x:810,y:240,w:260,h:90,kind:'ghost',
    d:{kind:'Domain skill',what:'Answers seller-onboarding questions with the same flow as the content skill, pointed at the wiki’s onboarding entries and recipes.'}},
   {id:'ext',label:'External agents',sub:'agent-to-agent calls',x:510,y:400,w:220,h:76,kind:'ghost',
    d:{kind:'External agents',what:'Routers and agents owned by other teams (product platform, datasets, governance), called over agent-to-agent calls. The router validates their result against an agreed result contract.'}},
-  {id:'wiki',label:'AI Wiki',sub:'source of truth\nknowledge + recipes',x:1130,y:45,w:300,h:80,go:'wiki'},
-  {id:'plat',label:'Platforms',sub:'DB read · logs · config\nrelease tickets',x:1130,y:140,w:300,h:90,kind:'ghost',
+  {id:'wiki',label:'AI Wiki',sub:'knowledge + recipes',x:1130,y:45,w:300,h:80,go:'wiki'},
+  {id:'plat',label:'Platforms',sub:'DB · logs · config · tickets',x:1130,y:140,w:300,h:90,kind:'ghost',
    d:{kind:'Platforms',what:'Internal systems the agents call as tools. Owned by other teams; the bot only holds credentials to them.',
     how:['Read: the worker runs the wiki’s queries and reads logs, config and deploy state through the generic read skills.','Write (write skills only): config change via a release ticket, prod DB row change via a DB release ticket, serverless timer trigger.','Restart, rollback and deploy are outside the bot’s tool allowlist.'],
     guards:[['code','Prod DB: SELECT / SHOW / DESCRIBE only, regex gate before any call.'],['platform','Release ticket and DB release stop at a human approval node.'],['platform','Timer trigger needs a second-person approval before it runs.'],['platform','Calls use the asker’s delegated per-user credentials (least privilege), not a shared identity.']]}},
-  {id:'gskill',label:'Generic skills',sub:'log search · DB read\nbounded summary output',x:810,y:340,w:260,h:90,
+  {id:'gskill',label:'Generic skills',sub:'log search · DB read',x:810,y:340,w:260,h:90,
    d:{kind:'Domain skill',what:'Generic skills shared by every domain skill: log search and DB read. They take a recipe or query from the wiki and return a bounded summary, never raw logs or rows.',guards:[['platform','Authorization is the caller’s token, enforced by the platform: shared skills never widen access, because each consumer calls with its own token.'],['code','Read-only skills.'],['code','Output is a bounded summary: top hits, window, counts.']],gotchas:['Live in the team’s skills repo like the domain skills. Starter versions can come from the same template the wiki is scaffolded from.']}},
   {id:'sched',label:'Wiki\nMaintainer',sub:'nightly + weekly',x:255,y:400,w:150,h:80,go:'sched'},
  ],
@@ -184,22 +191,22 @@ sched:{title:'Wiki Maintainer',
   guards:[['prompt','No PII: entries cite only the ticket / alarm id.'],['code','Wiki CI (link check, PII / secret scan, freshness lint) runs on every MR it opens.'],['platform','Human review on the MR before merge.'],['platform','Maintainer bot identity: pushes only to maintainer/* branches and opens MRs. It cannot merge, edit CI config or bypass branch protection; code owners per wiki area approve.'],['code','Evals run before any MR is opened: a drop in score holds the draft instead of opening a PR.']],
   gotchas:['Past Scenario Runbook entries are hypotheses, not answers: an agent tests an entry against the current evidence, and the Maintainer only updates one when the day’s evidence ties to it.','MR budget: each MR holds at most N entries and the overflow carries to the next day, so a reviewer can actually read it. A P0 or postmortem finding takes a fast path: its own small MR straight away, through the same evals and CI.']},
  nodes:[
-  {id:'cron',label:'Trigger',sub:'cron · nightly + weekly',x:20,y:30,w:220,h:80,
+  {id:'cron',label:'Trigger',sub:'nightly + weekly',x:20,y:30,w:220,h:80,
    d:{kind:'Trigger',what:'Two schedules start the same pipeline.',how:['Nightly, after the oncall shift ends: the day’s ticket and alarm history.','Weekly: the week’s merged changes in the registered service repos.']}},
-  {id:'tix',label:'Ticket history',sub:'today’s threads + outcomes',x:20,y:150,w:220,h:90,go:'bot'},
-  {id:'alm',label:'Alarm history',c:'alarm',sub:'today’s alarms + triage notes',x:20,y:280,w:220,h:90,
+  {id:'tix',label:'Ticket history',sub:'today’s threads',x:20,y:150,w:220,h:90,go:'bot'},
+  {id:'alm',label:'Alarm history',c:'alarm',sub:'today’s alarms',x:20,y:280,w:220,h:90,
    d:{kind:'Input',what:'The Alarm Agent’s output for the day: which alarms fired, what evidence was gathered, how each one was resolved.'}},
-  {id:'repos',label:'Service repos',sub:'this week’s merges\nin registered repos',x:20,y:410,w:220,h:90,go:'wiki',
+  {id:'repos',label:'Service repos',sub:'this week’s merges',x:20,y:410,w:220,h:90,go:'wiki',
    d:{kind:'Input',what:'The week’s merged changes in the service repos listed in the wiki’s service registry. Used to find wiki entries the code no longer matches and new behaviour the wiki does not cover yet.',guards:[['platform','Read-only access to the repos.']]}},
-  {id:'collect',label:'1 · Collect',sub:'scrub · group by\nsymptom / service',x:270,y:290,w:150,h:120,
+  {id:'collect',label:'1 · Collect',sub:'scrub · group',x:270,y:290,w:150,h:120,
    d:{kind:'Step',what:'Nightly: pull the day’s tickets and alarms and cluster them by symptom and service, so repeats collapse into one candidate. Weekly: pull the week’s merged changes and group them by service.',guards:[['code','Personal data and secrets are stripped from tickets before the model sees them.'],['code','Only history with a human-confirmed outcome (ticket resolved and the agent’s reply rated by the engineer, or alarm triage confirmed) can create or change an entry. Agent-only answers are logged but never promoted, so the wiki cannot reinforce its own mistakes.'],['code','An unrated ticket is skipped: no rating, no learning.']]}},
-  {id:'diff',label:'2 · Compare',sub:'New / Outdated\n/ Review per finding',x:450,y:290,w:150,h:120,
+  {id:'diff',label:'2 · Compare',sub:'new · outdated · review',x:450,y:290,w:150,h:120,
    d:{kind:'Step',what:'Walk the wiki index for each cluster and compare findings with the wiki claims that were used.',how:['Each finding marked New (no entry) or Outdated (entry contradicted by new evidence or a code change).','Entries past their review interval, or unused for N days, are flagged Review / Archive for a human to confirm.','No change → nothing to write.']}},
-  {id:'draft',label:'3 · Draft',sub:'Runbooks, recipes,\nrouting + index',x:630,y:290,w:150,h:120,
+  {id:'draft',label:'3 · Draft',sub:'entries + index',x:630,y:290,w:150,h:120,
    d:{kind:'Step',what:'Write or update wiki entries from the day’s evidence: Scenario Runbook entries from the template (symptom · applies to · root cause · resolution · handoff), log and query recipes, routing, and the matching index rows.',guards:[['prompt','Index-update invariant: every doc change updates its index in the same change.']]}},
-  {id:'evals',label:'4 · Run evals',sub:'question set on\nthe draft branch',x:810,y:290,w:150,h:120,
+  {id:'evals',label:'4 · Run evals',sub:'on the draft branch',x:810,y:290,w:150,h:120,
    d:{kind:'Step',what:'Applies the draft to a branch and answers the wiki’s fixed runbook-scenario question set against it. The score is compared with main.',how:['Score not lower than main → continue to the MR.','Score lower → no PR is opened; the draft is held for a human.'],guards:[['code','Gate before the PR exists: a regression never reaches a reviewer as a normal MR.']],gotchas:['The question set is not written by the Maintainer, so it cannot grade its own work.']}},
-  {id:'mr',label:'5 · Open MR',sub:'CI → review\n→ merge',x:990,y:290,w:170,h:120,
+  {id:'mr',label:'5 · Open MR',sub:'CI → review → merge',x:990,y:290,w:170,h:120,
    d:{kind:'Step',what:'Opens the MR with the before/after eval score attached. Wiki CI runs on it, then a code owner approves before merge.',how:['At most N entries per MR; overflow carries to the next day.','Fast path: a P0 or postmortem finding opens its own small MR immediately.'],guards:[['code','Wiki CI: link and index check, PII / secret scan, freshness lint.'],['platform','Code-owner approval before merge.']]}},
   {id:'wiki',label:'AI Wiki',sub:'Runbooks · docs · index',x:450,y:520,w:390,h:100,go:'wiki'},
  ],
@@ -222,23 +229,23 @@ wiki:{title:'AI Wiki',
   {id:'alarm',label:'Alarm Agent',sub:'alarm context',c:'alarm',x:20,y:190,w:190,h:80,kind:'ghost',d:{kind:'Consumer',what:'Pulls runbooks, Scenario Runbook precedents and the service registry as context for each alarm; its alarm history feeds the Wiki Maintainer.'}},
   {id:'sched',label:'Wiki\nMaintainer',sub:'nightly + weekly MRs',x:20,y:340,w:190,h:100,go:'sched'},
   {id:'harness',label:'Spec Workflow',sub:'context · archive',x:20,y:550,w:190,h:90,go:'harness'},
-  {id:'index',label:'Index tree',sub:'AGENTS.md → AI-INDEX\n→ sub-indexes → docs\n\nroutes, holds no detail',x:300,y:140,w:180,h:400,
+  {id:'index',label:'Index tree',sub:'routes, holds no detail',x:300,y:140,w:180,h:600,
    d:{kind:'Main contract',what:'Progressive-disclosure router: root index → sub-indexes → numbered docs. AGENTS.md is the single source of truth for agent rules.',how:['Root index: scenarios (understand domain, take an oncall, find a service, read code).','Knowledge index: change type → doc chain.','Oncall map: boundary → action skill → recipes → Scenario Runbook precedents.'],guards:[['prompt','“Don’t grep the whole repo, navigate from the indexes.”'],['code','Link checker fails on unindexed docs.']],gotchas:['Contract surface: moving it breaks every consumer at once.','Restructures aim to shrink agent context: remove mirrors, merge duplicates.']}},
   {id:'docs',label:'References',sub:'boundary · data model · recipes',x:520,y:130,w:220,h:90,
    d:{kind:'Content',what:'Numbered reference docs: overview, glossary, region dispatch, data model, extension hooks, oncall triage, debug recipes.',how:['008 oncall triage: the “is it ours?” boundary.','012 debug recipes.','004.1 extension-hook mappings.'],guards:[['prompt','Numbers are never reused (agents hard-code paths).']]}},
-  {id:'qa',label:'Scenario Runbook',sub:'seeded from real tickets\nfor oncall, alarms, people',x:520,y:240,w:220,h:90,
+  {id:'qa',label:'Scenario Runbook',sub:'from real tickets',x:520,y:240,w:220,h:90,
    d:{kind:'Content',what:'One runbook entry per recurring scenario, seeded from real historical tickets; new and outdated entries arrive through the Wiki Maintainer’s MR. Where a change is the right fix, the entry records the fact (when it applies, what to check first) and names the write skill in the skills repo. That skill and the platform’s approval gate carry it out; the entry never does.',how:['Template: symptom · applies to · root cause · resolution · handoff.','Provenance labelled: KB-derived vs confirmed against ticket chats.'],gotchas:['Entries are hypotheses, not answers: test them against the current ticket’s evidence before reusing.','Honest metric: adding files doesn’t move adoption; only real deflection does.']}},
   {id:'reg',label:'Service registry',sub:'service → docs map',x:520,y:350,w:220,h:90,
    d:{kind:'Content',what:'The services this wiki references: where each lives and which docs describe it. Identify services by the full triple (id + repo path + alias), never by a short name.',gotchas:['The Oncall Agent uses it as its onboarding code scope.']}},
   {id:'code',label:'Architecture notes',sub:'curated · why, not what',x:800,y:130,w:220,h:90,
    d:{kind:'Content',what:'Curated cross-service architecture and design-intent notes: what the code cannot say.',gotchas:['These notes cover architecture and direction; code detail is read from the service repos listed in the registry.']}},
-  {id:'svc',label:'Service repos',sub:'read on demand\nlisted in the registry',x:800,y:240,w:220,h:90,
+  {id:'svc',label:'Service repos',sub:'read on demand',x:800,y:590,w:220,h:120,
    d:{kind:'Code source',what:'The service repos themselves. An agent that needs code detail finds the repo through the registry and reads it, instead of reading a generated copy.',how:['Registry gives the repo.','Agent greps or reads the repo.','The Wiki Maintainer’s weekly run reads the week’s merges here to find wiki gaps.','Each repo keeps a short README / AGENTS.md for its own conventions.'],gotchas:['Needs agent access to checkouts.']}},
-  {id:'proj',label:'projects/',sub:'short ADRs\none per project',x:800,y:350,w:220,h:90,
+  {id:'proj',label:'projects/',sub:'one ADR per project',x:800,y:350,w:220,h:90,
    d:{kind:'Content',what:'Short architecture decision records, one per project: the context, the decision and why.',gotchas:['The Archive stage files each project here as an MR under the wiki’s NNN-name convention.']}},
-  {id:'ci',label:'Wiki CI',sub:'every MR · link check\nPII scan · freshness lint',x:800,y:460,w:220,h:100,
+  {id:'ci',label:'Wiki CI',sub:'checks every MR',x:800,y:240,w:220,h:100,
    d:{kind:'CI pipeline',what:'Runs on every MR into the wiki, whoever opens it: link and index check, PII / secret scan, owner and last-reviewed lint.'}},
-  {id:'evals',label:'Evals',sub:'runbook-scenario questions\nregression gate',x:800,y:590,w:220,h:100,
+  {id:'evals',label:'Evals',sub:'regression gate',x:800,y:460,w:220,h:100,
    d:{kind:'Test set',what:'A fixed set of real runbook-scenario questions with the doc or entry each should reach, kept in the wiki repo. Answered by an agent navigating the indexes, scored against main.',how:['Seeded from confirmed tickets; owned by the wiki’s code owners.','The Wiki Maintainer runs it before it opens an MR; Wiki CI can run it on any MR.','Before/after score is shown on the MR.'],gotchas:['Not generated by the Maintainer, so it cannot grade its own output.','Grow it from missed questions, not from the entries just written.']}},
  ],
  edges:[
@@ -257,7 +264,7 @@ harness:{title:'Spec Workflow',
  nodes:[
   {id:'eng',label:'Engineer',sub:'+ coding agent',x:30,y:200,w:180,h:80,kind:'person',
    d:{kind:'Entry',what:'Any team engineer in Claude Code / Codex / IDE agent asks to start or continue a project; the orchestrator takes over.',gotchas:['Any follow-up message must re-enter the orchestrator (agents drift after context compaction).']}},
-  {id:'wf',label:'Orchestrator',sub:'one stage at a time · callbacks finish stages · resume / rollback',x:270,y:200,w:620,h:80,
+  {id:'wf',label:'Orchestrator',sub:'one stage at a time · resume / rollback',x:270,y:200,w:620,h:80,
    d:{kind:'Harness core',what:'Owns current stage, dispatch, callback validation, flow changes, resume and rollback.',how:['Returns one action (recover / ask user / block / dispatch / complete).','Rollback: downstream stages marked rolled back, artifacts invalidated.'],guards:[['code','A callback is the only way to finish a stage (“done”, a green test or a push can’t).'],['prompt','A confirmation is valid only for what was shown.']],gotchas:['Order is scheduling, not dependency: each stage checks its own inputs.']}},
   {id:'s1',label:'1 Intake',sub:'PRD → project',x:30,y:450,w:135,h:100,
    d:{kind:'Stage 1',what:'Creates the project from a PRD, tracker item or text.',how:['Two read-only sub-agents in parallel: flow recommender + complexity scorer.','Exactly one confirmation: name, mode, complexity, flow.']}},
@@ -271,16 +278,16 @@ harness:{title:'Spec Workflow',
    d:{kind:'Stage 5',what:'Runs the API tests and scenarios from the test plan and writes a report.',guards:[['code','Coding loop: at most 3 rollbacks per project, counted in the project’s state database. The 4th failure stops for a human.']],gotchas:['A confirmed code defect rolls back to Coding. An environment issue rolls back to Env setup instead. An issue that is neither stops for a human. The issues are stored first, then the stage restarts.']}},
   {id:'s7',label:'6 Archive',sub:'wiki MR · audit',x:937,y:450,w:135,h:100,
    d:{kind:'Stage 6',what:'Closes the project: wiki MR, tracker advance, telemetry reconciliation.',guards:[['code','Never pushes master.']],gotchas:['A wrong working directory is detected and reported before archiving.','Filed as a wiki MR under the wiki’s own review gate.']}},
-  {id:'wiki',label:'AI Wiki',sub:'user-supplied reference\nindex → page, read-only',x:907,y:30,w:220,h:90,go:'wiki'},
-  {id:'sk',label:'Skills repo',sub:'read skills · write skills\nCI · config · DB release · A/B',x:650,y:30,w:220,h:90,
+  {id:'wiki',label:'AI Wiki',sub:'read-only reference',x:907,y:30,w:220,h:90,go:'wiki'},
+  {id:'sk',label:'Skills repo',sub:'read + write skills',x:650,y:30,w:220,h:90,
    d:{kind:'Skills repo',what:'The shared, team-maintained repo the orchestrator loads each stage’s skills from. It holds the read skills a stage uses to inspect platforms and the write skills it uses to change pre-prod.',how:['Read skills: generic, read-only (for example log search and DB read), each returning a bounded summary.','CI write skill: dev task and pre-prod lanes.','Config write skill: pre-prod config lane only.','DB write skill: release ticket that is never started.','A/B write skill: new layer and unpublished draft only.'],guards:[['platform','Every write skill calls its platform with the caller’s scoped token; the platform checks the permission, so a skill cannot exceed it.'],['prompt','Defence in depth: write skills load only on a change request; read skills load by default.']]}},
   {id:'plat',label:'Platforms',sub:'CI · config · DB release · A/B',x:400,y:30,w:180,h:90,kind:'ghost',
    d:{kind:'Platforms',what:'CI/CD platform, config centre (pre-prod lanes), DB change-release platform, A/B experiment platform.'}},
-  {id:'rec',label:'State recording',sub:'recorder · outbox · telemetry',x:1050,y:200,w:220,h:80,
+  {id:'rec',label:'State recording',sub:'outbox → telemetry',x:1000,y:200,w:220,h:80,
    d:{kind:'Workflow core',what:'Local success never depends on the remote store: state is written to local SQLite in a transaction, intents go to an outbox table in the same transaction, and a background worker ships them to the remote telemetry DB (MongoDB).',
   how:['Receives the orchestrator’s synced audit log: every stage transition, including rollbacks and the coding-loop count.','Archive reconciles the telemetry DB with the local state.','Feeds the telemetry dashboard: weekly active engineers and per-stage status.','Statuses: unstarted / progressing / waiting_user / blocked / failed / finished / skipped / rolled back.','Delivery is at least once: each audit entry has a sequence number, and the telemetry DB ignores repeats.','Next call first recovers any unfinished transaction.'],
   guards:[['code','Issue kind is a closed list: code_defect, env_issue or needs_human. The recorder rejects any other value.'],['code','Revision guard within a run; start-time guard across runs.'],['platform','Authenticated telemetry gateway: every request carries a per-client token.']]}},
-  {id:'proj',label:'Project folder',sub:'PRD · tech doc · tasks · test plan\nproject files · SQLite state',x:160,y:30,w:250,h:90,
+  {id:'proj',label:'Project folder',sub:'docs · tasks · SQLite state',x:160,y:30,w:250,h:90,
    d:{kind:'Local store',what:'One folder per project on the engineer’s machine. It holds the PRD, the tech design, tasks.md, the test plan, the project files and a local SQLite database, so any stage can resume from it.',how:['Stages read the PRD and tech design from it and write their outputs back.','Tech design creates tasks.md (the task checklist) and the test plan (tests, each with its scenarios). Both are kept apart from the database, which records only their paths.','One local SQLite database holds every stage’s status, the coding-loop count and the issues, so a rollback is a single transaction.','One append-only audit log for the whole project records every stage event, tagged by stage and loop round, so the state can be rebuilt from it. It is a table in the same database.','The orchestrator syncs the audit log to state recording, which ships it to the remote telemetry DB (MongoDB).','A read-only state summary is generated from the database for people and agent context. It is never read back.'],guards:[['code','Written only through the orchestrator’s recorder, never hand-edited.']],
    schema:[{name:'audit_log',desc:'One row per workflow event, in the local SQLite database. Appended only by the recorder.',
     cols:[['seq','INTEGER','PK, auto-increment. Gives the order and is the dedupe key for delivery.'],['ts','TEXT','UTC time, ISO 8601.'],['project_id','TEXT','Which project.'],['stage','INTEGER','1 to 6.'],['round','INTEGER','Coding-loop round. 0 until the first rollback.'],['event','TEXT','For example started, failed, issue_stored, rolled_back.'],['status','TEXT','Stage status after the event: unstarted / progressing / waiting_user / blocked / failed / finished / skipped / rolled back.'],['detail','TEXT','Short JSON note. For issue_stored it must hold kind and summary.']],
@@ -295,15 +302,15 @@ harness:{title:'Spec Workflow',
  ],
  edges:[
   ['eng','wf','starts project','read',{s:['R','L'],f:[.33,.33]}],
-  ['wf','s1','dispatch','read'],
+  ['wf','s1','dispatch','read',{s:['B','T'],f:[.03,.85]}],
   ['s1','s2','','read'],['s2','s3','','read'],['s3','s4','','read'],['s4','s5','','read'],['s5','s7','','read'],['s5','s4','coding loop · max 3','read',{s:['B','B']}],
-  ['wf','wiki','wiki context','read',{s:['R','L'],f:[.3,.5]}],
+  ['wf','wiki','wiki context','read',{s:['R','B'],f:[.3,.1]}],
   ['wf','sk','loads stage skills','read',{s:['T','B'],f:[.88,.5]}],
   ['wf','proj','reads · writes','write',{s:['T','B'],f:[.03,.58]}],
   ['sk','plat','reads · writes','write'],
   ['s7','rec','reconcile','read'],
   ['wf','rec','sync audit log','read',{s:['R','L'],f:[.65,.65]}],
-  ['s7','wiki','archive MR','write',{s:['T','B'],f:[.54,.5]}],
+  ['s7','wiki','archive MR','write',{s:['T','B'],f:[.25,.31],lt:.9}],
  ]},
 
 };
@@ -410,6 +417,15 @@ const NS='http://www.w3.org/2000/svg',
   VW=Math.max(...allNodes.map(n=>n.x+n.w),...allBands.map(b=>b.r))+EDGE_MARGIN,
   VH=Math.max(...allNodes.map(n=>n.y+n.h),...allBands.map(b=>b.b))+EDGE_MARGIN;
 document.getElementById('s').setAttribute('viewBox',`0 0 ${VW} ${VH}`);
+// Each layer is framed to its own content, so small layers fill the screen. The viewBox eases with the zoom animation.
+const FIT_PAD=24;
+function fitVB(lid){ const l=L[lid], xs=[], ys=[];
+  for(const n of l.nodes){xs.push(n.x,n.x+n.w); ys.push(n.y,n.y+n.h);}
+  for(const b of [...l.bands,...(l.groups||[])]){xs.push(b.x,b.r); ys.push(b.y,b.b);}
+  const x=Math.min(...xs)-FIT_PAD, y=Math.min(...ys)-FIT_PAD;
+  return [x,y,Math.max(...xs)+FIT_PAD-x,Math.max(...ys)+FIT_PAD-y]; }
+let vb=[0,0,VW,VH], vbFrom=vb, vbTo=vb;
+function setVB(a){vb=a; document.getElementById('s').setAttribute('viewBox',a.map(v=>v.toFixed(1)).join(' '));}
 
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -502,9 +518,25 @@ function routeLayer(lay){
   const frac={};
   for(const list of Object.values(slots)){ list.sort((p,q)=>p.o-q.o||p.i-q.i); list.forEach((s,k)=>{frac[s.i+s.role]=(k+1)/(list.length+1);}); }
   lay.edges.forEach((e,i)=>{ if(e[4]&&e[4].f){ frac[i+'a']=e[4].f[0]; frac[i+'b']=e[4].f[1]; } });   // forced port positions
+  // pass 3: when two boxes face each other with room between them, draw one straight line instead of a dog-leg
+  const PAD=6;
+  const blocked=(x1,y1,x2,y2,a,b)=>lay.nodes.some(n=>n.id!==a&&n.id!==b&&x1<n.x+n.w+PAD&&x2>n.x-PAD&&y1<n.y+n.h+PAD&&y2>n.y-PAD);
+  function straight(e,pts){
+    const A=byId[e[0]], B=byId[e[1]], s=e[4]&&e[4].s, p0=pts[0], p1=pts[pts.length-1];
+    const horiz=A.x+A.w<B.x||B.x+B.w<A.x, vert=A.y+A.h<B.y||B.y+B.h<A.y;
+    if(horiz&&(!s||'RL'.includes(s[0]))){
+      const lo=Math.max(A.y,B.y)+12, hi=Math.min(A.y+A.h,B.y+B.h)-12, xa=A.x<B.x?A.x+A.w:A.x, xb=A.x<B.x?B.x:B.x+B.w;
+      for(const y of [p0[1],p1[1],Math.round((lo+hi)/2/GRID)*GRID]) if(y>=lo&&y<=hi&&!blocked(Math.min(xa,xb),y-1,Math.max(xa,xb),y+1,A.id,B.id)) return [[xa,y],[xb,y]];
+    }
+    if(vert&&(!s||'TB'.includes(s[0]))){
+      const lo=Math.max(A.x,B.x)+12, hi=Math.min(A.x+A.w,B.x+B.w)-12, ya=A.y<B.y?A.y+A.h:A.y, yb=A.y<B.y?B.y:B.y+B.h;
+      for(const x of [p0[0],p1[0],Math.round((lo+hi)/2/GRID)*GRID]) if(x>=lo&&x<=hi&&!blocked(x-1,Math.min(ya,yb),x+1,Math.max(ya,yb),A.id,B.id)) return [[x,ya],[x,yb]];
+    }
+    return null;
+  }
   lay.routes=lay.edges.map((e,i)=>{
     const c=choice[i], r=run(e,c.sa,c.sb,frac[i+'a'],frac[i+'b'],true);
-    if(r) return r.pts;
+    if(r) return (r.pts.length>2&&straight(e,r.pts))||r.pts;
     const A=byId[e[0]], B=byId[e[1]];            // fallback: plain elbow
     return [[A.x+A.w/2,A.y+A.h/2],[B.x+B.w/2,A.y+A.h/2],[B.x+B.w/2,B.y+B.h/2]];
   });
@@ -583,7 +615,7 @@ function render(lid){
     ctx.edges.push({a,b,style,path,dots,text});
   });
   for(const n of lay.nodes){
-    const col=colorOf(lid,n), clickable=!!(n.child||n.go||n.d);
+    const col=colorOf(lid,n), clickable=!!(n.child||n.go||(SHOW_PANEL&&n.d));
     const ng1=el('g',{class:'node'+(clickable?' click':'')},ng);
     ctx.nodes.push({id:n.id,g:ng1});
     ng1.addEventListener('pointerenter',()=>{ctx.hover=n.id; applyFocus(ctx);});
@@ -601,7 +633,7 @@ function render(lid){
       if(n.child) el('rect',{x:n.x+5,y:n.y+5,width:n.w-10,height:n.h-10,rx:9,fill:'none',stroke:hexA(col,.35),'stroke-width':1},ng1);
     }
     const big=n.child&&lid==='root', lines=n.label.split('\n'), subs=(n.sub||'').split('\n').filter((s,i,a)=>s||a.length>1);
-    const fs=big?24:(n.w<160?13.5:15), ss=big?14:12, lh=fs*1.2, slh=ss*1.35;
+    const fs=big?30:(n.w<160?16:18), ss=big?14:12, lh=fs*1.2, slh=ss*1.35;
     const tot=lines.length*lh+(n.sub?subs.length*slh+6:0);
     let y=n.y+n.h/2+ry/2-tot/2+fs*.85;
     for(const ln of lines){const t=el('text',{x:n.x+n.w/2,y,'text-anchor':'middle','font-size':fs,'font-weight':700,fill:'#ffffff'},ng1); t.textContent=ln; y+=lh;}
@@ -670,6 +702,7 @@ function onNode(lid,n,gEl,ctx){
   if(busy) return;
   if(n.child) return drill(n);
   if(n.go) return jump(n.go);
+  if(!SHOW_PANEL) return;
   stage.querySelectorAll('rect.box').forEach(r=>r.removeAttribute('filter'));
   ctx.sel=n.id; applyFocus(ctx);
   showPanel(n.label.replace(/\n/g,' '),n.d,n.own);
@@ -687,11 +720,12 @@ const ID={s:1,tx:0,ty:0};
 function lerp(a,b,t){return {s:a.s+(b.s-a.s)*t,tx:a.tx+(b.tx-a.tx)*t,ty:a.ty+(b.ty-a.ty)*t};}
 function setM(g,m,o){g.setAttribute('transform',`translate(${m.tx},${m.ty}) scale(${m.s})`); g.setAttribute('opacity',o);}
 function animate(oldG,newG,oFrom,oTo,nFrom,nTo,done){
-  busy=true; const t0=performance.now(), D=520;
+  busy=true; vbFrom=vb; vbTo=fitVB(cur); const t0=performance.now(), D=520;
   (function step(now){
     let t=Math.min(1,(now-t0)/D); const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
     if(oldG) setM(oldG,lerp(oFrom,oTo,e),1-e);
     setM(newG,lerp(nFrom,nTo,e),e);
+    setVB(vbFrom.map((f,i)=>f+(vbTo[i]-f)*e));
     if(t<1) requestAnimationFrame(step); else {if(oldG) oldG.remove(); busy=false; done&&done();}
   })(t0);
 }
@@ -728,6 +762,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'||e.key==='Backspace'){e.prev
 
 // boot from hash: #l=wiki opens that layer (used by the deck's episodes)
 const hl=location.hash.match(/l=(\w+)/);
-cur=hl&&L[hl[1]]?hl[1]:'root'; path=pathTo(cur); curG=render(cur); ui();
+cur=hl&&L[hl[1]]?hl[1]:'root'; path=pathTo(cur); curG=render(cur); ui(); setVB(fitVB(cur));
+if(!SHOW_PANEL){ const fitWrap=()=>document.getElementById('wrap').style.bottom=document.getElementById('legend').offsetHeight+'px'; fitWrap(); addEventListener('resize',fitWrap); }
 </script>
 </body></html>

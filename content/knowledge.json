@@ -27,6 +27,7 @@
       "t": "One source of truth",
       "s": "",
       "poster": "knowledge-2",
+      "bg": "bigbang",
       "min": 3.5,
       "key": true,
       "rows": [
@@ -57,24 +58,6 @@
           "<span class=\"no\">✖︎</span> Fine-tuning"
         ],
         [
-          "Finds a doc",
-          "Agent reads the index, opens the right doc",
-          "Embedding search returns top chunks",
-          "Knowledge is in the weights"
-        ],
-        [
-          "Wiki changes",
-          "Update the index in the same MR",
-          "Re-embed the changed docs",
-          "Retrain"
-        ],
-        [
-          "When wrong",
-          "You can see which doc it opened",
-          "Hard to tell why a chunk ranked high",
-          "Can't trace the source"
-        ],
-        [
           "Fit",
           "Accurate, and our wiki is small enough to index",
           "Needs an embedding pipeline. Pays off at scale",
@@ -83,7 +66,7 @@
       ]
     },
     {
-      "t": "Who reads it",
+      "t": "How agents get context",
       "s": "",
       "poster": "knowledge-4",
       "min": 2,
@@ -120,6 +103,7 @@
       "t": "Skill design",
       "s": "",
       "poster": "knowledge-5",
+      "hold": 1,
       "min": 1,
       "tree": [
         [
@@ -232,7 +216,8 @@
           ]
         }
       ],
-      "snake": 3
+      "snake": 3,
+      "beads": true
     },
     {
       "t": "Guardrails",
@@ -251,46 +236,60 @@
       ]
     },
     {
-      "t": "Self-improvement",
-      "s": "Controlled feedback loop",
+      "t": "Wiki Self-improvement",
+      "s": "History in, reviewed MR out",
       "poster": "knowledge-10",
       "min": 3.5,
-      "view": "l=sched",
-      "rows": [
-        [
-          "Incidents",
-          "Nightly MR from the day's oncall and alarm incidents"
+      "flow": {
+        "fanIn": true,
+        "nodes": [
+          [
+            "Wiki Maintainer",
+            "drafts the wiki update"
+          ]
         ],
-        [
-          "Code changes",
-          "Weekly batch diffs the registered service repos and opens an MR for new wiki gaps"
+        "fan": [
+          [
+            "Ticket history",
+            "nightly"
+          ],
+          [
+            "Alarm history",
+            "nightly"
+          ],
+          [
+            "Code merges",
+            "weekly"
+          ]
         ],
-        [
-          "Engineers",
-          "Engineers rate each agent reply at ticket close. Wrong answers fix the wiki and become eval cases"
-        ],
-        [
-          "Gated",
-          "Evals and Wiki CI run before review. A code owner merges. The agent never does"
+        "next": [
+          [
+            "Evals + Wiki CI",
+            "score must not drop"
+          ],
+          [
+            "Code owner",
+            "reviews and merges"
+          ]
         ]
-      ]
+      }
     },
     {
       "t": "Evals",
       "s": "Three levels, like a test pyramid",
       "poster": "knowledge-11",
-      "min": 1,
+      "min": 2,
       "pyramid": {
         "axis": [
-          "Costly<br>Real use",
-          "Cheap<br>Fast"
+          "Cheap<br>Fast",
+          "Costly<br>Real use"
         ],
         "tiers": [
           [
-            "Outcome",
-            "3 tickets per class",
-            "Does the full system solve real tickets?",
-            "Model or rules change · weekly"
+            "Repo",
+            "Runbook questions",
+            "Can an agent find the right doc?",
+            "Every wiki MR"
           ],
           [
             "Skill",
@@ -299,13 +298,13 @@
             "Every skill change"
           ],
           [
-            "Repo",
-            "Runbook questions",
-            "Can an agent find the right doc?",
-            "Every wiki MR"
+            "Outcome",
+            "End to end tests",
+            "Does the full system solve real tickets?",
+            "Model or rules change · weekly"
           ]
         ],
-        "loop": "Each bad real run becomes a regression case at the lowest level that can catch it"
+        "loop": "Each bad real run becomes a regression case at the cheapest level that can catch it"
       }
     },
     {
@@ -320,43 +319,7 @@
         ],
         [
           "Oncall",
-          "~300 tickets condensed into 15 recurring issue classes. Ticket close time improved by 36%"
-        ]
-      ]
-    },
-    {
-      "t": "Retrospectives",
-      "s": "",
-      "poster": "knowledge-14",
-      "min": 1,
-      "rows": [
-        [
-          "Gate, don't automate",
-          "Human-gated write-back worked better than full automation. One human yes per MR keeps the wiki trusted"
-        ],
-        [
-          "Test on real traces",
-          "Static tests don't prove model behaviour, so bad runs from real traces became the regression set"
-        ]
-      ]
-    },
-    {
-      "t": "Enhancements",
-      "s": "",
-      "poster": "knowledge-12",
-      "min": 1,
-      "rows": [
-        [
-          "Frontend",
-          "Automated browser-based testing. Frontend support for the Spec Workflow"
-        ],
-        [
-          "LangGraph",
-          "Move our hand-built orchestration onto LangGraph. Checkpoints, resume and approval interrupts come built in, so we maintain less code"
-        ],
-        [
-          "Auto&#8209;triage",
-          "Automate Oncall Agent replies, no @ needed, so every ticket gets a reply to rate"
+          "Runbooks for oncall and alarm debugging, built from ~300 past tickets. Ticket close time improved by 36%"
         ]
       ]
     }

@@ -16,6 +16,7 @@ body.open #stage{right:var(--drawer)}
 svg{width:100%;height:100%;display:block;transition:opacity .22s}
 svg.fade{opacity:0}
 .node{cursor:pointer}
+.node.inert{cursor:default}
 .dim{opacity:.18}
 #bar{position:fixed;left:0;right:0;top:0;height:54px;display:flex;align-items:center;gap:14px;padding:0 18px;background:#0f1114e6;border-bottom:1px solid #272a30;backdrop-filter:blur(10px);z-index:5;transition:right .35s cubic-bezier(.2,.8,.2,1)}
 body.open #bar{right:var(--drawer)}
@@ -86,6 +87,12 @@ body.schema #schema{display:flex}
 <div id="schema" role="dialog" aria-modal="true"><div id="sbox"><button id="sclose" aria-label="close">✕</button><div id="sc"></div></div></div>
 <aside id="drawer"><button id="close" aria-label="close">✕</button><div id="dc"></div></aside>
 <script>
+// ===== Visibility switches (content is kept; flip these to bring it back) =====
+const SHOW_DRAWER = false;                          // false: clicking a component opens no side drawer
+const HIDDEN_VIEWS = new Set(['intake', 'offline']); // views kept in the data but not openable
+const canOpen = v => v && VIEWS[v] && !HIDDEN_VIEWS.has(v);
+const clickable = n => canOpen(n.zoom) || canOpen(n.go) || (SHOW_DRAWER && !n.zoom && !n.go && LLD[n.id]);
+
 // ===== Views =====
 // Level 0 = overview (grouped blocks). Click a block marked ⊕ to zoom into its level-1 view.
 // Level 1 = components. Click a component to open its low-level design drawer (level 2).
@@ -570,17 +577,20 @@ function render(){
     const fs = n.h < 60 ? 16 : n.w < 230 ? 18 : 20;
     const sh = nodeShape(n, c, n.owner==='mine' || n.zoom ? 2.6 : 1.5, ghost ? 'stroke-dasharray="6 5"' : '');
     const tx = cx(n) - sh.rx/2, ty = cy(n) + sh.ry/2; // centre text in the body, past the rim
-    o.push(`<g class="node${dim ? ' dim' : ''}" data-id="${n.id}" ${isSel ? 'filter="url(#glow)"' : ''}>
+    o.push(`<g class="node${dim ? ' dim' : ''}${clickable(n) ? '' : ' inert'}" data-id="${n.id}" ${isSel ? 'filter="url(#glow)"' : ''}>
       ${sh.svg}
       <text x="${tx}" y="${ty + (n.sub || ghost ? -4 : 6)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${ghost ? 'rgba(255,255,255,.75)' : '#fff'}">${esc(n.label)}</text>
       ${n.sub ? `<text x="${tx}" y="${ty + (n.h < 80 ? 16 : 20)}" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.65)">${esc(n.sub)}</text>` : ''}
-      ${ghost ? `<text x="${cx(n)}" y="${cy(n) + 20}" text-anchor="middle" font-size="13" fill="rgba(255,255,255,.5)">open view →</text>` : ''}
+      ${ghost && canOpen(n.go) ? `<text x="${cx(n)}" y="${cy(n) + 20}" text-anchor="middle" font-size="13" fill="rgba(255,255,255,.5)">open view →</text>` : ''}
       ${techTag(n, c)}
-      ${n.zoom ? `<text x="${n.x+n.w-12}" y="${n.y+n.h-11}" text-anchor="end" font-size="14" font-weight="700" fill="${c.s}">⊕ open</text>` : ''}
+      ${canOpen(n.zoom) ? `<text x="${n.x+n.w-12}" y="${n.y+n.h-11}" text-anchor="end" font-size="14" font-weight="700" fill="${c.s}">⊕ open</text>` : ''}
     </g>`);
   }
   o.push(labels.join(''));
   svg.innerHTML = o.join('');
+  // Frame each view to its own content (plus padding), so short views fill the screen
+  const bb = svg.getBBox(), P = 16;
+  FULL = [bb.x - P, bb.y - P, bb.width + 2 * P, bb.height + 2 * P];
   crumb();
 }
 
@@ -592,11 +602,11 @@ function crumb(){
     : `<a data-nav="overview">${root}</a><span class="sep">›</span><span class="cur">${esc(v.title)}</span>`;
   document.getElementById('hint').textContent = cur === 'overview'
     ? `${v.hint} · Esc to close`
-    : `${v.hint} · click a component for detail · Esc to zoom out`;
+    : `${v.hint}${SHOW_DRAWER ? ' · click a component for detail' : ''} · Esc to zoom out`;
 }
 
 // ===== Zoom navigation =====
-const FULL = [0, 0, W, H];
+let FULL = [0, 0, W, H];   // replaced by the current view's content box on every render
 let busy = false;
 const setVB = a => svg.setAttribute('viewBox', a.map(x => x.toFixed(1)).join(' '));
 const ease = k => 1 - Math.pow(1 - k, 3);
@@ -713,9 +723,9 @@ function writeHash(){ history.replaceState(null, '', '#v=' + cur + (sel ? '&c=' 
 function activate(id){
   const n = V().by[id];
   if (!n) return;
-  if (n.zoom) zoomIn(n);
-  else if (n.go) VIEWS[n.go] && jump(n.go);
-  else openDrawer(id);
+  if (n.zoom){ if (canOpen(n.zoom)) zoomIn(n); }
+  else if (n.go){ if (canOpen(n.go)) jump(n.go); }
+  else if (SHOW_DRAWER) openDrawer(id);
 }
 
 svg.addEventListener('mousemove', e => {
@@ -745,8 +755,8 @@ addEventListener('keydown', e => {
 
 // boot from hash: #v=posting&c=sched
 const hv = location.hash.match(/v=(\w+)/), hc = location.hash.match(/c=(\w+)/);
-if (hv && VIEWS[hv[1]]) cur = hv[1];
-render();
-if (hc) openDrawer(hc[1]);
+if (hv && canOpen(hv[1])) cur = hv[1];
+render(); setVB(FULL);
+if (hc && SHOW_DRAWER) openDrawer(hc[1]);
 </script>
 </body></html>
