@@ -265,7 +265,7 @@
         "next": [
           [
             "Evals + Wiki CI",
-            "score must not drop"
+            "regression tests"
           ],
           [
             "Code owner",
@@ -294,7 +294,7 @@
           [
             "Skill",
             "Simulated scenarios",
-            "Does the procedure behave?",
+            "Does the skill improve or not?",
             "Every skill change"
           ],
           [
@@ -303,8 +303,7 @@
             "Does the full system solve real tickets?",
             "Model or rules change · weekly"
           ]
-        ],
-        "loop": "Each bad real run becomes a regression case at the cheapest level that can catch it"
+        ]
       }
     },
     {
@@ -315,11 +314,11 @@
       "rows": [
         [
           "Adoption",
-          "~100 weekly active engineers on the Spec Workflow since October, up from 20+"
+          "Started out with only me in April, and now used by 100 engineers. Median time to merged PR is now 1 week"
         ],
         [
           "Oncall",
-          "Runbooks for oncall and alarm debugging, built from ~300 past tickets. Ticket close time improved by 36%"
+          "Runbooks for oncall and alarm debugging, built from ~300 past tickets. Median time to solve improved from around 3 hours to 1 hour"
         ]
       ]
     }
