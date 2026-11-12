@@ -44,7 +44,7 @@
       "s": "Translation is the cheapest per quality point, and it starts from a video that already sells",
       "min": 1,
       "poster": "pipeline-5",
-      "foot": "Per active shop, 21 translations a week cost ~$3 with BytePlus and potentially bring in ~$100 (for TikTok)",
+      "foot": "Per active shop, 21 translations a week cost ~$6 with BytePlus and potentially bring in ~$100 (for TikTok)",
       "compare": {
         "max": 14.1,
         "items": [
@@ -189,7 +189,7 @@
       "rows": [
         ["Sellers own translation quality", "→ Videos post T+2 after translation. Sellers can cancel or give feedback before post"],
         ["No bursts on downstream services", "→ The scheduler posts due videos in throttled batches of up to 50"],
-        ["Tune posting without a deploy", "→ We can widen or narrow the posting window, or slide it for daylight saving time"]
+        ["Tune posting without a deploy", "→ We can widen, narrow or move the posting window"]
       ]
     },
     {
@@ -198,7 +198,7 @@
       "min": 1.5,
       "poster": "pipeline-10",
       "rows": [
-        ["Method", "Calculate average GMV of treatment against control. Random Seller A/B: 15% treatment vs 15% control (Aug - Oct)"],
+        ["Method", "Compare average seller revenue of treatment against control. Random Seller A/B: 15% treatment vs 15% control (Aug - Oct)"],
         ["Result", "+8% average seller revenue"],
         ["Reliability", "~95% of translated videos posted. Sellers kept them through the review window"]
       ]

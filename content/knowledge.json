@@ -20,7 +20,7 @@
         "label": "of merged AI-agent pull requests still needed a reviewer to step in",
         "cite": "Peralta et al., arXiv 2026",
         "url": "https://arxiv.org/abs/2605.22534",
-        "takeaway": "Agents fail on what they don't know. Team context improves accuracy"
+        "takeaway": "Agents still need a human. Team context and review gates keep that cost low"
       }
     },
     {
@@ -65,7 +65,7 @@
         [
           "Wiki changes",
           "Update the index in the same MR",
-          "Re-embed and re-tune ranking",
+          "Re-embed the changed docs",
           "Retrain"
         ],
         [
@@ -77,7 +77,7 @@
         [
           "Fit",
           "Accurate, and our wiki is small enough to index",
-          "Less accurate. Pays off only with many documents",
+          "Needs an embedding pipeline. Pays off at scale",
           "Expensive, and recall is unreliable"
         ]
       ]
@@ -245,12 +245,8 @@
           "Skills call the platform with scoped auth tokens (bot or user's)"
         ],
         [
-          "Prod untouched",
-          "Limit writes to staging environment. Prod changes go through tickets or drafts"
-        ],
-        [
-          "Safe retries",
-          "Every write carries an idempotency key. Without one, read the state before retrying"
+          "Minimal prod changes",
+          "Agents run approved write skills, like an allowlist change. Code and table changes go through MRs and tickets"
         ]
       ]
     },
@@ -263,7 +259,7 @@
       "rows": [
         [
           "Incidents",
-          "Nightly MR from the day's oncall and alarm incidents. P0s skip the batch and get their own MR at once"
+          "Nightly MR from the day's oncall and alarm incidents"
         ],
         [
           "Code changes",
@@ -324,7 +320,7 @@
         ],
         [
           "Oncall",
-          "~300 tickets condensed into 15 recurring issue classes"
+          "~300 tickets condensed into 15 recurring issue classes. Ticket close time improved by 36%"
         ]
       ]
     },
@@ -356,7 +352,7 @@
         ],
         [
           "LangGraph",
-          "Spec Workflow and oncall agents run as graphs. Checkpoints give pause, resume and rollback, and an approval is an interrupt"
+          "Move our hand-built orchestration onto LangGraph. Checkpoints, resume and approval interrupts come built in, so we maintain less code"
         ],
         [
           "Auto&#8209;triage",

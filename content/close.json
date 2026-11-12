@@ -17,7 +17,7 @@
       "rows": [
         [
           "KISS (Keep it simple, stupid)",
-          "A failed translation is never flagged AI-origin. Daily runs retry without needing a scheduler"
+          "A failed translation leaves no successful row, so the next daily run picks it up. No retry scheduler needed"
         ],
         [
           "Single source of truth",
@@ -65,7 +65,7 @@
         ],
         [
           "Cut time to release",
-          "Tighten the spec workflow and its coding loop, and reduce HITL"
+          "Tighten the spec workflow and its coding loop. Keep human approval for risky changes only"
         ],
         [
           "Make evals cheaper",
@@ -113,7 +113,7 @@
           "t": "Ready",
           "pts": [
             "Ready for the next big match or on-sale",
-            "Department-wide AI tooling, e.g. reconciliation",
+            "Department-wide AI tooling",
             "Drive business impact and product optimizations"
           ]
         }
@@ -128,7 +128,7 @@
       "rows": [
         [
           "I've built systems that turn video into sales",
-          "At Coupang Play, the sale happens right in the stream"
+          "At Coupang Play, the stream itself is what people pay for"
         ],
         [
           "I love building AI tooling that moves fast and stays safe",
