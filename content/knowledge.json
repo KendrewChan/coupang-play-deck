@@ -16,11 +16,11 @@
       "poster": "knowledge-1",
       "min": 2,
       "stat": {
-        "n": "15.4%",
-        "label": "of merged AI-agent pull requests still needed a reviewer to step in",
+        "n": "31.2%",
+        "label": "of rejected AI-agent pull requests were turned down over workflow constraints",
         "cite": "Peralta et al., arXiv 2026",
         "url": "https://arxiv.org/abs/2605.22534",
-        "takeaway": "Agents still need a human. Team context and review gates keep that cost low"
+        "takeaway": "Agents miss how a team works. The wiki gives them that context"
       }
     },
     {

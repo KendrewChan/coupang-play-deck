@@ -77,6 +77,12 @@ kbd{font:inherit;font-size:13px;padding:1px 7px;border-radius:4px;border:1px sol
 .agenda button:focus-visible{box-shadow:0 0 0 3px rgba(0,128,255,.4)}
 .agenda .an{display:block;font-size:16px;font-weight:850;letter-spacing:.07em;color:var(--accent)}
 .agenda .at{display:block;font-size:22px;font-weight:750;line-height:1.25;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agenda.pts button{padding:22px 26px 26px;display:flex;flex-direction:column;justify-content:flex-start}
+.agenda.pts .an{font-size:20px}
+.agenda.pts .at{font-size:32px;white-space:normal}
+.agenda .ap{display:block;margin-top:18px;font-size:24px;font-weight:500;line-height:1.35;color:var(--fg2)}
+.agenda .ap > span{display:block;position:relative;padding-left:1em;margin-top:10px}
+.agenda .ap > span::before{content:'•';position:absolute;left:0;color:var(--accent)}
 section.rail{padding:34px 0 6px}
 .rail h2{font-size:26px;font-weight:800;margin:0 0 18px;display:flex;align-items:baseline;gap:12px}
 .rail h2 small{font-size:15px;font-weight:600;color:var(--fg3)}
@@ -147,6 +153,7 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .stage .stack .h{font-size:48px;font-weight:800;line-height:1.15;letter-spacing:-.02em;color:var(--fg)}
 #player .stage .stack .sub{font-size:34px;font-weight:550;line-height:1.35;color:var(--fg2);margin-top:8px}
 #player .stage .agenda{margin:26px 0 0;width:min(1200px,100%);max-width:none}
+#player .stage .agenda.pts{width:min(1632px,100%)}
 #player .stage .foot{margin-top:28px;font-size:34px;font-weight:600;color:var(--fg2)}
 #player .stage table{margin-top:26px;border-collapse:collapse;max-width:1632px;font-size:30px;color:var(--fg2);text-align:left}
 #player .stage th{font:600 22px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:12px 24px 12px 0;border-bottom:2px solid var(--line-strong)}
@@ -358,6 +365,9 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
   .badges{flex-wrap:wrap}
   .agenda{flex-wrap:wrap}
   .agenda button{flex:1 1 calc(50% - 10px)}
+  .agenda.pts button{flex-basis:100%;padding:14px 16px 16px}
+  .agenda.pts .at{font-size:20px}
+  .agenda .ap{font-size:15px;margin-top:8px}
   .rail h2{font-size:22px}
   #title .meta,.meta{grid-template-columns:90px 1fr;font-size:16px;gap:8px 14px}
   .ep-row,#title .ep-row{grid-template-columns:22px 96px 1fr;gap:12px;padding:10px 4px}
@@ -507,12 +517,15 @@ const art = (id, c, fit = 'slice') => `<svg viewBox="0 0 800 450" preserveAspect
 const $ = id => document.getElementById(id);
 const SECTIONS = TALK.filter(p => !p.clip);   // the four sections with a title page; intro clips are not numbered
 const byId = Object.fromEntries(TALK.map(p => [p.id, {...p, n:SECTIONS.indexOf(p) + 1}]));   // n = Episode number
-const nextOf = p => !p.clip && SECTIONS[p.n] && byId[SECTIONS[p.n].id];
-const agendaChips = (ids = SECTIONS.map(q => q.id)) => `<div class="agenda">${ids.map(id => byId[id]).map((q, j) => { const r = byId[q.id]; return `<button data-step="${j}" data-go="${r.id}" style="--accent:${r.accent}"><span class="an">EPISODE ${r.n}</span><span class="at">${r.nav}</span></button>`; }).join('')}</div>`;
+// Page count runs across the whole deck: every part of every section, intro included (title pages are not slides).
+const TOTAL = TALK.reduce((a, q) => a + q.parts.length, 0);
+const slideNo = (p, i) => TALK.slice(0, TALK.findIndex(q => q.id === p.id)).reduce((a, q) => a + q.parts.length, 0) + i + 1;
+const nextOf = p => SECTIONS[p.n] && byId[SECTIONS[p.n].id];   // intro clips have n = 0, so they lead to the first section
+const agendaChips = (ids = SECTIONS.map(q => q.id), pts) => `<div class="agenda${pts ? ' pts' : ''}">${ids.map(id => byId[id]).map((q, j) => { const r = byId[q.id]; return `<button data-step="${j}" data-go="${r.id}" style="--accent:${r.accent}"><span class="an">SERIES ${r.n}</span><span class="at">${r.nav}</span>${pts?.[r.id] ? `<span class="ap">${pts[r.id].map(t => `<span>${t}</span>`).join('')}</span>` : ''}</button>`; }).join('')}</div>`;   // pts: optional {sectionId: [overview points]}
 
-const badges = p => `<div class="badges"><span class="badge solid">Episode ${p.n}</span><span class="badge subtle">${p.kind}</span></div>`;
-// Last episode of a section: a Netflix-style "Next" button in the bottom-right corner whose fill sweeps across once (no auto-advance).
-const nextBtn = p => { const q = nextOf(p); return q ? `<button class="nextep" data-go="${q.id}"><span class="fill"></span><span class="lbl">▶&nbsp; Next: ${q.title}</span></button>` : ''; };
+const badges = p => `<div class="badges"><span class="badge solid">Series ${p.n}</span><span class="badge subtle">${p.kind}</span></div>`;
+// Last episode of a section: a Netflix-style "Next" button (opens the next section's episode 1) in the bottom-right corner whose fill sweeps across once (no auto-advance).
+const nextBtn = p => { const q = nextOf(p); return q ? `<button class="nextep" data-go="${q.id}/1"><span class="fill"></span><span class="lbl">▶&nbsp; Next: ${q.title}</span></button>` : ''; };
 
 function renderHome(){
   const h = HERO;
@@ -550,8 +563,7 @@ function renderPlayer(p, i){
   const e = p.parts[i], last = i === p.parts.length - 1, out = p.clip ? '' : p.id;
   const body = e.stack ? `<div class="stack">${e.rows.map(([k, v], j) => `<div data-step="${j}"><div class="h">${k}</div><div class="sub">${v}</div></div>`).join('')}</div>`
     : e.rows ? `<dl class="meta">${(() => { let j = 0; return e.rows.map(([k, v]) => k === '#' ? `<div class="grp" data-step="${j}">${v}</div>` : `<dt data-step="${j}">${k}</dt><dd data-step="${j++}">${v}</dd>`).join(''); })()}</dl>`
-    : e.cards ? partCards(e.cards) : e.chips ? agendaChips(e.chips) : e.tree ? partTree(e.tree) : e.flow ? partFlow(e.flow) : e.arch ? partArch(e.arch) : e.screens ? partScreens(e.screens) : e.compare ? partCompare(e.compare) : e.stat ? partStat(e.stat) : e.timeline ? (e.snake ? partSnake(e.timeline, e.snake) : partTimeline(e.timeline, e.edge)) : e.pyramid ? partPyramid(e.pyramid) : '';
-  const end = p.clip ? `<button class="pbtn" data-go="">Kendrew ›</button>` : '';
+    : e.cards ? partCards(e.cards) : e.chips ? agendaChips(e.chips, e.points) : e.tree ? partTree(e.tree) : e.flow ? partFlow(e.flow) : e.arch ? partArch(e.arch) : e.screens ? partScreens(e.screens) : e.compare ? partCompare(e.compare) : e.stat ? partStat(e.stat) : e.timeline ? (e.snake ? partSnake(e.timeline, e.snake) : partTimeline(e.timeline, e.edge)) : e.pyramid ? partPyramid(e.pyramid) : '';
   document.documentElement.style.setProperty('--accent', p.accent);
   // A part with `view` (e.g. v=posting&c=sched) gets a button that opens the section's diagram popup at that spot.
   const dia = e.view && p.diagram ? `<button class="btn secondary" data-diagram="${p.id}" data-view="${e.view}">◫&nbsp;Expand diagram</button>` : '';
@@ -559,9 +571,9 @@ function renderPlayer(p, i){
   $('player').innerHTML = `<div class="canvas"><div class="stage${e.edge ? ' edge' : ''}${seen ? ' back' : ''}"${seen ? ' data-seen="1"' : ''}>${e.hideTitle ? '<b style="visibility:hidden">&nbsp;</b>' : `<b>${e.t}</b>`}${e.s ? `<span>${e.s}</span>` : '<span class="empty"></span>'}${body}${e.foot ? `<div class="foot">${e.foot}</div>` : ''}${e.table ? partTable(e.table) : ''}${dia}</div>
     ${last ? nextBtn(p) : ''}<div class="sfoot"><span>${p.clip ? '' : `Episode ${i + 1} · `}${p.title}</span>
       <div class="segs">${p.parts.map((x, j) => `<button data-go="${p.id}/${j + 1}" class="${j < i ? 'done' : j === i ? 'cur' : ''}" style="flex:1 1 0" title="${x.t}"></button>`).join('')}</div>
-      <span>${two(i + 1)} / ${two(p.parts.length)}</span></div></div>
+      <span>${two(slideNo(p, i))} / ${two(TOTAL)}</span></div></div>
     <div class="top"><button class="pbtn" data-go="${out}">‹ ${p.clip ? 'Kendrew' : 'Back'}</button><span class="sp"></span>
-      ${i > 0 ? `<button class="pbtn" data-go="${p.id}/${i}">‹ Prev</button>` : ''}${!last ? `<button class="pbtn" data-go="${p.id}/${i + 2}">Next ›</button>` : end}</div>`;
+      ${i > 0 ? `<button class="pbtn" data-go="${p.id}/${i}">‹ Prev</button>` : ''}${!last ? `<button class="pbtn" data-go="${p.id}/${i + 2}">Next ›</button>` : ''}</div>`;
 }
 // The canvas scales as a whole to the window. If a slide's body is still taller or wider than the body region, shrink the body until it fits.
 // Phones (≤900px) use the scrolling layout in the CSS instead.
@@ -849,7 +861,7 @@ addEventListener('keydown', e => {
 function advance(){
   const [id, n] = location.hash.slice(1).split('/'), p = byId[id]; if (!p) return;
   const i = clampPart(p, +(n || 1) - 1);
-  if (i < p.parts.length - 1) go(`${id}/${i + 2}`); else if (p.clip) go(''); else if (nextOf(p)) go(nextOf(p).id);
+  if (i < p.parts.length - 1) go(`${id}/${i + 2}`); else go(nextOf(p) ? `${nextOf(p).id}/1` : '');
 }
 addEventListener('hashchange', route);
 let idleT; addEventListener('mousemove', () => { $('player').classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => $('player').classList.add('idle'), 2500); });

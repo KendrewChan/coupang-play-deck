@@ -8,28 +8,36 @@
   "kind": "Intro",
   "parts": [
     {
-      "t": "Hi, I'm Kendrew",
-      "s": "TikTok Shop (Global E-Commerce)",
-      "poster": "me-1",
-      "min": 2,
-      "rows": [
-        [
-          "Team",
-          "Video Strategy: drive revenue on TikTok video across regions"
+      "t": "Today's agenda",
+      "poster": "me-3",
+      "min": 1,
+      "chips": [
+        "pipeline",
+        "knowledge",
+        "close"
+      ],
+      "points": {
+        "pipeline": [
+          "Problem statement",
+          "High level",
+          "Managing GPU capacity",
+          "Impact & Retro"
         ],
-        [
-          "Experience",
-          "4 years"
+        "knowledge": [
+          "Design methodology",
+          "Guardrails",
+          "Quality maintenance",
+          "Enhancements"
         ],
-        [
-          "Focus",
-          "Go, Distributed systems, AI infrastructure"
+        "close": [
+          "Philosophies",
+          "Timeline at Coupang",
+          "Outro"
         ]
-      ]
+      }
     },
     {
-      "t": "What I've built",
-      "s": "Highlights",
+      "t": "Highlights",
       "poster": "me-2",
       "min": 2,
       "rows": [
@@ -41,16 +49,6 @@
           "AI Harness",
           "AI Wiki (10 members), Spec Workflow (~100 weekly active engineers), Oncall and Alarm Agents"
         ]
-      ]
-    },
-    {
-      "t": "Today's agenda",
-      "poster": "me-3",
-      "min": 1,
-      "chips": [
-        "pipeline",
-        "knowledge",
-        "close"
       ],
       "foot": "Feel free to ask any questions"
     }
