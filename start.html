@@ -155,9 +155,10 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
 #player .stage .agenda{margin:26px 0 0;width:min(1200px,100%);max-width:none}
 #player .stage .agenda.pts{width:min(1632px,100%)}
 #player .stage .foot{margin-top:28px;font-size:34px;font-weight:600;color:var(--fg2)}
-#player .stage table{margin-top:26px;border-collapse:collapse;max-width:1632px;font-size:30px;color:var(--fg2);text-align:left}
+#player .stage table{margin-top:26px;border-collapse:collapse;max-width:1632px;font-size:36px;color:var(--fg);text-align:left}  /* matches row slides (.meta): 36px, full colour */
 #player .stage th{font:600 22px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:12px 24px 12px 0;border-bottom:2px solid var(--line-strong)}
-#player .stage td{padding:18px 24px 18px 0;border-bottom:1px solid var(--line);font-weight:600;line-height:1.4;vertical-align:top}
+#player .stage td{padding:24px 36px 24px 0;border-top:1px solid var(--line);font-weight:550;line-height:1.35;vertical-align:top}
+#player .stage td:first-child{white-space:nowrap;padding-right:48px;font-weight:700}
 #player .stage .cmp{margin-top:30px;width:100%;display:flex;flex-direction:column;gap:12px}
 #player .cmp .ch,#player .cmp .cr{display:grid;grid-template-columns:430px 1fr 130px 190px;column-gap:36px;align-items:center}
 #player .cmp .ch{font-size:18px;font-weight:850;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:0 28px}
@@ -445,7 +446,8 @@ footer{padding:30px 0 44px;font-size:15px;color:var(--fg3)}
   #player .stage .agenda{margin-top:14px}
   /* wide widgets: keep their layout, scroll sideways */
   #player .stage table,#player .stage .tree,#player .stage .cmp,#player .stage .flow,#player .stage .screens,#player .stage .pyr{overflow-x:auto;width:100%}
-  #player .stage table{display:block;font-size:14px;margin-top:14px}
+  #player .stage table{display:block;font-size:17px;margin-top:14px}
+  #player .stage td{padding:12px 14px 12px 0}
   #player .stage th{font-size:12px;padding:8px 14px 8px 0;white-space:nowrap}
   #player .stage td{padding:10px 14px 10px 0;min-width:140px}
   #player .stage .tree{margin-top:14px;font-size:14px;column-gap:20px}
@@ -674,7 +676,8 @@ const partCards = list => `<div class="cards" style="--n:${list.length}">${list.
 const partStat = ({n, label, cite, url, takeaway}) => `<div class="stat"><div class="n">${n}</div><div class="l">${label}</div>
   <cite>Source: ${url ? `<a href="${url}" target="_blank" rel="noopener">${cite}</a>` : cite}</cite>
   ${takeaway ? `<div class="k" data-step="0">${takeaway}</div>` : ''}</div>`;
-const partTable = ([head, ...rows]) => `<table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+// table: [head, ...rows]. An empty head ([]) draws no header row, for a vertical list of options.
+const partTable = ([head, ...rows]) => `<table>${head.length ? `<thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead>` : ''}
   <tbody>${rows.map((r, j) => `<tr data-step="${j}">${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 // compare: {max, items:[{name, note, lo, hi, cost, q, per, pick?}]}. One row per option: bar = cost per minute (faint to `hi`, solid to `lo`, so a range
 // reads as a range), then quality and cost per quality point. The `pick` row is highlighted.

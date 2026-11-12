@@ -51,16 +51,17 @@
       "poster": "knowledge-3",
       "min": 2,
       "table": [
+        [],
         [
-          "",
           "<span class=\"yes\">✔︎</span> Index navigation",
-          "<span class=\"no\">✖︎</span> RAG",
-          "<span class=\"no\">✖︎</span> Fine-tuning"
+          "Accurate, and our wiki is small enough to index"
         ],
         [
-          "Fit",
-          "Accurate, and our wiki is small enough to index",
-          "Needs an embedding pipeline. Pays off at scale",
+          "<span class=\"no\">✖︎</span> RAG",
+          "Needs an embedding pipeline. Pays off at scale"
+        ],
+        [
+          "<span class=\"no\">✖︎</span> Fine-tuning",
           "Expensive, and recall is unreliable"
         ]
       ]
