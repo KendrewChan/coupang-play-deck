@@ -39,15 +39,15 @@
       "rows": [
         [
           "Systemize the second time, not the first",
-          "Systemize only when a problem repeats, and only if the quality gained outweighs the speed lost"
+          "Systemize only when a problem repeats, and only if the tradeoffs are worth it"
         ],
         [
           "Make the safe path the fast path",
-          "Build the gate into the tool so it is quicker than skipping it"
+          "Spec Workflow speeds up development time whilst automating safety checks"
         ],
         [
           "Write it down so it scales past me",
-          "Facts in the wiki, procedures in skills, every change reviewed"
+          "Facts in the wiki, procedures in skills"
         ]
       ],
       "stack": true
@@ -65,7 +65,7 @@
         ],
         [
           "Cut time to release",
-          "Tighten the spec workflow and its coding loop. Keep human approval for risky changes only"
+          "Tighten the Spec Workflow and its coding loop. Keep human approval for risky changes only"
         ],
         [
           "Make evals cheaper",
