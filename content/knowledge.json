@@ -231,7 +231,7 @@
         ],
         [
           "Minimal prod changes",
-          "Agents run approved write skills, like an allowlist change. Code and table changes go through MRs and tickets"
+          "Agents run approved write skills. Code and table changes go through MRs and tickets"
         ]
       ]
     },

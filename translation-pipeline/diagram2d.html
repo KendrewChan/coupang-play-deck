@@ -123,7 +123,7 @@ def('overview', {title:'Overview', hint:'click a box with ⊕ to open its inside
   {id:'g_intake',      x:240,  y:320, w:340,  h:115, owner:'mine', label:'Candidate intake', sub:'live events + daily batch', zoom:'intake'},
   {id:'g_translation', x:700,  y:320, w:340,  h:115, owner:'mine', label:'AI translation',   sub:'tasks · AI jobs', zoom:'translation'},
   {id:'g_posting',     x:1140, y:320, w:380,  h:115, owner:'mine', label:'Posting queue',    sub:'book slots · post due videos', zoom:'posting'},
-  {id:'evbus',         x:240,  y:530, w:340,  h:100, owner:'ext', label:'Event bus',        sub:'3 topics'},
+  {id:'evbus',         x:240,  y:530, w:340,  h:100, owner:'ext', label:'Message queue',    sub:'3 topics'},
   {id:'svcdb',         x:700,  y:530, w:800,  h:100, owner:'mine', label:'Service DB',       sub:'task tables · seller config · dynamic config'},
   {id:'g_offline',     x:240,  y:725, w:800,  h:100, owner:'ext',  label:'Offline data',     sub:'warehouse · daily ETL · OLAP', zoom:'offline'},
  ], P => [
@@ -380,7 +380,7 @@ const RELS = [
  ['video_sub_task','1 : 1','posted_video_metrics','item_id'],
 ];
 
-// ===== Event bus topics (rough; names generalised) =====
+// ===== Message queue topics (rough; names generalised) =====
 // fields: [name, type, note]
 const TOPICS = {
  video_product_bind:{owner:'Other team', desc:'Change event on a video ↔ product binding. We only want brand-new bindings from the seller\'s official account.',
@@ -452,7 +452,7 @@ function figStates(){
 
 // Level-0 blocks without a deep dive get a summary drawer.
 Object.assign(LLD, {
-evbus:{tag:'BE data · event bus', role:'Three topics move work between stages. Nothing waits on a request.',
+evbus:{tag:'BE data · message queue', role:'Three topics move work between stages. Nothing waits on a request.',
  lld:['<b>Publish events</b> (other team): a seller\'s official account binds a product to a new video.','<b>Batch candidates</b> (ours): one message per (video × market) from the daily ETL.','<b>Job events</b> (AI platform): one status event per translation job.'],
  nu:['Both intake topics carry <b>candidates, not commands</b>. The consumer re-checks live state on arrival.'],
  topics:['video_product_bind','autopost_candidates','ai_job_status']},
@@ -469,16 +469,16 @@ LLD.svcdb.ex = LLD.dyncfg.ex;
 // ===== Tech tags (top-left of each node; generic names per confidentiality.md) =====
 const TECH = {
   g_apis:'HTTP', g_intake:'MQ consumer', g_translation:'RPC', g_posting:'MQ consumer · Cron',
-  evbus:'MQ', svcdb:'RDS', g_offline:'Hive',
+  evbus:'MQ', svcdb:'SQL', g_offline:'Hive',
   c_auth:'Web', c_markets:'Web', c_sched:'Web', c_posted:'Web',
   gw:'HTTP', task:'RPC', elig:'MQ consumer', sched:'MQ consumer', cron:'Cron',
   lookups:'RPC', inventory:'RPC', posting:'RPC', ai:'GPU · RPC',
   ev_pub:'MQ', ev_batch:'MQ', ev_done:'MQ',
-  tables:'RDS', sellercfg:'RDS', dyncfg:'Config center',
+  tables:'SQL', sellercfg:'SQL', dyncfg:'Config center',
   batch:'Hive SQL', mirror:'Hive', wh:'Hive', olap:'OLAP',
 };
 // Node shape follows the tech tag: queues are pipes, data stores are cylinders, the rest are boxes.
-const SHAPE = {MQ:'pipe', RDS:'db', Hive:'db', OLAP:'db'};
+const SHAPE = {MQ:'pipe', SQL:'db', Hive:'db', OLAP:'db'};
 const shapeOf = n => SHAPE[TECH[n.id]] || 'box';
 // Returns the outline path and the visible end/rim ellipse for a pipe or cylinder.
 function shapePath(shape, x, y, w, h){
@@ -685,7 +685,7 @@ function flowHtml(f){
 }
 function openTopic(name){
   const t = TOPICS[name];
-  document.getElementById('sc').innerHTML = `<div class="tag">Event bus · topic · ${esc(t.owner)}</div><h2><code>${name}</code></h2><p class="role">${t.desc}</p>
+  document.getElementById('sc').innerHTML = `<div class="tag">Message queue · topic · ${esc(t.owner)}</div><h2><code>${name}</code></h2><p class="role">${t.desc}</p>
     <h3>Message fields</h3><div class="ex-tbl"><table><tr><th>field</th><th>type</th><th>note</th></tr>${t.fields.map(c => `<tr><td><b>${c[0]}</b></td><td>${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join('')}</table></div>
     <h3>Flow</h3><ul class="rels">${FLOWS.filter(f => f[1] === name).map(flowHtml).join('')}</ul>
     <h3>Handling rules</h3><ul>${t.filter.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
