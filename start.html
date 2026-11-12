@@ -532,8 +532,8 @@ function renderHome(){
   document.documentElement.style.setProperty('--accent', h.accent);
   $('home').innerHTML = `<div class="hero"><div class="art">${POSTER[h.art] ? `<img src="assets/posters/${POSTER[h.art]}.png" alt="">` : art(h.art, h.accent)}</div><div class="wrap">
       <div class="badges"><span class="badge solid">${h.kind}</span></div>
-      <h1>${h.title}</h1><p class="logline">${h.logline}</p>
-      <div class="btns"><button class="btn primary" data-go="me/1">▶&nbsp;Introduction</button></div></div></div>
+      <h1>${h.title}</h1>${h.logline ? `<p class="logline">${h.logline}</p>` : ''}
+      <div class="btns"><button class="btn primary" data-go="me/1">▶&nbsp;Start</button></div></div></div>
     ${partsRail(byId.me)}`;
 }
 

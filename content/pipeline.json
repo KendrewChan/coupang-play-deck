@@ -148,7 +148,7 @@
       ]
     },
     {
-      "t": "One video, end to end",
+      "t": "End-to-end flow",
       "s": "",
       "min": 1.5,
       "poster": "pipeline-4",
@@ -177,19 +177,6 @@
         ["Selective invocation", "Translate each seller's top videos first, ranked by revenue, so capacity goes to the best bets"],
         ["Reuse", "Reuse videos for markets with the same language"],
         ["Load shifting", "Backfill runs in an off-peak window to reduce GPU contention"]
-      ]
-    },
-    {
-      "t": "Controlled posting",
-      "s": "",
-      "min": 2.5,
-      "poster": "pipeline-9",
-      "key": true,
-      "stack": true,
-      "rows": [
-        ["Sellers own translation quality", "→ Videos post T+2 after translation. Sellers can cancel or give feedback before post"],
-        ["No bursts on downstream services", "→ The scheduler posts due videos in throttled batches of up to 50"],
-        ["Tune posting without a deploy", "→ We can widen, narrow or move the posting window"]
       ]
     },
     {
