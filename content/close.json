@@ -1,17 +1,12 @@
 {
   "id": "close",
-  "accent": "#42D6A4",
-  "nav": "Principles",
-  "title": "Principles",
-  "time": "~5 min",
+  "accent": "#5d9eff",
+  "nav": "My Technical Perspectives",
+  "title": "My Technical Perspectives",
+  "time": "~15 min",
   "kind": "Philosophy",
-  "logline": "Six principles, each from something you just saw",
-  "rows": [
-    [
-      "",
-      "Revenue systems are judged on availability, latency, correctness and revenue. These are my habits for trading them off while keeping the team fast"
-    ]
-  ],
+  "logline": "What I value and what I hope to achieve within the first 6 months",
+  "rows": [],
   "parts": [
     {
       "t": "Technical Principles",
@@ -21,16 +16,16 @@
       "key": true,
       "rows": [
         [
-          "Make failure cheap",
-          "Partial results, retries and a DLQ make failure routine, not an outage"
+          "KISS (Keep it simple, stupid)",
+          "A failed translation is never flagged AI-origin. Daily runs retry without needing a scheduler"
         ],
         [
-          "Shape the load you control",
-          "Spread the workload and protect shared capacity with quotas"
+          "Single source of truth",
+          "AI Wiki stores team knowledge, code detail stays in service repos"
         ],
         [
-          "Correctness lives in the write",
-          "A cancel works only from SCHEDULED, enforced by a conditional update"
+          "Separation of concerns",
+          "The AI wiki holds knowledge, the skills repo holds tool calls, and workflows orchestrate both"
         ]
       ],
       "stack": true
@@ -44,7 +39,7 @@
       "rows": [
         [
           "Systemize the second time, not the first",
-          "Solve it by hand once, then automate it when it comes back"
+          "Systemize only when a problem repeats, and only if the quality gained outweighs the speed lost"
         ],
         [
           "Make the safe path the fast path",
@@ -71,8 +66,81 @@
         [
           "Cut time to release",
           "Tighten the spec workflow and its coding loop, and reduce HITL"
+        ],
+        [
+          "Make evals cheaper",
+          "Go deeper on evals, and reduce what they cost in tokens and in upkeep"
         ]
       ]
+    },
+    {
+      "t": "My first six months",
+      "s": "A draft built on assumptions. Correct me where I'm wrong",
+      "poster": "bridge-1",
+      "min": 7,
+      "key": true,
+      "timeline": [
+        {
+          "when": "Month 0",
+          "t": "Learn",
+          "pts": [
+            "How money flows across payments, promotions, ads and ticketing",
+            "Meet Seoul product and ops",
+            "Shadow oncall and alarm handling",
+            "Shared docs and an architecture map, filling any gaps I hit"
+          ]
+        },
+        {
+          "when": "Month 1",
+          "t": "Own",
+          "pts": [
+            "Join oncall and alarm rotation",
+            "Form a mental schema of key metric baselines",
+            "Several changes shipped: oncall fixes or feature requirements with teammates"
+          ]
+        },
+        {
+          "when": "Month 3",
+          "t": "Deliver",
+          "pts": [
+            "One revenue win, owned end to end",
+            "Alarms and runbooks in place",
+            "Individual AI tooling"
+          ]
+        },
+        {
+          "when": "Month 6",
+          "t": "Ready",
+          "pts": [
+            "Ready for the next big match or on-sale",
+            "Department-wide AI tooling, e.g. reconciliation",
+            "Drive business impact and product optimizations"
+          ]
+        }
+      ]
+    },
+    {
+      "t": "Why Coupang Play",
+      "s": "A natural next step",
+      "poster": "bridge-2",
+      "min": 2,
+      "stack": true,
+      "rows": [
+        [
+          "I've built systems that turn video into sales",
+          "At Coupang Play, the sale happens right in the stream"
+        ],
+        [
+          "I love building AI tooling that moves fast and stays safe",
+          "Revenue systems need both"
+        ]
+      ]
+    },
+    {
+      "t": "Thank you",
+      "s": "Happy to take your questions",
+      "poster": "bridge-3",
+      "min": 1
     }
   ]
 }

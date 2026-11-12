@@ -1,7 +1,7 @@
 {
   "id": "me",
   "clip": true,
-  "accent": "#25D1FF",
+  "accent": "#5d9eff",
   "nav": "Introduction",
   "title": "Introduction",
   "time": "~5 min",
@@ -10,26 +10,48 @@
     {
       "t": "Hi, I'm Kendrew",
       "s": "TikTok Shop (Global E-Commerce)",
+      "poster": "me-1",
       "min": 2,
       "rows": [
-        ["Team", "Video Strategy: drive revenue on TikTok video across regions"],
-        ["Experience", "4 years"],
-        ["Focus", "Go, Distributed systems, AI infrastructure"]
+        [
+          "Team",
+          "Video Strategy: drive revenue on TikTok video across regions"
+        ],
+        [
+          "Experience",
+          "4 years"
+        ],
+        [
+          "Focus",
+          "Go, Distributed systems, AI infrastructure"
+        ]
       ]
     },
     {
       "t": "What I've built",
       "s": "Highlights",
+      "poster": "me-2",
       "min": 2,
       "rows": [
-        ["AI video translation", "Initiated and led the project. Live in 13 EU markets; +8% average seller revenue in a randomized A/B"],
-        ["AI knowledge layer", "AI Wiki (10 members), Spec Workflow (~100 weekly active engineers), Oncall and Alarm Agents"]
+        [
+          "Translation Pipeline",
+          "Initiated and led the project. Live in 13 EU markets; +8% average seller revenue in a randomized A/B"
+        ],
+        [
+          "AI Harness",
+          "AI Wiki (10 members), Spec Workflow (~100 weekly active engineers), Oncall and Alarm Agents"
+        ]
       ]
     },
     {
       "t": "Today's agenda",
+      "poster": "me-3",
       "min": 1,
-      "chips": ["pipeline", "knowledge", "close", "bridge"],
+      "chips": [
+        "pipeline",
+        "knowledge",
+        "close"
+      ],
       "foot": "Feel free to ask any questions"
     }
   ]

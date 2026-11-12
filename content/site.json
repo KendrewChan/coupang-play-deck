@@ -1,8 +1,13 @@
 {
-  "talk": ["me", "pipeline", "knowledge", "close", "bridge"],
+  "talk": [
+    "me",
+    "pipeline",
+    "knowledge",
+    "close"
+  ],
   "hero": {
     "art": "me",
-    "accent": "#25D1FF",
+    "accent": "#5d9eff",
     "kind": "Intro",
     "time": "~5 min",
     "title": "Self-introduction",
@@ -12,21 +17,33 @@
     "name": "Kendrew",
     "full": "Chan Yong Soon, Kendrew",
     "rows": [
-      ["Company", "TikTok · Global E-commerce (TikTok Shop)"],
-      ["Role", "Backend Software Engineer"],
-      ["Experience", "4 years (Jan 2023 – Present)"],
-      ["University", "National University of Singapore"],
-      ["Degree", "B.Comp. Computer Science (Hons)"],
-      ["Citizenship", "Singaporean"]
+      [
+        "Company",
+        "TikTok · Global E-commerce (TikTok Shop)"
+      ],
+      [
+        "Role",
+        "Backend Software Engineer"
+      ],
+      [
+        "Experience",
+        "4 years (Jan 2023 – Present)"
+      ],
+      [
+        "University",
+        "National University of Singapore"
+      ],
+      [
+        "Degree",
+        "B.Comp. Computer Science (Hons)"
+      ],
+      [
+        "Citizenship",
+        "Singaporean"
+      ]
     ]
   },
-  "top": ["pipeline", "knowledge"],
-  "trending": ["close", "bridge"],
   "posters": {
-    "pipeline": "pipeline",
-    "knowledge": "knowledge",
-    "bridge": "bridge",
-    "close": "close",
     "me": "me"
   }
 }

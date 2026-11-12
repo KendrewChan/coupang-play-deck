@@ -92,7 +92,7 @@ body.schema #schema{display:flex}
 // Layers always run top → bottom (client · backend · BE data · offline data).
 // Labels: node and edge names are kept to ~2 words.
 const W = 1600, H = 900;
-const TINT = {client:'#5d9eff', backend:'#8B65FF', svc:'#42d094', ana:'#00deed'}; // blue-300 · deck purple · green-200 · cyan-200
+const TINT = {client:'#5d9eff', backend:'#00deed', svc:'#42d094', ana:'#00deed'}; // blue-300 · deck purple · green-200 · cyan-200
 const BAND_LABEL = {client:'CLIENT LAYER', backend:'BACKEND LAYER', svc:'BE DATA LAYER', ana:'OFFLINE DATA LAYER'};
 const BAND_SUB = {client:'seller screens', backend:'services', svc:'online · per request', ana:'warehouse · daily batch'};
 
@@ -115,8 +115,7 @@ def('overview', {title:'Overview', hint:'click a box with ⊕ to open its inside
   {id:'g_apis',        x:200,  y:150, w:1340, h:80,  owner:'mine', label:'Seller APIs',      sub:'4 screens', zoom:'apis'},
   {id:'g_intake',      x:240,  y:320, w:340,  h:115, owner:'mine', label:'Candidate intake', sub:'live events + daily batch', zoom:'intake'},
   {id:'g_translation', x:700,  y:320, w:340,  h:115, owner:'mine', label:'AI translation',   sub:'tasks · AI jobs', zoom:'translation'},
-  {id:'g_posting',     x:1140, y:320, w:180,  h:115, owner:'mine', label:'Post Scheduler',   sub:'slot calendar', zoom:'posting'},
-  {id:'g_cron',        x:1340, y:320, w:180,  h:115, owner:'mine', label:'Cron',             sub:'posts due videos', zoom:'posting'},
+  {id:'g_posting',     x:1140, y:320, w:380,  h:115, owner:'mine', label:'Posting queue',    sub:'book slots · post due videos', zoom:'posting'},
   {id:'evbus',         x:240,  y:530, w:340,  h:100, owner:'ext', label:'Event bus',        sub:'3 topics'},
   {id:'svcdb',         x:700,  y:530, w:800,  h:100, owner:'mine', label:'Service DB',       sub:'task tables · seller config · dynamic config'},
   {id:'g_offline',     x:240,  y:725, w:800,  h:100, owner:'ext',  label:'Offline data',     sub:'warehouse · daily ETL · OLAP', zoom:'offline'},
@@ -126,8 +125,7 @@ def('overview', {title:'Overview', hint:'click a box with ⊕ to open its inside
   ['g_intake','g_translation','sync','create task',{pts:[P.R('g_intake'),P.L('g_translation')]}],
   ['g_translation','g_posting','async','job done',{pts:[P.R('g_translation'),P.L('g_posting')]}],
   ['g_translation','svcdb','sync','tasks',{pts:[[870,435],[870,530]]}],
-  ['g_posting','svcdb','sync','slots',{pts:[[1230,435],[1230,530]]}],
-  ['g_cron','svcdb','sync','read due',{pts:[[1430,435],[1430,530]]}],
+  ['g_posting','svcdb','sync','slots · due tasks',{pts:[[1330,435],[1330,530]]}],
   ['svcdb','g_offline','async','daily sync',{pts:[[940,630],[940,725]]}],
   ['g_offline','evbus','async','daily batch',{pts:[[330,725],[330,630]],side:'L'}],
  ]);
@@ -159,21 +157,18 @@ def('translation', {title:'AI translation', parent:'g_translation', hint:'task f
   bands:[{id:'backend',y:150,h:280},{id:'svc',y:460,h:220}]},
  [
   {id:'x_intake',  x:200,  y:230, w:220, h:120, owner:'ghost',label:'Candidate intake', go:'intake'},
-  {id:'task',      x:520,  y:230, w:260, h:120, owner:'mine', label:'Task service',     sub:'parent/child · dedup'},
-  {id:'ai',        x:900,  y:230, w:260, h:120, owner:'ext',  label:'AI platform',      sub:'high · low lane'},
-  {id:'tables',    x:440,  y:520, w:420, h:110, owner:'mine', label:'Task tables',      sub:'parent + children'},
-  {id:'ev_done',   x:900,  y:520, w:260, h:110, owner:'ext',  label:'Job events',       sub:'1 per AI job'},
-  {id:'x_posting', x:1300, y:180, w:220, h:100, owner:'ghost',label:'Posting queue',    go:'posting'},
-  {id:'retry',     x:1300, y:310, w:220, h:100, owner:'mine', label:'Retry scheduler',  sub:'failed tasks'},
+  {id:'task',      x:540,  y:230, w:260, h:120, owner:'mine', label:'Task service',     sub:'parent/child · dedup'},
+  {id:'ai',        x:920,  y:230, w:260, h:120, owner:'ext',  label:'AI platform',      sub:'high · low lane'},
+  {id:'x_posting', x:1300, y:230, w:240, h:120, owner:'ghost',label:'Posting queue',    go:'posting'},
+  {id:'tables',    x:540,  y:520, w:260, h:110, owner:'mine', label:'Task tables',      sub:'parent + children'},
+  {id:'ev_done',   x:920,  y:520, w:260, h:110, owner:'ext',  label:'Job events',       sub:'1 per AI job'},
  ], P => [
   ['x_intake','task','sync','create task',{pts:[P.R('x_intake'),P.L('task')]}],
   ['task','ai','sync','AI jobs',{pts:[P.R('task'),P.L('ai')],fan:3}],
-  ['ai','ev_done','async','job done',{pts:[[1060,350],[1060,520]]}],
-  ['ev_done','task','async','status',{pts:[[940,520],[940,440],[720,440],[720,350]]}],
+  ['ai','ev_done','async','job done',{pts:[[1100,350],[1100,520]]}],
+  ['ev_done','task','async','status',{pts:[[980,520],[980,440],[740,440],[740,350]]}],
   ['task','tables','sync','write rows',{pts:[[600,350],[600,520]],side:'L'}],
-  ['task','x_posting','async','book slot',{pts:[[650,230],[650,190],[1230,190],[1230,230],[1300,230]]}],
-  ['retry','ai','sync','resubmit',{pts:[[1300,360],[1230,360],[1230,300],[1160,300]]}],
-  ['retry','tables','sync','read failed',{pts:[[1410,410],[1410,660],[650,660],[650,630]]}],
+  ['task','x_posting','async','book slot',{pts:[[670,230],[670,190],[1420,190],[1420,230]]}],
  ]);
 
 // ---------- L1: posting queue ----------
@@ -182,7 +177,7 @@ def('posting', {title:'Posting queue', parent:'g_posting', hint:'slot booking �
  [
   {id:'x_translation', x:200,  y:175, w:200, h:110, owner:'ghost',label:'AI translation',  go:'translation'},
   {id:'sched',         x:470,  y:175, w:200, h:110, owner:'mine', label:'Post Scheduler',  sub:'slot calendar'},
-  {id:'cron',          x:760,  y:175, w:200, h:110, owner:'mine', label:'Cron',            sub:'every 5 min · due tasks'},
+  {id:'cron',          x:760,  y:175, w:200, h:110, owner:'mine', label:'Cron',            sub:'every 5 min · ≤50 due'},
   {id:'inventory',     x:1040, y:300, w:200, h:70,  owner:'ext',  label:'Inventory',       sub:'stock check'},
   {id:'posting',       x:1300, y:175, w:220, h:110, owner:'ext',  label:'Posting service', sub:'publishes video'},
   {id:'tables',        x:470,  y:455, w:490, h:110, owner:'mine', label:'Task tables',     sub:'= the posting queue'},
@@ -202,8 +197,8 @@ def('apis', {title:'Seller APIs', parent:'g_apis', hint:'screens → gateway →
  [
   {id:'c_auth',      x:200,  y:140, w:280, h:75, owner:'mine', label:'Authorize pipeline', sub:'auto-post on / off'},
   {id:'c_markets',   x:560,  y:140, w:280, h:75, owner:'mine', label:'Target markets',     sub:'pick markets'},
-  {id:'c_sched',     x:920,  y:140, w:280, h:75, owner:'mine', label:'Scheduled posts',    sub:'list · cancel · hide'},
-  {id:'c_posted',    x:1280, y:140, w:280, h:75, owner:'mine', label:'Posted videos',      sub:'list · delete'},
+  {id:'c_sched',     x:920,  y:140, w:280, h:75, owner:'mine', label:'Scheduled posts',    sub:'list · cancel · feedback'},
+  {id:'c_posted',    x:1280, y:140, w:280, h:75, owner:'mine', label:'Posted videos',      sub:'list · delete · cancel retry'},
   {id:'gw',          x:200,  y:290, w:1360,h:50, owner:'mine', label:'API gateway',        sub:'HTTP → RPC'},
   {id:'task',        x:660,  y:380, w:280, h:70, owner:'mine', label:'Task service',       sub:'all endpoints'},
   {id:'sellercfg',   x:200,  y:530, w:240, h:90, owner:'mine', label:'Seller config',      sub:'opt-in · markets'},
@@ -254,11 +249,11 @@ c_markets:{tag:'Client · auto-post', role:'The seller picks which target market
 c_overview:{tag:'Client · auto-post', role:'Videos posted, views and GMV from auto-post, for the last period vs the one before.',
  lld:['Posted count comes from the task tables (live).','Views and GMV come from the warehouse via OLAP serving (daily), joined on the posted item ids.','Period length is in dynamic config (7 days by default).','A sibling auto-post product (AI-original videos) lives in another system. The client calls both and merges them; the backend does not fan in.'],
  nu:['Two sources with different freshness on one card: the count is real-time, the money is up to a day old. That\'s an acceptable trade for a weekly comparison.']},
-c_sched:{tag:'Client · auto-post', role:'Upcoming posts with their slot times. The seller can cancel a post, or post it without showing it on their profile.',
- lld:['<b>list</b> = parent tasks with their children grouped (one card per source video, flags per market).','<b>update</b> per child: <code>cancel</code> and/or <code>hide_from_profile</code>.','List is scoped by task type + entry point, so manual translation tasks never show up here.'],
- nu:['<b>Reads the same rows the posting queue uses.</b> Nothing is copied, so what the seller sees is exactly what the cron will post.','Cancel wins over hide when both are sent. Cancel is only valid from SCHEDULED and is final.','"Hide from profile" is stored and <b>passed as an input at post time</b> (a post that is not shown on the seller\'s profile). Nothing is edited after posting.','The 24h lead time exists to give the seller this review window.']},
+c_sched:{tag:'Client · auto-post', role:'Upcoming posts with their slot times. The seller can cancel a post or rate the translation Good or Bad.',
+ lld:['<b>list</b> = parent tasks with their children grouped (one card per source video, flags per market).','<b>update</b> per child: <code>cancel</code> and/or <code>feedback</code> (Good, or Bad with reasons).','List is scoped by task type + entry point, so manual translation tasks never show up here.'],
+ nu:['<b>Reads the same rows the posting queue uses.</b> Nothing is copied, so what the seller sees is exactly what the cron will post.','Cancel is valid from SCHEDULED or RETRY and is final. Once the cron has claimed a row (POSTING), cancel is rejected and the seller sees it is already posting.','<b>Feedback is binary first:</b> Good or Bad, and only Bad asks for reasons. It is stored on the child, so translation quality can be reviewed per market.','The T+2 lead time exists to give the seller this review window.']},
 c_posted:{tag:'Client · auto-post', role:'Posted and retrying videos, one row per market. The seller can delete a posted video.',
- lld:['<b>list</b> = flat child rows (one per posted market video), including ones waiting for a retry.','Product search takes one string: if it parses as a number, it\'s an exact id match; otherwise a name search.','Current stock is computed at read time, not stored.','<b>delete</b> = mark the posted item as user-deleted + soft-delete the child row.'],
+ lld:['<b>list</b> = flat child rows (one per posted market video), including ones waiting for a retry.','<b>cancel</b> on a row waiting for a retry: RETRY → CANCELLED, so the seller can stop a post that is waiting for stock.','Product search takes one string: if it parses as a number, it\'s an exact id match; otherwise a name search.','Current stock is computed at read time, not stored.','<b>delete</b> = mark the posted item as user-deleted + soft-delete the child row.'],
  nu:['Scheduled list is grouped by parent, posted list is flat by child. The two screens answer different questions ("what\'s coming" vs "how did each market do").']},
 gw:{tag:'Backend · gateway', role:'The HTTP front door for every seller screen. Translates to RPC calls on the task service.',
  lld:['Thin layer: auth, request shaping, HTTP ↔ RPC mapping. No business state.','All 7 auto-post endpoints: settings get/set, overview, scheduled list/update, posted list, delete.'],
@@ -268,21 +263,18 @@ elig:{tag:'Backend · consumer', role:'Turns a candidate (live event or batch ro
  nu:['<b>Validate at consume:</b> the batch is built from a day-old snapshot, so the seller may have switched off, or the video may already be translated. The batch is a candidate list, never the truth.','"Not AI-generated" includes our own translated outputs, so the system can\'t translate its own translations.','Global-post outputs (one video posted to many markets) are collapsed to one representative row. Its source language is the shared language, or English when the markets mix languages.']},
 task:{tag:'Backend · core service', role:'Owns the task model. One parent per source video, one child per target market.',
  lld:['<b>Create:</b> insert parent + children (one transaction where possible), then start one AI job per child that needs one.','<b>Dedup, two levels:</b> (video × market) already posted → no-op. (video × language) already translated → <b>clone the existing assets</b>, mark success, skip the AI call.','Chooses the AI lane: live → high priority, backfill → low priority.','<b>Parent status is computed from children:</b> all ok → success, all failed → failed, otherwise partial success.','On a status event: update the child, recompute the parent.'],
- nu:['<b>Partial success still posts</b> the markets that succeeded. One failed market never blocks the others.','Dedup runs inside create, so it is the last line of defence against duplicate events, whatever the consumers did.','The batch job counts any existing row as "done"; the online check needs a <i>successful</i> row. The two definitions differ on purpose: batch is coarse, online is exact.','Manual translate had no language dedup (DE and AT were two paid jobs). It was added for auto-post.']},
+ nu:['<b>Partial success still posts</b> the markets that succeeded. One failed market never blocks the others.','Dedup runs inside create, so it is the last line of defence against duplicate events, whatever the consumers did.','<b>No retry scheduler:</b> a failed translation never gets an AI-origin video, so the daily ETL resends it as a candidate. Dedup on the video id means a resend never starts a second job for work that already succeeded.','The batch job counts any existing row as "done"; the online check needs a <i>successful</i> row. The two definitions differ on purpose: batch is coarse, online is exact.','Manual translate had no language dedup (DE and AT were two paid jobs). It was added for auto-post.']},
 ai:{tag:'Other team · AI platform', role:'One job = voice translation + voice clone + lip-sync + subtitles. We integrate; we didn\'t build the models.',
  lld:['Async: start job → job id stored on the child → status event published when done.','Two priority lanes: live work on high, backfill on low.','Takes hours per job (≈2h average at launch).','<b>Per-account daily quota</b> is checked before the call (dynamic config); over quota → the backfill candidate is dropped.','<b>Max video length is enforced by the platform</b> in its own config. We don\'t pre-check, so an over-long video comes back as a failed job.'],
  nu:['<b>GPU capacity was the binding constraint</b> for the whole system. That\'s why there are priority lanes, a per-seller backfill cap and an off-peak window for backfill.','Launch failure rate dropped ~5× once the platform added lip-sync capacity. The cause was upstream, not in our pipeline.','Jobs take hours, so we never wait on them in a request path.','<b>Why translate the original instead of full AI video generation?</b> Full generation costs far more per video with lower ROI. The seller\'s proven video is the asset; we only change the language.']},
 sched:{tag:'Backend · scheduler', role:'When a translation completes, books the video into the seller\'s next free posting slot.', fig:'slots',
- lld:['Triggered by the translation-complete event.','Finds the seller\'s latest booked slot (index on seller + task type + scheduled time).','Earliest allowed slot = first slot ≥ now + 24h (the review window).','If that slot already has its quota, move to the next slot, then roll into the next window.','Writes the slot time on the <b>parent</b>; every child (market) posts in the same batch. Status → SCHEDULED.','Window, slots per window, videos per slot and lead time all come from dynamic config.'],
+ lld:['Triggered by the translation-complete event.','Finds the seller\'s latest booked slot (index on seller + task type + scheduled time).','Earliest allowed slot = first slot ≥ now + 48h (T+2, the review window).','If that slot already has its quota, move to the next slot, then roll into the next window.','Writes the slot time on the <b>parent</b>; every child (market) posts in the same batch. Status → SCHEDULED.','Window, slots per window, videos per slot and lead time all come from dynamic config.'],
  nu:['<b>A calendar-style token bucket:</b> tokens are reserved when scheduling, not spent when sending. So the post time is known up front and shown to the seller, and a late cron can never cause a burst.','<b>Why not delayed queue messages or fixed post times</b> (what earlier auto-post systems did): a delayed message can\'t be listed, edited or cancelled. A DB row can.','The quota unit is the <b>source video</b>, not the market post. One video to 5 markets is one slot.','Spreading posts across the day avoids flooding one account, which also helps with platform spam signals.']},
-retry:{tag:'Backend · retry scheduler', role:'On a schedule, reads failed tasks from the Task tables, then resubmits them to the AI platform.',
- lld:['Scans the task tables for failed child tasks that are still within the retry limit.','Resubmits each one as a new AI job; the parent status is recomputed when the job event comes back.','Successful siblings are never touched.'],
- nu:['Retrying a failed market does not block or re-run the markets that already succeeded.']},
 cron:{tag:'Backend · cron', role:'Runs every 5 minutes. Posts whatever is due, but only if the product is still in stock.', fig:'states',
- lld:['Selects rows where scheduled time ≤ now and status ∈ {SCHEDULED, RETRY}.','Per child: read the stock threshold from dynamic config, call inventory for the target market\'s product.','In stock → call the posting service (with the hide-from-profile flag) → POSTED + item id + post time.','Low stock or delisted → <b>RETRY</b>, next attempt in 3 days, attempt counter +1.','At the attempt cap → soft-delete the task and delete the generated video.'],
- nu:['<b>Stock is checked twice:</b> at eligibility and right before posting, because 24h+ can pass in between.','<b>No head-of-line blocking:</b> an out-of-stock video pauses alone; the seller\'s next videos still post.','The retry counter lives on the parent and is never reset, so a flapping product can\'t retry forever (worst case ≈ 2 weeks).','Five-minute granularity means a post can land up to ~5 min after its slot. Fine for feed posting; it would not be for live sports.']},
+ lld:['Selects up to 50 rows (batch size from dynamic config) where scheduled time ≤ now and status ∈ {SCHEDULED, RETRY}.','<b>Claim</b> each row first: <code>SET status = POSTING WHERE id = ? AND status IN (SCHEDULED, RETRY)</code>. No row changed → skip it.','Per child: read the stock threshold from dynamic config, call inventory for the target market\'s product.','In stock → call the posting service with the task id as the idempotency key → POSTED + item id + post time.','Low stock or delisted → <b>RETRY</b>, next attempt in 7 days, attempt counter +1.','At the attempt cap → soft-delete the task and delete the generated video.'],
+ nu:['<b>Why claim first:</b> the post is a call to another service, so it can\'t be atomic with the status change. The claim is one conditional write that decides who wins: cancel or post, or one cron instance or another.','A row left in POSTING past a timeout (a crash mid-post) goes back to SCHEDULED. The idempotency key makes that retry safe.','<b>Stock is checked twice:</b> at eligibility and right before posting, because two days can pass in between.','<b>No head-of-line blocking:</b> an out-of-stock video pauses alone; the seller\'s next videos still post.','The retry counter lives on the parent and is never reset, so a flapping product can\'t retry forever (3 attempts, 7 days apart, so worst case ≈ 3 weeks).','The batch cap of 50 per run limits load on the posting service and the DB.','Five-minute granularity means a post can land up to ~5 min after its slot. Fine for feed posting; it would not be for live sports.']},
 posting:{tag:'Other team · posting', role:'Publishes the generated video to the target market\'s account.',
- lld:['Input: generated video, target account, product link, caption/hashtags, hide-from-profile flag, trigger scenario (for attribution).','Output: new item id → stored on the child.'],
+ lld:['Input: idempotency key (task id), generated video, target account, product link, caption/hashtags, trigger scenario (for attribution).','Output: new item id → stored on the child.'],
  nu:['The trigger-scenario tag on every post is what lets the warehouse attribute views and GMV back to translation.']},
 lookups:{tag:'Other teams · lookups', role:'Read-only services the pipeline asks before acting.',
  lld:['<b>Account:</b> is an official account bound in the target market?','<b>Product mapping:</b> source product → the same product in the target market.','<b>Inventory:</b> unreserved stock in the target market.','<b>Item:</b> visibility, review status, bound product, compliance.'],
@@ -309,14 +301,14 @@ wh:{tag:'Data team · warehouse', role:'The data team\'s tables the batch job re
  tbls:['video_stats_daily','shop_account_binding','product_catalog']},
 batch:{tag:'Batch scheduler · daily ETL', role:'Picks which past videos are worth translating, per seller, once a day.',
  lld:['<b>Joins</b> the warehouse tables (stats, labels, bindings, products) with the DB snapshots of our own tables (opt-in config, finished tasks).','Last 180 days of each opted-in seller\'s videos.','Same eligibility rules as online, in SQL (except stock, which is online-only).','Rank by revenue with engagement as a tie-breaker; cap per seller.','Fan out to each enabled target market, minus (video × market) already done.'],
- nu:['<b>Implicit retry:</b> a failed translation is never recorded as done, so tomorrow\'s run picks it up again. No retry code needed, at the cost of a one-day delay.','Backfill is capped per seller so one big seller can\'t eat the shared GPU budget.'],
+ nu:['<b>Implicit retry:</b> a failed translation is never tagged AI-origin, so tomorrow\'s run picks it up again. No retry code needed, at the cost of a one-day delay.','Backfill is capped per seller so one big seller can\'t eat the shared GPU budget.'],
  tbls:['video_stats_daily','shop_account_binding','product_catalog','seller_autopost','seller_market','video_task','video_sub_task']},
 mirror:{tag:'Data team · DB snapshots', role:'A daily copy of our own service tables inside the warehouse, so the batch job can join them with the data team\'s tables.',
  lld:['Synced daily from the service DB, one partition per day.','<b>Seller config</b> → who is opted in, and which source / target markets are enabled.','<b>Task, sub-task and media tables</b> → which (video × market) pairs are already done, plus the task type behind the AI-origin flags.','The sync was part of the data contract we agreed with the data team.'],
  nu:['The batch job reads <b>yesterday\'s</b> copy of our config, so a seller who switched off today can still show up as a candidate. The online consumer reads the live DB, which is why it re-checks.','Bulk scans and joins run on the snapshot, never on the serving database.'],
  tbls:['seller_autopost','seller_market','video_task','video_sub_task','video_task_media']},
 tables:{tag:'BE data · task tables', role:'The task model and the posting queue in one place.', fig:'states',
- lld:['<b>Parent:</b> seller, source video, task type, scheduled post time, retry attempts, computed post status.','<b>Child:</b> target market, target language, AI job id, generated video, posted item id, post time, hide-from-profile.','Indexes: (seller, task type, scheduled time) for slot lookup; source video id for dedup.','States added for auto-post: SCHEDULED, RETRY, CANCELLED.'],
+ lld:['<b>Parent:</b> seller, source video, task type, scheduled post time, retry attempts, computed post status.','<b>Child:</b> target market, target language, AI job id, generated video, posted item id, post time, seller feedback.','Indexes: (seller, task type, scheduled time) for slot lookup; source video id for dedup.','States added for auto-post: SCHEDULED, POSTING, RETRY, CANCELLED.'],
  nu:['<b>The table is the queue.</b> Durable, queryable, cancellable, and the same rows back the seller\'s screens.','Tables were reused from an earlier AI voiceover project and extended, not rebuilt.','Delete is soft everywhere, so history and attribution survive.'],
  tbls:['video_task','video_sub_task','video_task_media']},
 sellercfg:{tag:'BE data · config', role:'Who has auto-post on, and which markets / languages they want.',
@@ -324,13 +316,14 @@ sellercfg:{tag:'BE data · config', role:'Who has auto-post on, and which market
  nu:['Read live by the consumer; read a day late by the batch job through the daily snapshot. Opt-outs are honoured on the live read.'],
  tbls:['seller_autopost','seller_market']},
 dyncfg:{tag:'BE data · dynamic config', role:'Every quota and threshold, changeable without a deploy.',
- lld:['Posting window, slots per window, videos per slot, minimum lead time.','Retry delay and max attempts; translation max attempts.','Minimum product stock; overview period.'],
+ lld:['Posting window, slots per window, videos per slot, minimum lead time, cron batch size.','Retry delay and max attempts; translation max attempts.','Minimum product stock; overview period.'],
  nu:['Rollout lever: posting rate can be tightened instantly if a market reacts badly, with no code change.'],
  ex:[{cap:'Dynamic config value (illustrative)', json:{
    overview:{metrics_period_days:7},
    posting:{
-     time_window:{hour_start:10, hour_end:22, slots:4, videos_per_slot:1, min_lead_time_hours:24},
-     retry:{max_attempts:5, delay_days:3},
+     time_window:{hour_start:10, hour_end:22, slots:4, videos_per_slot:1, min_lead_time_hours:48},
+     cron_batch_size:50,
+     retry:{max_attempts:3, delay_days:7},
      min_product_stock:10},
    translation:{max_attempts:2}}}]},
 };
@@ -347,11 +340,11 @@ const TABLES = {
   keys:['PK (id)','UNIQUE (global_seller_id, region)'],
   rows:[['11','S-42','DE','de','1'],['12','S-42','FR','fr','1'],['13','S-42','ES','es','0']], rowCols:['id','global_seller_id','region','target_lang','is_enable']},
  video_task:{desc:'Parent task: one per source video. Holds the posting slot, so it is also the queue.',
-  cols:[['id','bigint','PK'],['seller_id','bigint','→ seller_autopost'],['source_item_id','bigint','source video (dedup)'],['product_id','bigint','source product'],['task_type','tinyint','4 = AUTO_POST (new)'],['source_language','varchar(4)',''],['agg_trans_status','tinyint','PENDING / SUCCESS / FAIL / PARTIAL'],['agg_post_status','tinyint','+ SCHEDULED / RETRY / CANCELLED (new)'],['scheduled_post_time','timestamp','slot (new)'],['post_retry_attempt','tinyint','(new)'],['is_del','tinyint','soft delete']],
+  cols:[['id','bigint','PK'],['seller_id','bigint','→ seller_autopost'],['source_item_id','bigint','source video (dedup)'],['product_id','bigint','source product'],['task_type','tinyint','4 = AUTO_POST (new)'],['source_language','varchar(4)',''],['agg_trans_status','tinyint','PENDING / SUCCESS / FAIL / PARTIAL'],['agg_post_status','tinyint','+ SCHEDULED / POSTING / RETRY / CANCELLED (new)'],['scheduled_post_time','timestamp','slot (new)'],['post_retry_attempt','tinyint','(new)'],['is_del','tinyint','soft delete']],
   keys:['PK (id)','IDX (seller_id, task_type, scheduled_post_time): slot lookup + cron scan','IDX (source_item_id): dedup'],
   rows:[['1001','S-42','V-9001','4','SCHEDULED','2026-11-07 18:00','0'],['1002','S-42','V-9002','4','RETRY','2026-11-14 18:00','2'],['1003','S-77','V-9150','4','POSTED','2026-11-04 10:00','0']], rowCols:['id','seller_id','source_item_id','task_type','agg_post_status','scheduled_post_time','post_retry_attempt']},
  video_sub_task:{desc:'Child task: one per (source video × target market). Tracks the AI job and the posted video.',
-  cols:[['id','bigint','PK'],['task_id','bigint','→ video_task'],['seller_id','bigint','denormalised (new)'],['task_type','tinyint','denormalised (new)'],['target_region','varchar(2)','market (new)'],['target_language','varchar(4)',''],['target_shop_id','bigint','shop in that market'],['product_id','bigint','mapped target product'],['ai_job_id','bigint','AI platform job'],['status','tinyint','per-market status'],['item_id','bigint','posted video'],['post_time','timestamp','(new)'],['hide_from_profile','tinyint','(new)'],['is_del','tinyint','soft delete']],
+  cols:[['id','bigint','PK'],['task_id','bigint','→ video_task'],['seller_id','bigint','denormalised (new)'],['task_type','tinyint','denormalised (new)'],['target_region','varchar(2)','market (new)'],['target_language','varchar(4)',''],['target_shop_id','bigint','shop in that market'],['product_id','bigint','mapped target product'],['ai_job_id','bigint','AI platform job'],['status','tinyint','per-market status'],['item_id','bigint','posted video'],['post_time','timestamp','(new)'],['feedback','varchar(64)','GOOD / BAD + reasons (new)'],['is_del','tinyint','soft delete']],
   keys:['PK (id)','IDX (task_id, target_language, is_del)','IDX (seller_id, task_type, status, post_time): posted list','IDX (item_id): delete / stats join'],
   rows:[['5001','1001','DE','de','J-771','SCHEDULED','—'],['5002','1001','FR','fr','J-772','SCHEDULED','—'],['5003','1003','ES','es','J-610','POSTED','I-3301']], rowCols:['id','task_id','target_region','target_language','ai_job_id','status','item_id']},
  video_task_media:{desc:'Input media for a task (source video file, music).',
@@ -405,10 +398,10 @@ const FLOWS = [
 
 // ===== Drawer figures =====
 function figSlots(){
-  // 24h buffer, then windows with 4 slots × 1 video; 5th–6th roll into next window
+  // T+2 buffer, then windows with 4 slots × 1 video; 5th–6th roll into next window
   const W = 460, o = [`<svg viewBox="0 0 ${W} 150" width="100%">`];
   const x0 = 14, buf = 120, win = 150;
-  o.push(`<rect x="${x0}" y="58" width="${buf}" height="26" fill="#ffffff10" stroke="#ffffff30" stroke-dasharray="4 4"/><text x="${x0+buf/2}" y="76" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.65)">24h review</text>`);
+  o.push(`<rect x="${x0}" y="58" width="${buf}" height="26" fill="#ffffff10" stroke="#ffffff30" stroke-dasharray="4 4"/><text x="${x0+buf/2}" y="76" text-anchor="middle" font-size="12" fill="rgba(255,255,255,.65)">T+2 review</text>`);
   o.push(`<text x="${x0}" y="104" font-size="11" fill="rgba(255,255,255,.5)">now</text>`);
   for (let w = 0; w < 2; w++){
     const wx = x0 + buf + w*win;
@@ -430,13 +423,13 @@ function figSlots(){
   return o.join('');
 }
 function figStates(){
-  const S = {PENDING:[50,40], SUCCESS:[160,40], SCHEDULED:[290,40], POSTED:[410,40], FAIL:[50,120], RETRY:[290,120], CANCELLED:[410,120]};
+  const S = {PENDING:[50,40], SUCCESS:[160,40], SCHEDULED:[270,40], POSTING:[380,40], POSTED:[490,40], FAIL:[50,120], CANCELLED:[270,120], RETRY:[380,120]};
   const col = {FAIL:'#f87575', RETRY:'#ff8800', CANCELLED:'rgba(255,255,255,.5)', POSTED:'#42d094'};
-  const T = [['PENDING','SUCCESS'],['SUCCESS','SCHEDULED'],['SCHEDULED','POSTED'],['PENDING','FAIL'],['SCHEDULED','RETRY'],['RETRY','SCHEDULED'],['SCHEDULED','CANCELLED']];
-  const o = [`<svg viewBox="0 0 470 175" width="100%"><defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#b5b9c4"/></marker></defs>`];
+  const T = [['PENDING','SUCCESS'],['SUCCESS','SCHEDULED'],['SCHEDULED','POSTING'],['POSTING','POSTED'],['PENDING','FAIL'],['POSTING','RETRY'],['RETRY','POSTING'],['SCHEDULED','CANCELLED'],['RETRY','CANCELLED']];
+  const o = [`<svg viewBox="0 0 540 175" width="100%"><defs><marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#b5b9c4"/></marker></defs>`];
   for (const [a,b] of T){
-    const [x1,y1] = S[a], [x2,y2] = S[b], back = a === 'RETRY';
-    const off = (a==='SCHEDULED'&&b==='RETRY') ? -10 : back ? 10 : 0;
+    const [x1,y1] = S[a], [x2,y2] = S[b], back = a === 'RETRY' && b === 'POSTING';
+    const off = (a==='POSTING'&&b==='RETRY') ? -10 : back ? 10 : 0;
     const dx = x2-x1, dy = y2-y1, L = Math.hypot(dx,dy), ux = dx/L, uy = dy/L;
     o.push(`<line x1="${x1+ux*44+off}" y1="${y1+uy*16}" x2="${x2-ux*44+off}" y2="${y2-uy*16}" stroke="#b5b9c4" stroke-width="1.4" marker-end="url(#sa)"/>`);
   }
@@ -444,8 +437,8 @@ function figStates(){
     const c = col[k] || '#0080ff';
     o.push(`<rect x="${x-44}" y="${y-14}" width="88" height="28" rx="8" fill="${c}22" stroke="${c}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="12" fill="#fff">${k}</text>`);
   }
-  o.push(`<text x="232" y="84" font-size="11" fill="#ff8800">+7d · capped</text>`);
-  o.push(`<text x="10" y="160" font-size="11" fill="rgba(255,255,255,.5)">FAIL → re-picked by next daily batch · parent = computed from children</text></svg>`);
+  o.push(`<text x="398" y="84" font-size="11" fill="#ff8800">+7d · capped</text>`);
+  o.push(`<text x="10" y="160" font-size="11" fill="rgba(255,255,255,.5)">FAIL → re-picked by next daily batch · POSTING past timeout → SCHEDULED · parent = computed from children</text></svg>`);
   return o.join('');
 }
 
@@ -461,25 +454,52 @@ svcdb:{tag:'BE data · service DB', role:'Everything the online system reads and
  nu:['Copied to the warehouse once a day, so the batch job can join it without touching the serving DB.']},
 inventory:{tag:'Other team · inventory', role:'Unreserved stock for the product in the target market.',
  lld:['Called by the cron right before posting each child.','Batched multi-get per run.'],
- nu:['Stock is checked twice: at eligibility, and again here, because 24h+ can pass in between.']},
+ nu:['Stock is checked twice: at eligibility, and again here, because two days can pass in between.']},
 });
 LLD.svcdb.tbls = Object.keys(TABLES).filter(k => !TABLES[k].db);
 LLD.svcdb.ex = LLD.dyncfg.ex;
 
 // ===== Tech tags (top-left of each node; generic names per confidentiality.md) =====
 const TECH = {
-  g_apis:'HTTP', g_intake:'MQ consumer', g_translation:'RPC', g_posting:'MQ consumer', g_cron:'Cron',
+  g_apis:'HTTP', g_intake:'MQ consumer', g_translation:'RPC', g_posting:'MQ consumer · Cron',
   evbus:'MQ', svcdb:'RDS', g_offline:'Hive',
   c_auth:'Web', c_markets:'Web', c_sched:'Web', c_posted:'Web',
-  gw:'HTTP', task:'RPC', elig:'MQ consumer', sched:'MQ consumer', cron:'Cron', retry:'Cron',
+  gw:'HTTP', task:'RPC', elig:'MQ consumer', sched:'MQ consumer', cron:'Cron',
   lookups:'RPC', inventory:'RPC', posting:'RPC', ai:'GPU · RPC',
   ev_pub:'MQ', ev_batch:'MQ', ev_done:'MQ',
   tables:'RDS', sellercfg:'RDS', dyncfg:'Config center',
   batch:'Hive SQL', mirror:'Hive', wh:'Hive', olap:'OLAP',
 };
+// Node shape follows the tech tag: queues are pipes, data stores are cylinders, the rest are boxes.
+const SHAPE = {MQ:'pipe', RDS:'db', Hive:'db', OLAP:'db'};
+const shapeOf = n => SHAPE[TECH[n.id]] || 'box';
+// Returns the outline path and the visible end/rim ellipse for a pipe or cylinder.
+function shapePath(shape, x, y, w, h){
+  if (shape === 'db'){
+    const rx = w/2, ry = Math.min(14, h*.14);
+    return {ry, rx: 0,
+      d:`M${x},${y+ry}A${rx},${ry} 0 0 1 ${x+w},${y+ry}V${y+h-ry}A${rx},${ry} 0 0 1 ${x},${y+h-ry}Z`,
+      rim:`M${x},${y+ry}A${rx},${ry} 0 0 0 ${x+w},${y+ry}`};
+  }
+  const rx = Math.min(16, w*.08), ry = h/2;
+  return {ry: 0, rx,
+    d:`M${x+rx},${y}H${x+w-rx}A${rx},${ry} 0 0 1 ${x+w-rx},${y+h}H${x+rx}A${rx},${ry} 0 0 1 ${x+rx},${y}Z`,
+    rim:`M${x+w-rx},${y}A${rx},${ry} 0 0 0 ${x+w-rx},${y+h}`};
+}
+function nodeShape(n, c, sw, dash){
+  const shape = shapeOf(n);
+  if (shape === 'box') return {rx: 0, ry: 0, svg:
+    `<rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="12" fill="${c.f}" stroke="${c.s}" stroke-width="${sw}" ${dash}/>` +
+    (n.zoom ? `<rect x="${n.x+5}" y="${n.y+5}" width="${n.w-10}" height="${n.h-10}" rx="9" fill="none" stroke="${c.s}" stroke-opacity=".35" stroke-width="1"/>` : '')};
+  const p = shapePath(shape, n.x, n.y, n.w, n.h);
+  return {rx: p.rx, ry: p.ry, svg:
+    `<path d="${p.d}" fill="${c.f}" stroke="${c.s}" stroke-width="${sw}" ${dash}/>` +
+    `<path d="${p.rim}" fill="none" stroke="${c.s}" stroke-width="${sw}" ${dash}/>` +
+    (n.zoom ? `<path d="${shapePath(shape, n.x+6, n.y+6, n.w-12, n.h-12).d}" fill="none" stroke="${c.s}" stroke-opacity=".35" stroke-width="1"/>` : '')};
+}
 function techTag(n, c){
   const t = TECH[n.id]; if (!t) return '';
-  const w = Math.ceil(t.length * 8 + 20), x = n.x + 12, y = n.y - 9;
+  const w = Math.ceil(t.length * 8 + 20), x = n.x + 12 + (shapeOf(n) === 'pipe' ? 10 : 0), y = n.y - 9;
   return `<rect x="${x}" y="${y}" width="${w}" height="18" rx="9" fill="#0f1114" stroke="${c.s}" stroke-width="1.2"/><text x="${x + w/2}" y="${y + 13}" text-anchor="middle" font-size="11" font-weight="700" letter-spacing=".5" fill="${c.s}">${esc(t)}</text>`;
 }
 
@@ -548,11 +568,12 @@ function render(){
     const c = COL[n.owner], dim = rel && !rel.has(n.id), isSel = sel === n.id || hover === n.id;
     const ghost = n.owner === 'ghost';
     const fs = n.h < 60 ? 16 : n.w < 230 ? 18 : 20;
+    const sh = nodeShape(n, c, n.owner==='mine' || n.zoom ? 2.6 : 1.5, ghost ? 'stroke-dasharray="6 5"' : '');
+    const tx = cx(n) - sh.rx/2, ty = cy(n) + sh.ry/2; // centre text in the body, past the rim
     o.push(`<g class="node${dim ? ' dim' : ''}" data-id="${n.id}" ${isSel ? 'filter="url(#glow)"' : ''}>
-      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="12" fill="${c.f}" stroke="${c.s}" stroke-width="${n.owner==='mine' || n.zoom ? 2.6 : 1.5}" ${ghost ? 'stroke-dasharray="6 5"' : ''}/>
-      ${n.zoom ? `<rect x="${n.x+5}" y="${n.y+5}" width="${n.w-10}" height="${n.h-10}" rx="9" fill="none" stroke="${c.s}" stroke-opacity=".35" stroke-width="1"/>` : ''}
-      <text x="${cx(n)}" y="${cy(n) + (n.sub || ghost ? -4 : 6)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${ghost ? 'rgba(255,255,255,.75)' : '#fff'}">${esc(n.label)}</text>
-      ${n.sub ? `<text x="${cx(n)}" y="${cy(n) + (n.h < 80 ? 16 : 20)}" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.65)">${esc(n.sub)}</text>` : ''}
+      ${sh.svg}
+      <text x="${tx}" y="${ty + (n.sub || ghost ? -4 : 6)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="${ghost ? 'rgba(255,255,255,.75)' : '#fff'}">${esc(n.label)}</text>
+      ${n.sub ? `<text x="${tx}" y="${ty + (n.h < 80 ? 16 : 20)}" text-anchor="middle" font-size="14" fill="rgba(255,255,255,.65)">${esc(n.sub)}</text>` : ''}
       ${ghost ? `<text x="${cx(n)}" y="${cy(n) + 20}" text-anchor="middle" font-size="13" fill="rgba(255,255,255,.5)">open view →</text>` : ''}
       ${techTag(n, c)}
       ${n.zoom ? `<text x="${n.x+n.w-12}" y="${n.y+n.h-11}" text-anchor="end" font-size="14" font-weight="700" fill="${c.s}">⊕ open</text>` : ''}
@@ -564,7 +585,7 @@ function render(){
 }
 
 function crumb(){
-  const v = V(), el = document.getElementById('crumbs'), root = 'AI Video Translation &amp; Auto-post';
+  const v = V(), el = document.getElementById('crumbs'), root = 'Translation Pipeline';
   document.getElementById('up').disabled = cur === 'overview';
   el.innerHTML = cur === 'overview'
     ? `<span class="cur">${root}</span>`

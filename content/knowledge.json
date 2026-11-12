@@ -1,9 +1,10 @@
 {
   "id": "knowledge",
   "diagram": "ai-knowledge-layer/diagram-layers.html",
-  "accent": "#8B65FF",
-  "nav": "AI knowledge layer",
-  "title": "AI knowledge layer",
+  "titleDiagram": false,
+  "accent": "#5d9eff",
+  "nav": "AI Harness",
+  "title": "AI Harness",
   "time": "~25 min",
   "kind": "Platform",
   "logline": "Software patterns, applied to AI workflows",
@@ -23,52 +24,61 @@
       }
     },
     {
-      "t": "The wiki",
+      "t": "One source of truth",
       "s": "",
       "poster": "knowledge-2",
       "min": 3.5,
       "key": true,
-      "view": "l=wiki",
       "rows": [
         [
-          "Ingest",
-          "Daily scheduler, code sync, project archive. All arrive as merge requests"
+          "Knowledge",
+          "An AI wiki holds facts, runbooks and scenarios, one per direction"
         ],
         [
-          "Gates",
-          "Wiki CI, evals, then a code owner approves"
+          "Code detail",
+          "Read from the service repos the wiki registers, never copied"
         ],
         [
-          "Contents",
-          "Facts only"
+          "Skills",
+          "A team's skills all live in the same repo, and only skills call tools"
         ]
       ]
     },
     {
-      "t": "Design decisions",
+      "t": "Designed for fast retrieval",
       "s": "",
       "poster": "knowledge-3",
       "min": 2,
       "table": [
         [
-          "Decision",
-          "<span style=\"color:#22c55e\">✓</span> Chosen",
-          "<span style=\"color:#ef4444\">✗</span> Rejected"
+          "",
+          "<span class=\"yes\">✔︎</span> Index navigation",
+          "<span class=\"no\">✖︎</span> RAG",
+          "<span class=\"no\">✖︎</span> Fine-tuning"
         ],
         [
-          "Retrieval",
-          "Index navigation: the agent follows the index to the right doc",
-          "RAG adds an index to refresh and ranking to tune. Fine-tuning needs a retrain on every change"
+          "Finds a doc",
+          "Agent reads the index, opens the right doc",
+          "Embedding search returns top chunks",
+          "Knowledge is in the weights"
         ],
         [
-          "Code detail",
-          "Stays in the service repo",
-          "A copy in the wiki goes stale quickly"
+          "Wiki changes",
+          "Update the index in the same MR",
+          "Re-embed and re-tune ranking",
+          "Retrain"
         ],
         [
-          "Skills",
-          "All skills live in a separate skills repo",
-          "Procedures would mix with facts. Skills need their own review and tests"
+          "When wrong",
+          "You can see which doc it opened",
+          "Hard to tell why a chunk ranked high",
+          "Can't trace the source"
+        ],
+        [
+          "Fit",
+          "Accurate, and our wiki is small enough to index",
+          "Less accurate. Pays off only with many documents",
+          "Expensive, and recall is unreliable"
         ]
       ]
     },
@@ -178,22 +188,13 @@
       "t": "Skill simulation",
       "s": "",
       "poster": "knowledge-6",
-      "min": 1,
+      "min": 2,
       "timeline": [
-        {
-          "when": "Step 0",
-          "t": "Sandbox",
-          "pts": [
-            "Git worktree in /tmp",
-            "Seeded from environment templates"
-          ]
-        },
         {
           "when": "Step 1",
           "t": "Load fixture",
           "pts": [
             "Frozen agent session",
-            "DB seeds or mock registries",
             "1 fixture : N scenarios"
           ]
         },
@@ -201,8 +202,7 @@
           "when": "Step 2",
           "t": "Fork",
           "pts": [
-            "Fork the frozen agent session",
-            "Each run gets its own copy, so scenarios never affect each other"
+            "Fork the frozen agent session per scenario"
           ]
         },
         {
@@ -212,25 +212,14 @@
             "Sets how the test starts and who the user is",
             "Per-scenario caps on simulation turns and tokens"
           ]
-        }
-      ],
-      "edge": "right",
-      "auto": 200
-    },
-    {
-      "t": "Skill simulation (cont.)",
-      "s": "",
-      "poster": "knowledge-7",
-      "min": 1,
-      "timeline": [
+        },
         {
           "when": "Step 4",
           "t": "Simulate",
           "pts": [
             "Agent acts, simulated user replies",
             "Safety gate blocks hallucinated or forbidden tools",
-            "Fixtures supply mocked tool results",
-            "Circuit breaker stops on goal, error or limit"
+            "Fixtures supply mocked tool results"
           ]
         },
         {
@@ -241,21 +230,9 @@
             "Tier 2: state invariants (tool sequence, file diffs, DB changes)",
             "Tier 3: rubric-based LLM judge, templated response"
           ]
-        },
-        {
-          "when": "Step 6",
-          "t": "Record and clean up",
-          "pts": [
-            "Metrics to history.jsonl",
-            "Pass deletes the sandbox",
-            "Fail keeps trajectory, diff and judge scores in .runs/failures/",
-            "Prune: keep failed runs for 30 days"
-          ]
         }
       ],
-      "edge": "left",
-      "hideTitle": true,
-      "auto": 200
+      "snake": 3
     },
     {
       "t": "Guardrails",
@@ -269,32 +246,11 @@
         ],
         [
           "Prod untouched",
-          "Writes limited to staging environment. DB writes via tickets, A/B changes as drafts"
+          "Limit writes to staging environment. Prod changes go through tickets or drafts"
         ],
         [
-          "Never replay",
-          "Never retry blind: read the state first"
-        ]
-      ]
-    },
-    {
-      "t": "Definition of done",
-      "s": "Spec workflow: done is a gate in code, not the agent's word",
-      "poster": "knowledge-9",
-      "min": 2,
-      "view": "l=harness",
-      "rows": [
-        [
-          "Problem",
-          "Agents declare victory early and drift after context compaction"
-        ],
-        [
-          "Mechanism",
-          "Stage state lives in code. Only a validated callback moves a stage forward"
-        ],
-        [
-          "Failure",
-          "Every transition is logged, so a bad run can be resumed or rolled back. After 3 rollbacks, a human steps in"
+          "Safe retries",
+          "Every write carries an idempotency key. Without one, read the state before retrying"
         ]
       ]
     },
@@ -306,16 +262,20 @@
       "view": "l=sched",
       "rows": [
         [
-          "Daily",
-          "Daily batch MR from the day's oncall/alarm incidents"
+          "Incidents",
+          "Nightly MR from the day's oncall and alarm incidents. P0s skip the batch and get their own MR at once"
         ],
         [
-          "Per scenario",
-          "KB gap check on solved issues: the agent proposes, a human confirms. The engineer rates each agent reply at ticket close"
+          "Code changes",
+          "Weekly batch diffs the registered service repos and opens an MR for new wiki gaps"
         ],
         [
-          "Bounded",
-          "Capped MR size, human merge and a git history that can be reverted"
+          "Engineers",
+          "Engineers rate each agent reply at ticket close. Wrong answers fix the wiki and become eval cases"
+        ],
+        [
+          "Gated",
+          "Evals and Wiki CI run before review. A code owner merges. The agent never does"
         ]
       ]
     },
@@ -333,8 +293,8 @@
           [
             "Outcome",
             "3 tickets per class",
-            "Does it solve real tickets?",
-            "Every release · pass rate per class"
+            "Does the full system solve real tickets?",
+            "Model or rules change · weekly"
           ],
           [
             "Skill",
@@ -353,7 +313,39 @@
       }
     },
     {
-      "t": "Future direction",
+      "t": "Impact",
+      "s": "",
+      "poster": "knowledge-13",
+      "min": 1,
+      "rows": [
+        [
+          "Adoption",
+          "~100 weekly active engineers on the Spec Workflow since October, up from 20+"
+        ],
+        [
+          "Oncall",
+          "~300 tickets condensed into 15 recurring issue classes"
+        ]
+      ]
+    },
+    {
+      "t": "Retrospectives",
+      "s": "",
+      "poster": "knowledge-14",
+      "min": 1,
+      "rows": [
+        [
+          "Gate, don't automate",
+          "Human-gated write-back worked better than full automation. One human yes per MR keeps the wiki trusted"
+        ],
+        [
+          "Test on real traces",
+          "Static tests don't prove model behaviour, so bad runs from real traces became the regression set"
+        ]
+      ]
+    },
+    {
+      "t": "Enhancements",
       "s": "",
       "poster": "knowledge-12",
       "min": 1,
@@ -369,38 +361,6 @@
         [
           "Auto&#8209;triage",
           "Automate Oncall Agent replies, no @ needed, so every ticket gets a reply to rate"
-        ]
-      ]
-    },
-    {
-      "t": "Impact and retro",
-      "s": "",
-      "poster": "knowledge-13",
-      "min": 1.5,
-      "rows": [
-        [
-          "#",
-          "Impact"
-        ],
-        [
-          "Adoption",
-          "~100 weekly active engineers on the workflow since October, up from 20+"
-        ],
-        [
-          "Oncall",
-          "~300 tickets condensed into 15 recurring issue classes"
-        ],
-        [
-          "#",
-          "Lessons"
-        ],
-        [
-          "Gate, don't automate",
-          "Human-gated write-back worked better than full automation. One human yes per MR keeps the wiki trusted"
-        ],
-        [
-          "Test on real traces",
-          "Static tests don't prove model behaviour, so bad runs from real traces became the regression set"
         ]
       ]
     }

@@ -22,16 +22,16 @@ svg{width:100%;height:100%;display:block}
 #panel h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.6}
 #panel ul{margin:0;padding-left:18px}
 #panel .sbtns{display:flex;flex-wrap:wrap;gap:8px}
-.sbtn{background:#ffffff0d;border:1px solid #3a3f47;border-radius:8px;color:#e6e8eb;padding:6px 12px;cursor:pointer;font-size:13px}
-.sbtn:hover{background:#ffffff1a;border-color:#7cc4ff}
+.sbtn{background:#ffffff0d;border:1px solid #3b4048;border-radius:8px;color:#e0e2e7;padding:6px 12px;cursor:pointer;font-size:13px}
+.sbtn:hover{background:#ffffff1a;border-color:#95b9ff}
 #schema{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.45);padding-right:400px}
 body.schema #schema{display:flex}
 #sbox{position:relative;width:min(640px,calc(100vw - 448px));max-height:86vh;overflow-y:auto;background:#1c2024;border:1px solid #272a30;border-radius:14px;padding:24px 26px 28px;font-size:13px;line-height:1.5}
-#sbox .stag{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#7cc4ff}
+#sbox .stag{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#95b9ff}
 #sbox h2{margin:6px 0;font-size:22px}
 #sbox h4{margin:16px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.6}
 #sbox ul{margin:0;padding-left:18px}
-#sclose{position:absolute;top:10px;right:12px;background:none;border:0;color:#9aa0a6;font-size:18px;cursor:pointer}
+#sclose{position:absolute;top:10px;right:12px;background:none;border:0;color:#989ead;font-size:18px;cursor:pointer}
 #sbox .ex-tbl{overflow-x:auto;border:1px solid #272a30;border-radius:8px;margin:6px 0}
 #sbox .ex-tbl table{border-collapse:collapse;font-size:12px;font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
 #sbox .ex-tbl th,#sbox .ex-tbl td{padding:4px 8px;border-bottom:1px solid #272a30;text-align:left}
@@ -55,7 +55,7 @@ body.schema #schema{display:flex}
 .node.click{cursor:pointer}
 .node{transition:opacity .15s}
 .node.dim{opacity:.22}
-.node.click:hover rect.box{filter:brightness(1.35)}
+.node.click:hover .box{filter:brightness(1.35)}
 .node text{pointer-events:none}
 </style></head>
 <body>
@@ -81,11 +81,11 @@ body.schema #schema{display:flex}
   <div><i style="background:#5d9eff40;border:1px solid #5d9eff"></i>AI Wiki</div>
   <div><i style="background:#00deed40;border:1px solid #00deed"></i>Spec Workflow</div>
   <div><i style="background:#989ead33;border:1px dashed #989ead"></i>External system</div>
-  <div><i style="background:#15181c;border:1px dashed #fff"></i>↗ Jump to other layer</div>
+  <div><i style="background:#1c2024;border:1px dashed #fff"></i>↗ Jump to other layer</div>
   <div><span class="ln" style="border-top-color:#b5b9c4"></span>Flow / read (grey)</div>
   <div><span class="ln" style="border-top:4px solid #b5b9c4"></span>Write</div>
   <div class="full"><span><span class="ln" style="border-top-color:#00eafa"></span>Cyan = hovered / selected links</span></div>
-  <div class="full">Bands:<span><i style="background:#42d09440;border:1px solid #42d094"></i>entry</span><span><i style="background:#8B65FF40;border:1px solid #8B65FF"></i>agent</span><span><i style="background:#5d9eff40;border:1px solid #5d9eff"></i>knowledge</span><span><i style="background:#00deed40;border:1px solid #00deed"></i>workflow</span></div>
+  <div class="full">Bands:<span><i style="background:#42d09440;border:1px solid #42d094"></i>entry</span><span><i style="background:#00deed40;border:1px solid #00deed"></i>agent</span><span><i style="background:#5d9eff40;border:1px solid #5d9eff"></i>knowledge</span><span><i style="background:#00deed40;border:1px solid #00deed"></i>workflow</span></div>
 </div>
 
 <script>
@@ -98,16 +98,24 @@ body.schema #schema{display:flex}
 // 4 system colours (logo gradient: orange, magenta, blue, cyan) + 2 status colours (gray external, yellow stale)
 const C = {oncall:'#ff8800',alarm:'#ffa185',maint:'#ff4fff',wiki:'#5d9eff',spec:'#00deed',ext:'#989ead',warn:'#ffd13c'};
 const SYS = {bot:C.oncall,sched:C.maint,wiki:C.wiki,harness:C.spec,env:C.spec,rec:C.spec};
+// Data stores (wiki, repos, histories) draw as cylinders; everything else is a box.
+const STORE=new Set(['wiki','skills','sk','tix','alm','svc']);
+function cylPath(x,y,w,h){
+  const rx=w/2, ry=Math.min(14,h*.14);
+  return {ry,
+    d:`M${x},${y+ry}A${rx},${ry} 0 0 1 ${x+w},${y+ry}V${y+h-ry}A${rx},${ry} 0 0 1 ${x},${y+h-ry}Z`,
+    rim:`M${x},${y+ry}A${rx},${ry} 0 0 0 ${x+w},${y+ry}`};
+}
 function colorOf(lid,n){ return (n.c&&C[n.c]) || (n.child&&SYS[n.child]) || (n.go&&SYS[n.go]) || ((n.kind==='ghost'||n.kind==='person')?C.ext:SYS[lid]) || C.ext; }
 
 const L = {
-root:{title:'AI knowledge layer',
- d:{kind:'Overview',what:'One agent-readable wiki at the centre. Agents pull context from it on every ticket, alarm or delivery stage. A nightly scheduler closes the loop: it reads the day’s oncall and alarm history and writes what was learned back into the wiki.',
-  how:['Arrows show which way knowledge flows: wiki → agents is context; the scheduler pulls the histories and writes updates to the wiki.','Skills repo is shared: the Oncall Agent and the Spec Workflow stages both load their skills from it.','Oncall Agent and Alarm Agent use the wiki as context; their history is the scheduler’s input.','Wiki Maintainer: end-of-day job that diffs the day’s tickets and alarms against the wiki and opens an update MR.','Spec Workflow: uses the wiki as context at each stage; its Archive stage files each project back.','The wiki is plain Markdown + YAML in git: index routing, no vector DB.'],
+root:{title:'AI Harness',
+ d:{kind:'Overview',what:'One agent-readable wiki at the centre. Agents pull context from it on every ticket, alarm or delivery stage. A scheduled job closes the loop: nightly it reads the day’s oncall and alarm history, weekly it reads the week’s code changes, and it writes what was learned back into the wiki.',
+  how:['Arrows show which way knowledge flows: wiki → agents is context; the scheduler pulls the histories and writes updates to the wiki.','Skills repo is shared: the Oncall Agent and the Spec Workflow stages both load their skills from it.','Oncall Agent and Alarm Agent use the wiki as context; their history is the scheduler’s input.','Wiki Maintainer: diffs the day’s tickets and alarms (nightly) and the week’s merged code changes (weekly) against the wiki and opens an update MR.','Spec Workflow: uses the wiki as context at each stage; its Archive stage files each project back.','The wiki is plain Markdown + YAML in git: index routing, no vector DB.'],
   gotchas:['This is the team’s own wiki, covering every domain the team owns.','Success is judged on real outcomes (MTTR, deflection), not on how much content is added.']},
  nodes:[
   {id:'oncall',label:'Oncall Agent',sub:'answers oncall questions\nin chat',x:30,y:50,w:270,h:140,child:'bot'},
-  {id:'sched',label:'Wiki Maintainer',sub:'end-of-day scheduler\noncall + alarm history → wiki',x:30,y:280,w:270,h:120,child:'sched'},
+  {id:'sched',label:'Wiki Maintainer',sub:'nightly + weekly scheduler\nhistories + code → wiki',x:30,y:280,w:270,h:120,child:'sched'},
   {id:'alarm',label:'Alarm Agent',sub:'triages monitoring alarms',c:'alarm',x:30,y:500,w:270,h:140,
    d:{kind:'Agent',what:'Picks up monitoring alarms, pulls the matching runbook / known issue from the wiki, and gathers evidence (logs, metrics, recent deploys) before a human acts.',how:['Same building blocks as the Oncall Agent: same runtime, same wiki, read-only evidence tools.','The difference is the trigger and the output: an alarm starts it, and it writes a triage note instead of a chat answer.','Context: wiki runbooks, Scenario Runbook precedents, service registry.','Output: alarm triage note + its outcome, kept as alarm history.','Alarm history is one of the Wiki Maintainer’s two inputs.'],link:['See the Oncall Agent diagram','bot']}},
   {id:'wiki',label:'AI Wiki',sub:'the team’s agent-readable\nknowledge, in git',x:465,y:235,w:270,h:210,child:'wiki'},
@@ -156,7 +164,7 @@ bot:{title:'Oncall Agent',
     guards:[['code','Prod DB: SELECT / SHOW / DESCRIBE only, regex gate before any call.'],['platform','Release ticket and DB release stop at a human approval node.'],['platform','Timer trigger needs a second-person approval before it runs.'],['platform','Calls use the asker’s delegated per-user credentials (least privilege), not a shared identity.']]}},
   {id:'gskill',label:'Generic skills',sub:'log search · DB read\nbounded summary output',x:810,y:340,w:260,h:90,
    d:{kind:'Domain skill',what:'Generic skills shared by every domain skill: log search and DB read. They take a recipe or query from the wiki and return a bounded summary, never raw logs or rows.',guards:[['platform','Authorization is the caller’s token, enforced by the platform: shared skills never widen access, because each consumer calls with its own token.'],['code','Read-only skills.'],['code','Output is a bounded summary: top hits, window, counts.']],gotchas:['Live in the team’s skills repo like the domain skills. Starter versions can come from the same template the wiki is scaffolded from.']}},
-  {id:'sched',label:'Wiki\nMaintainer',sub:'end of day',x:255,y:400,w:150,h:80,go:'sched'},
+  {id:'sched',label:'Wiki\nMaintainer',sub:'nightly + weekly',x:255,y:400,w:150,h:80,go:'sched'},
  ],
  edges:[
   ['chat','router','@mention','read'],
@@ -171,20 +179,22 @@ bot:{title:'Oncall Agent',
 
 // ---------------- WIKI MAINTAINER ----------------
 sched:{title:'Wiki Maintainer',
- d:{kind:'Scheduled job',what:'A generic end-of-day scheduler. It polls the day’s oncall ticket history and alarm history, compares what was learned with what the wiki says, and opens update MRs for the wiki, after its question evals pass.',
-  how:['Trigger: cron at end of day.','Collect → compare with the wiki → draft entries → run evals → open MR → review → merge.','Tomorrow’s Oncall and Alarm agents read the updated wiki: the loop closes without anyone remembering to write docs.'],
+ d:{kind:'Scheduled job',what:'A scheduled job with two runs. Nightly, it polls the day’s oncall ticket history and alarm history. Weekly, it reads the week’s merged changes in the registered service repos. Each run compares what changed with what the wiki says and opens update MRs for the wiki, after its question evals pass.',
+  how:['Trigger: nightly for tickets and alarms, weekly for code changes.','Collect → compare with the wiki → draft entries → run evals → open MR → review → merge.','Tomorrow’s Oncall and Alarm agents read the updated wiki: the loop closes without anyone remembering to write docs.'],
   guards:[['prompt','No PII: entries cite only the ticket / alarm id.'],['code','Wiki CI (link check, PII / secret scan, freshness lint) runs on every MR it opens.'],['platform','Human review on the MR before merge.'],['platform','Maintainer bot identity: pushes only to maintainer/* branches and opens MRs. It cannot merge, edit CI config or bypass branch protection; code owners per wiki area approve.'],['code','Evals run before any MR is opened: a drop in score holds the draft instead of opening a PR.']],
   gotchas:['Past Scenario Runbook entries are hypotheses, not answers: an agent tests an entry against the current evidence, and the Maintainer only updates one when the day’s evidence ties to it.','MR budget: each MR holds at most N entries and the overflow carries to the next day, so a reviewer can actually read it. A P0 or postmortem finding takes a fast path: its own small MR straight away, through the same evals and CI.']},
  nodes:[
-  {id:'cron',label:'Nightly trigger',sub:'cron',x:20,y:60,w:180,h:80,
-   d:{kind:'Trigger',what:'Runs once a day after the oncall shift ends.'}},
-  {id:'tix',label:'Ticket history',sub:'today’s threads + outcomes',x:20,y:230,w:220,h:90,go:'bot'},
-  {id:'alm',label:'Alarm history',c:'alarm',sub:'today’s alarms + triage notes',x:20,y:400,w:220,h:90,
+  {id:'cron',label:'Trigger',sub:'cron · nightly + weekly',x:20,y:30,w:220,h:80,
+   d:{kind:'Trigger',what:'Two schedules start the same pipeline.',how:['Nightly, after the oncall shift ends: the day’s ticket and alarm history.','Weekly: the week’s merged changes in the registered service repos.']}},
+  {id:'tix',label:'Ticket history',sub:'today’s threads + outcomes',x:20,y:150,w:220,h:90,go:'bot'},
+  {id:'alm',label:'Alarm history',c:'alarm',sub:'today’s alarms + triage notes',x:20,y:280,w:220,h:90,
    d:{kind:'Input',what:'The Alarm Agent’s output for the day: which alarms fired, what evidence was gathered, how each one was resolved.'}},
+  {id:'repos',label:'Service repos',sub:'this week’s merges\nin registered repos',x:20,y:410,w:220,h:90,go:'wiki',
+   d:{kind:'Input',what:'The week’s merged changes in the service repos listed in the wiki’s service registry. Used to find wiki entries the code no longer matches and new behaviour the wiki does not cover yet.',guards:[['platform','Read-only access to the repos.']]}},
   {id:'collect',label:'1 · Collect',sub:'scrub · group by\nsymptom / service',x:270,y:290,w:150,h:120,
-   d:{kind:'Step',what:'Pull the day’s tickets and alarms and cluster them by symptom and service, so repeats collapse into one candidate.',guards:[['code','Personal data and secrets are stripped from tickets before the model sees them.'],['code','Only history with a human-confirmed outcome (ticket resolved and the agent’s reply rated by the engineer, or alarm triage confirmed) can create or change an entry. Agent-only answers are logged but never promoted, so the wiki cannot reinforce its own mistakes.'],['code','An unrated ticket is skipped: no rating, no learning.']]}},
+   d:{kind:'Step',what:'Nightly: pull the day’s tickets and alarms and cluster them by symptom and service, so repeats collapse into one candidate. Weekly: pull the week’s merged changes and group them by service.',guards:[['code','Personal data and secrets are stripped from tickets before the model sees them.'],['code','Only history with a human-confirmed outcome (ticket resolved and the agent’s reply rated by the engineer, or alarm triage confirmed) can create or change an entry. Agent-only answers are logged but never promoted, so the wiki cannot reinforce its own mistakes.'],['code','An unrated ticket is skipped: no rating, no learning.']]}},
   {id:'diff',label:'2 · Compare',sub:'New / Outdated\n/ Review per finding',x:450,y:290,w:150,h:120,
-   d:{kind:'Step',what:'Walk the wiki index for each cluster and compare findings with the wiki claims that were used.',how:['Each finding marked New (no entry) or Outdated (entry contradicted by today’s evidence).','Entries past their review interval, or unused for N days, are flagged Review / Archive for a human to confirm.','No change → nothing to write.']}},
+   d:{kind:'Step',what:'Walk the wiki index for each cluster and compare findings with the wiki claims that were used.',how:['Each finding marked New (no entry) or Outdated (entry contradicted by new evidence or a code change).','Entries past their review interval, or unused for N days, are flagged Review / Archive for a human to confirm.','No change → nothing to write.']}},
   {id:'draft',label:'3 · Draft',sub:'Runbooks, recipes,\nrouting + index',x:630,y:290,w:150,h:120,
    d:{kind:'Step',what:'Write or update wiki entries from the day’s evidence: Scenario Runbook entries from the template (symptom · applies to · root cause · resolution · handoff), log and query recipes, routing, and the matching index rows.',guards:[['prompt','Index-update invariant: every doc change updates its index in the same change.']]}},
   {id:'evals',label:'4 · Run evals',sub:'question set on\nthe draft branch',x:810,y:290,w:150,h:120,
@@ -194,8 +204,8 @@ sched:{title:'Wiki Maintainer',
   {id:'wiki',label:'AI Wiki',sub:'Runbooks · docs · index',x:450,y:520,w:390,h:100,go:'wiki'},
  ],
  edges:[
-  ['cron','collect','','read'],
-  ['tix','collect','','read'],['alm','collect','','read'],
+  ['cron','collect','','read',{s:['R','L']}],
+  ['tix','collect','','read',{s:['R','L']}],['alm','collect','','read',{s:['R','L']}],['repos','collect','','read',{s:['R','L']}],
   ['collect','diff','','read'],['diff','draft','','read'],['draft','evals','','read'],['evals','mr','','read'],
   ['wiki','diff','current claims','read',{s:['T','B'],f:[.19,.5],lt:.8}],
   ['mr','wiki','merge','write',{c:[1075,600]}],
@@ -204,28 +214,26 @@ sched:{title:'Wiki Maintainer',
 // ---------------- WIKI ----------------
 wiki:{title:'AI Wiki',
  d:{kind:'Knowledge base (git)',what:'Git-hosted Markdown / YAML knowledge for AI agents on a business domain. No service code.',
-  how:['Retrieve: index routing (progressive disclosure), not search. No embeddings anywhere.','Stay fresh: Wiki Maintainer MRs, index-update invariant, Wiki CI on every MR, evals before the Maintainer opens one.','Code detail is read from the service repos at the registry commit; the wiki keeps architecture, direction and context.','Consumers: Oncall Agent, Alarm Agent, Spec Workflow, coding-agent sessions.','The wiki holds facts only: no procedures, tool or MCP calls. All skills (domain, read and write) live in the skills repo and point at wiki entries; reads and writes run behind the platform’s approval.'],
+  how:['Retrieve: index routing (progressive disclosure), not search. No embeddings anywhere.','Stay fresh: Wiki Maintainer MRs, index-update invariant, Wiki CI on every MR, evals before the Maintainer opens one.','Code detail is read from the service repos the wiki registers; the wiki keeps architecture, direction and context.','Consumers: Oncall Agent, Alarm Agent, Spec Workflow, coding-agent sessions.','The wiki holds facts only: no procedures, tool or MCP calls. All skills (domain, read and write) live in the skills repo and point at wiki entries; reads and writes run behind the platform’s approval.'],
   guards:[['prompt','Any doc change updates its index in the same change.'],['code','Wiki CI on every MR: link check, PII / secret scan, freshness lint.'],['code','Evals: a fixed set of real runbook-scenario questions is re-run on a change; a lower score than main blocks it.']],
  },
  nodes:[
   {id:'oncall',label:'Oncall Agent',sub:'ticket context',x:20,y:40,w:190,h:80,go:'bot'},
   {id:'alarm',label:'Alarm Agent',sub:'alarm context',c:'alarm',x:20,y:190,w:190,h:80,kind:'ghost',d:{kind:'Consumer',what:'Pulls runbooks, Scenario Runbook precedents and the service registry as context for each alarm; its alarm history feeds the Wiki Maintainer.'}},
-  {id:'sched',label:'Wiki\nMaintainer',sub:'end-of-day MRs',x:20,y:340,w:190,h:100,go:'sched'},
+  {id:'sched',label:'Wiki\nMaintainer',sub:'nightly + weekly MRs',x:20,y:340,w:190,h:100,go:'sched'},
   {id:'harness',label:'Spec Workflow',sub:'context · archive',x:20,y:550,w:190,h:90,go:'harness'},
   {id:'index',label:'Index tree',sub:'AGENTS.md → AI-INDEX\n→ sub-indexes → docs\n\nroutes, holds no detail',x:300,y:140,w:180,h:400,
    d:{kind:'Main contract',what:'Progressive-disclosure router: root index → sub-indexes → numbered docs. AGENTS.md is the single source of truth for agent rules.',how:['Root index: scenarios (understand domain, take an oncall, find a service, read code).','Knowledge index: change type → doc chain.','Oncall map: boundary → action skill → recipes → Scenario Runbook precedents.'],guards:[['prompt','“Don’t grep the whole repo, navigate from the indexes.”'],['code','Link checker fails on unindexed docs.']],gotchas:['Contract surface: moving it breaks every consumer at once.','Restructures aim to shrink agent context: remove mirrors, merge duplicates.']}},
-  {id:'kbsync',label:'Code sync',sub:'code merge → docs MR',x:800,y:20,w:220,h:62,
-   d:{kind:'Automation',what:'When a code MR merges in a watched repo, the sync opens a docs MR into the wiki. It only opens the MR: Wiki CI and human code-owner review check it like every other wiki MR.',gotchas:['Same gate as the nightly Wiki Maintainer update: nothing reaches the wiki without a reviewed MR.']}},
   {id:'docs',label:'References',sub:'boundary · data model · recipes',x:520,y:130,w:220,h:90,
    d:{kind:'Content',what:'Numbered reference docs: overview, glossary, region dispatch, data model, extension hooks, oncall triage, debug recipes.',how:['008 oncall triage: the “is it ours?” boundary.','012 debug recipes.','004.1 extension-hook mappings.'],guards:[['prompt','Numbers are never reused (agents hard-code paths).']]}},
   {id:'qa',label:'Scenario Runbook',sub:'seeded from real tickets\nfor oncall, alarms, people',x:520,y:240,w:220,h:90,
    d:{kind:'Content',what:'One runbook entry per recurring scenario, seeded from real historical tickets; new and outdated entries arrive through the Wiki Maintainer’s MR. Where a change is the right fix, the entry records the fact (when it applies, what to check first) and names the write skill in the skills repo. That skill and the platform’s approval gate carry it out; the entry never does.',how:['Template: symptom · applies to · root cause · resolution · handoff.','Provenance labelled: KB-derived vs confirmed against ticket chats.'],gotchas:['Entries are hypotheses, not answers: test them against the current ticket’s evidence before reusing.','Honest metric: adding files doesn’t move adoption; only real deflection does.']}},
   {id:'reg',label:'Service registry',sub:'service → docs map',x:520,y:350,w:220,h:90,
-   d:{kind:'Content',what:'Where each service lives and which docs describe it. Identify services by the full triple (id + repo path + alias), never by a short name.',gotchas:['The Oncall Agent uses it as its onboarding code scope.']}},
+   d:{kind:'Content',what:'The services this wiki references: where each lives and which docs describe it. Identify services by the full triple (id + repo path + alias), never by a short name.',gotchas:['The Oncall Agent uses it as its onboarding code scope.']}},
   {id:'code',label:'Architecture notes',sub:'curated · why, not what',x:800,y:130,w:220,h:90,
-   d:{kind:'Content',what:'Curated cross-service architecture and design-intent notes: what the code cannot say.',gotchas:['These notes cover architecture and direction; code detail is read from the service repos at the registry commit.']}},
-  {id:'svc',label:'Service repos',sub:'read on demand\npinned to registry commit',x:800,y:240,w:220,h:90,
-   d:{kind:'Code source',what:'The service repos themselves. An agent that needs code detail opens the repo at the commit the registry names, instead of reading a generated copy.',how:['Registry gives repo + commit.','Agent greps or reads that checkout.','Each repo keeps a short README / AGENTS.md for its own conventions.'],gotchas:['Needs agent access to checkouts.']}},
+   d:{kind:'Content',what:'Curated cross-service architecture and design-intent notes: what the code cannot say.',gotchas:['These notes cover architecture and direction; code detail is read from the service repos listed in the registry.']}},
+  {id:'svc',label:'Service repos',sub:'read on demand\nlisted in the registry',x:800,y:240,w:220,h:90,
+   d:{kind:'Code source',what:'The service repos themselves. An agent that needs code detail finds the repo through the registry and reads it, instead of reading a generated copy.',how:['Registry gives the repo.','Agent greps or reads the repo.','The Wiki Maintainer’s weekly run reads the week’s merges here to find wiki gaps.','Each repo keeps a short README / AGENTS.md for its own conventions.'],gotchas:['Needs agent access to checkouts.']}},
   {id:'proj',label:'projects/',sub:'short ADRs\none per project',x:800,y:350,w:220,h:90,
    d:{kind:'Content',what:'Short architecture decision records, one per project: the context, the decision and why.',gotchas:['The Archive stage files each project here as an MR under the wiki’s NNN-name convention.']}},
   {id:'ci',label:'Wiki CI',sub:'every MR · link check\nPII scan · freshness lint',x:800,y:460,w:220,h:100,
@@ -239,7 +247,6 @@ wiki:{title:'AI Wiki',
   ['sched','index','MR','write'],
   ['index','harness','','read'],
   ['index','docs','','read'],['index','qa','','read'],['index','reg','','read'],
-  ['kbsync','docs','docs MR','write'],
   ['reg','svc','','read'],['ci','index','gates MR','weak'],['evals','index','tests routing','weak'],
  ]},
 // ---------------- HARNESS ----------------
@@ -312,7 +319,7 @@ const SPREAD={x:1.14,y:1.2};
 // group of boxes, headed by a LAYER name and a one-line subtitle. Boxes listed in `m` define the
 // band's extent. Boxes not listed (external systems, portals to other layers) stay outside any band.
 // Tints: green = entry / inputs · purple = agents / pipeline · blue = knowledge / state · cyan = workflow / owners.
-const TINT={entry:'#42d094', agent:'#8B65FF', know:'#5d9eff', flow:'#00deed'};
+const TINT={entry:'#42d094', agent:'#00deed', know:'#5d9eff', flow:'#00deed'};
 const BANDS={
  root:[ {l:'AGENT LAYER',s:'answer · maintain · triage',c:TINT.agent,m:['oncall','sched','alarm']},
         {l:'KNOWLEDGE LAYER',s:'one agent-readable wiki, in git',c:TINT.know,m:['skills','wiki'],keep:true},
@@ -321,13 +328,13 @@ const BANDS={
         {l:'SUPERVISOR LAYER',s:'route · merge · answer',c:TINT.agent,m:['router'],keep:true},
         {l:'WORKER LAYER',s:'one per thread · closes after 1 hour',c:TINT.agent,m:['worker','ext'],keep:true},
         {l:'KNOWLEDGE · SKILLS · PLATFORMS',s:'source of truth · skills · tools',c:TINT.know,m:['cskill','wskill','oskill','gskill','wiki','plat'],padT:30} ],
- sched:[{l:'INPUTS',s:'trigger · histories',c:TINT.entry,m:['cron','tix','alm'],tall:true},
-        {l:'MAINTAINER PIPELINE',s:'nightly · five steps',c:TINT.agent,m:['collect','diff','draft','evals','mr']},
+ sched:[{l:'INPUTS',s:'trigger · histories · code',c:TINT.entry,m:['cron','tix','alm','repos'],tall:true},
+        {l:'MAINTAINER PIPELINE',s:'nightly + weekly · five steps',c:TINT.agent,m:['collect','diff','draft','evals','mr']},
         {l:'KNOWLEDGE LAYER',s:'the wiki it updates',c:TINT.know,m:['wiki']} ],
  wiki:[ {l:'CONSUMERS',s:'who reads · who writes',c:TINT.entry,m:['oncall','alarm','sched','harness']},
         {l:'ROUTING LAYER',s:'index, no detail',c:TINT.agent,m:['index']},
         {l:'CURATED KNOWLEDGE',s:'references · runbooks · registry',c:TINT.know,m:['docs','qa','reg']},
-        {l:'CODE · GOVERNANCE',s:'notes · repos · sync · CI · evals',c:TINT.flow,m:['kbsync','code','svc','proj','ci','evals']} ],
+        {l:'CODE · GOVERNANCE',s:'notes · repos · CI · evals',c:TINT.flow,m:['code','svc','proj','ci','evals']} ],
  harness:[{l:'CONTROL LAYER',s:'engineer · orchestrator',c:TINT.agent,m:['eng','wf']},
         {l:'STAGE LAYER',s:'one stage at a time',c:TINT.flow,m:['s1','s2','s3','s4','s5','s7'],padB:30},
         {l:'KNOWLEDGE LAYER',s:'skills · wiki',c:TINT.know,m:['sk','wiki']},
@@ -545,11 +552,11 @@ function render(lid){
     // headers sit above the edges (dark outline) so a line crossing a band never hides its name
     const ol={'paint-order':'stroke',stroke:'#0f1114','stroke-width':4,'stroke-linejoin':'round'};
     const t=el('text',{...ol,x:b.x+18,y:b.y+27,'font-size':14,'font-weight':800,'letter-spacing':1.5,fill:b.c},hg); t.textContent=b.l;
-    const s=el('text',{...ol,x:b.x+18,y:b.y+45,'font-size':12.5,fill:'#9a9ea6'},hg); s.textContent=b.s;
+    const s=el('text',{...ol,x:b.x+18,y:b.y+45,'font-size':12.5,fill:'#989ead'},hg); s.textContent=b.s;
   }
   for(const gr of lay.groups||[]){
     el('rect',{x:gr.x,y:gr.y,width:gr.r-gr.x,height:gr.b-gr.y,rx:12,fill:'#ffffff08',stroke:'#989ead','stroke-width':1.4,'stroke-dasharray':'3 4'},bg);
-    const t=el('text',{x:gr.x+12,y:gr.y+16,'font-size':12,'font-weight':800,'letter-spacing':1.2,fill:'#c9ccd4'},bg); t.textContent=gr.l+' · '+gr.s;
+    const t=el('text',{x:gr.x+12,y:gr.y+16,'font-size':12,'font-weight':800,'letter-spacing':1.2,fill:'#d2d4db'},bg); t.textContent=gr.l+' · '+gr.s;
   }
   // Edges: grey right-angle routes. Hover or select a box and its links turn cyan with dots flowing along them.
   const ctx={lay,nodes:[],edges:[],hover:null,sel:null};
@@ -582,17 +589,25 @@ function render(lid){
     ng1.addEventListener('pointerenter',()=>{ctx.hover=n.id; applyFocus(ctx);});
     ng1.addEventListener('pointerleave',()=>{ctx.hover=null; applyFocus(ctx);});
     const dash=n.go||n.kind==='ghost'?'6 5':'';
+    const cyl=STORE.has(n.id), cp=cyl&&cylPath(n.x,n.y,n.w,n.h), ry=cyl?cp.ry:0;
     if(n.kind==='stack'){ for(const k of [10,5]) el('rect',{x:n.x+k,y:n.y-k,width:n.w,height:n.h,rx:12,fill:'#1c2024',stroke:hexA(col,.5)},ng1); }
-    el('rect',{class:'box',x:n.x,y:n.y,width:n.w,height:n.h,rx:n.kind==='person'?n.h/2:12,fill:n.go?'#15181c':hexA(col,n.child?.22:.14),stroke:col,'stroke-width':n.child?2.6:1.4,'stroke-dasharray':dash},ng1);
-    if(n.child) el('rect',{x:n.x+5,y:n.y+5,width:n.w-10,height:n.h-10,rx:9,fill:'none',stroke:hexA(col,.35),'stroke-width':1},ng1);
+    const boxA={class:'box',fill:n.go?'#1c2024':hexA(col,n.child?.22:.14),stroke:col,'stroke-width':n.child?2.6:1.4,'stroke-dasharray':dash};
+    if(cyl){
+      el('path',{...boxA,d:cp.d},ng1);
+      el('path',{d:cp.rim,fill:'none',stroke:col,'stroke-width':boxA['stroke-width'],'stroke-dasharray':dash},ng1);
+      if(n.child) el('path',{d:cylPath(n.x+6,n.y+6,n.w-12,n.h-12).d,fill:'none',stroke:hexA(col,.35),'stroke-width':1},ng1);
+    } else {
+      el('rect',{...boxA,x:n.x,y:n.y,width:n.w,height:n.h,rx:n.kind==='person'?n.h/2:12},ng1);
+      if(n.child) el('rect',{x:n.x+5,y:n.y+5,width:n.w-10,height:n.h-10,rx:9,fill:'none',stroke:hexA(col,.35),'stroke-width':1},ng1);
+    }
     const big=n.child&&lid==='root', lines=n.label.split('\n'), subs=(n.sub||'').split('\n').filter((s,i,a)=>s||a.length>1);
     const fs=big?24:(n.w<160?13.5:15), ss=big?14:12, lh=fs*1.2, slh=ss*1.35;
     const tot=lines.length*lh+(n.sub?subs.length*slh+6:0);
-    let y=n.y+n.h/2-tot/2+fs*.85;
+    let y=n.y+n.h/2+ry/2-tot/2+fs*.85;
     for(const ln of lines){const t=el('text',{x:n.x+n.w/2,y,'text-anchor':'middle','font-size':fs,'font-weight':700,fill:'#ffffff'},ng1); t.textContent=ln; y+=lh;}
     if(n.sub){ y+=6-lh+ss*1.1; for(const s of subs){const t=el('text',{x:n.x+n.w/2,y,'text-anchor':'middle','font-size':ss,fill:'#ffffff',opacity:.65},ng1); t.textContent=s; y+=slh;} }
     if(n.child){const t=el('text',{x:n.x+n.w-12,y:n.y+n.h-11,'text-anchor':'end','font-size':big?14:12,'font-weight':700,fill:col},ng1); t.textContent='⊕ open';}
-    if(n.go){const t=el('text',{x:n.x+n.w-10,y:n.y+18,'text-anchor':'end','font-size':12,'font-weight':700,fill:col},ng1); t.textContent='↗';}
+    if(n.go){const t=el('text',{x:n.x+n.w-10,y:n.y+ry+18,'text-anchor':'end','font-size':12,'font-weight':700,fill:col},ng1); t.textContent='↗';}
     if(clickable) ng1.addEventListener('click',ev=>{ev.stopPropagation(); onNode(lid,n,ng1,ctx);});
   }
   stage.appendChild(g);
@@ -641,7 +656,7 @@ function showPanel(title,d,own,extra){
   if(d.how&&d.how.length) h+=`<h4>How it works</h4><ul>${d.how.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
   const schemas=d.schema?(Array.isArray(d.schema)?d.schema:[d.schema]):[];
   if(schemas.length) h+=`<h4>Table schema</h4><div class="sbtns">${schemas.map((t,i)=>`<button class="sbtn" data-sch="${i}"><code>${esc(t.name)}</code> ▸</button>`).join('')}</div>`;
-  if(d.link) h+=`<p><a class="jl" data-go="${esc(d.link[1])}" style="color:#7cc4ff;cursor:pointer;text-decoration:underline">${esc(d.link[0])} ↗</a></p>`;
+  if(d.link) h+=`<p><a class="jl" data-go="${esc(d.link[1])}" style="color:#95b9ff;cursor:pointer;text-decoration:underline">${esc(d.link[0])} ↗</a></p>`;
   if(d.guards&&d.guards.length) h+=`<h4>Guardrails</h4><ul>${d.guards.map(([k,x])=>`<li><span class="g ${k}">${k}</span>${esc(x)}</li>`).join('')}</ul>`;
   if(d.gotchas&&d.gotchas.length) h+=`<h4>Nuances</h4><ul>${d.gotchas.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
   if(d.equiv) h+=`<h4>Industry equivalent</h4><p>${esc(d.equiv)}</p>`;

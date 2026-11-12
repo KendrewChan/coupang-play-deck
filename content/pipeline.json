@@ -1,22 +1,42 @@
 {
   "id": "pipeline",
   "diagram": "translation-pipeline/diagram2d.html",
-  "accent": "#00A8FF",
-  "nav": "AI translation pipeline",
-  "title": "AI video translation pipeline",
+  "titleDiagram": false,
+  "accent": "#5d9eff",
+  "nav": "Translation Pipeline",
+  "title": "Translation Pipeline",
   "time": "~15 min",
   "kind": "Deep dive",
   "logline": "One video, posted in every market a seller sells in",
   "rows": [],
   "parts": [
     {
-      "t": "Problem",
-      "s": "",
+      "t": "AI Translation",
+      "s": "Closing cross-border revenue leaks with AI",
       "min": 2,
       "poster": "pipeline-1",
-      "rows": [
-        ["Problem", "High-performing videos don't carry over to other markets. One-click cross-posts of the original video earned ~50% less revenue than an average post"],
-        ["Insight", "In-house models already translate speech, clone the voice and sync lips"]
+      "cards": [
+        {
+          "big": "−50%",
+          "tone": "red",
+          "h": "Revenue deficit",
+          "p": "Cross-regional posts earned ~50% less than an average post, held back by language friction"
+        },
+        {
+          "icon": "cube",
+          "h": "AI Generation Capabilities",
+          "p": "Researched alongside Product on an AI video localization engine"
+        },
+        {
+          "icon": "flask",
+          "h": "Phase 1: MVP",
+          "p": "Lightweight upload-and-translate flow"
+        },
+        {
+          "icon": "network",
+          "h": "Phase 2: Pipeline",
+          "p": "Automated AI translation pipeline"
+        }
       ]
     },
     {
@@ -24,18 +44,10 @@
       "s": "Translation is the cheapest per quality point, and it starts from a video that already sells",
       "min": 1,
       "poster": "pipeline-5",
+      "foot": "Per active shop, 21 translations a week cost ~$3 with BytePlus and potentially bring in ~$100 (for TikTok)",
       "compare": {
         "max": 14.1,
         "items": [
-          {
-            "name": "Full generation: Seedance 1.0",
-            "note": "Rejected: no sales history",
-            "lo": 8.07,
-            "hi": 8.07,
-            "cost": "$8.07",
-            "q": "~95%",
-            "per": "$0.085"
-          },
           {
             "name": "Full generation: Seedance 2.0",
             "note": "Rejected: highest cost, unproven",
@@ -46,23 +58,23 @@
             "per": "$0.14"
           },
           {
-            "name": "Translate + lip-sync: Pinch",
+            "name": "Translate + lip-sync: BytePlus Dubbing",
             "note": "Chosen: best value + video already sells",
+            "lo": 0.299,
+            "hi": 0.299,
+            "cost": "$0.299",
+            "q": "~88%",
+            "per": "$0.003",
+            "pick": true
+          },
+          {
+            "name": "Translate + lip-sync: Pinch",
+            "note": "Rejected: ~3.5× the cost for the same quality",
             "lo": 1.06,
             "hi": 1.06,
             "cost": "$1.06",
             "q": "~88%",
-            "per": "$0.012",
-            "pick": true
-          },
-          {
-            "name": "Translate + lip-sync: HeyGen Precision",
-            "note": "Rejected: ~4× the cost for +2 points",
-            "lo": 4.06,
-            "hi": 4.06,
-            "cost": "$4.06",
-            "q": "~90%",
-            "per": "$0.045"
+            "per": "$0.012"
           }
         ]
       }
@@ -72,16 +84,13 @@
       "s": "",
       "min": 1,
       "poster": "pipeline-2",
-      "view": "v=apis",
       "screens": [
         {
-          "t": "Authorize",
+          "t": "Opt-in",
           "api": "authorize seller",
           "ui": [
             ["h", "Auto-post"],
-            ["note", "Let us translate your best videos and post them to your other EU markets"],
-            ["toggle", "Turn on auto-post", true],
-            ["button", "Authorize"]
+            ["toggle", "Opt-in", true]
           ]
         },
         {
@@ -89,10 +98,9 @@
           "api": "get / set settings",
           "ui": [
             ["h", "Target markets"],
-            ["note", "Only markets you tick get posts"],
             ["check", "Italy", true],
-            ["check", "Spain", true],
-            ["check", "Germany", true],
+            ["check", "Spain", false],
+            ["check", "Germany", false],
             ["check", "Poland", false],
             ["button", "Save"]
           ]
@@ -106,19 +114,21 @@
               "video",
               "Summer linen dress",
               "Italy · posts Tue 18:00",
-              ["Cancel", "Feedback"]
+              ["Cancel", "Feedback"],
+              ["Lip-sync is off", "Translation is wrong", "Voice sounds wrong", "Wrong market"]
             ],
             [
               "video",
               "Summer linen dress",
               "Spain · posts Tue 18:00",
-              ["Cancel", "Feedback"]
+              ["Cancel", "Feedback"],
+              ["Lip-sync is off", "Translation is wrong", "Voice sounds wrong", "Wrong market"]
             ]
           ]
         },
         {
           "t": "Posted",
-          "api": "list posted",
+          "api": "list · delete · cancel retry",
           "ui": [
             ["h", "Posted videos"],
             [
@@ -131,7 +141,7 @@
               "video",
               "Garden chair set",
               "Germany · retry in 7 days",
-              []
+              ["Cancel"]
             ]
           ]
         }
@@ -154,58 +164,32 @@
           ["Spain", "lip-synced · voice translated"],
           ["Germany", "lip-synced · voice translated"]
         ],
-        "after": ["Auto-Post"]
+        "after": ["Post"]
       }
     },
     {
-      "t": "Deduplicating translations",
-      "s": "",
-      "min": 1.5,
-      "poster": "pipeline-6",
-      "view": "v=intake&c=elig",
-      "rows": [
-        ["<span style=\"color:#ef4444\">✗</span> GPU waste", "Translating our own output, or translating a video into markets with the same language"],
-        ["<span style=\"color:#22c55e\">✓</span> Mark", "Mark videos as AI-translated. Filter them out in the warehouse tables and ETL"],
-        ["<span style=\"color:#22c55e\">✓</span> Clone", "Reuse videos for markets with the same language"]
-      ]
-    },
-    {
       "t": "Rationing shared AI capacity",
-      "s": "",
+      "s": "AI platform has limited resources shared across teams",
       "min": 1,
       "poster": "pipeline-8",
-      "view": "v=translation&c=ai",
       "rows": [
-        ["Constraint", "AI platform has limited resources shared across teams"],
-        ["Decision", "Limit sellers to 3 translations a day, so large sellers can't use up the shared budget"],
-        ["Backfill", "Backfill runs in an off-peak window to reduce GPU contention"]
+        ["Quotas", "Limit sellers to 3 translations a day, so large sellers can't use up the shared budget"],
+        ["Selective invocation", "Translate each seller's top videos first, ranked by revenue, so capacity goes to the best bets"],
+        ["Reuse", "Reuse videos for markets with the same language"],
+        ["Load shifting", "Backfill runs in an off-peak window to reduce GPU contention"]
       ]
     },
     {
-      "t": "Fan-out: parent / child tasks and partial success",
-      "s": "",
-      "min": 2,
-      "poster": "pipeline-7",
-      "view": "v=translation&c=tables",
-      "rows": [
-        ["Shape", "1 source : N target videos. Compute parent status from children"],
-        ["<span style=\"color:#ef4444\">✗</span> Prevent partial", "Succeed and fail together"],
-        ["<span style=\"color:#22c55e\">✓</span> Allow partial", "Successful tasks proceed, failed tasks retry"],
-        ["Failure handling", "Retry failed tasks up to 3 times, then send them to the DLQ"]
-      ]
-    },
-    {
-      "t": "Scheduled posting: review window and throttled release",
+      "t": "Controlled posting",
       "s": "",
       "min": 2.5,
       "poster": "pipeline-9",
       "key": true,
-      "view": "v=posting&c=sched",
       "stack": true,
       "rows": [
-        ["Videos post T+2 after translation", "→ Sellers can cancel bad translations before they go live, and their quality feedback helps us improve the system"],
-        ["The scheduler polls for due videos in throttled batches of up to 50", "→ Spreads load on the DB and downstream services"],
-        ["Scheduled post time, queue and throttle limits are dynamic config", "→ We can tune them without a deploy"]
+        ["Sellers own translation quality", "→ Videos post T+2 after translation. Sellers can cancel or give feedback before post"],
+        ["No bursts on downstream services", "→ The scheduler posts due videos in throttled batches of up to 50"],
+        ["Tune posting without a deploy", "→ We can widen or narrow the posting window, or slide it for daylight saving time"]
       ]
     },
     {
@@ -220,13 +204,23 @@
       ]
     },
     {
-      "t": "What I would do differently",
+      "t": "Retrospectives",
       "s": "",
-      "min": 1,
+      "min": 3,
       "poster": "pipeline-11",
       "rows": [
         ["Blind spot", "Posted videos flowed back into our candidate pool and got translated again. An AI-origin flag fixed it. Now I ask of every output: can this come back as input?"],
         ["Metrics", "I launched with technical metrics but no business metrics, and only added those after release. Next time I'd define both before launch"]
+      ]
+    },
+    {
+      "t": "Enhancements",
+      "s": "",
+      "min": 1.5,
+      "poster": "pipeline-12",
+      "rows": [
+        ["Tiered quality", "Match model cost to video value. Top videos get premium lip-sync, the long tail gets a cheaper tier, and seller feedback can move a video up a tier"],
+        ["Uplift ranking", "Rank by expected revenue in the target market, not past revenue in the source market. Learn it from how posted translations perform per market and category"]
       ]
     }
   ]
